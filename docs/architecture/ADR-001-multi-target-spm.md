@@ -18,7 +18,7 @@ Auth must provide shared Codable models, an iOS SwiftUI client layer, and a Vapo
 Adopt a three-target multi-target SPM package:
 
 - **`AuthShared`** — shared Codable request/response types; no dependencies; usable by both iOS and Vapor consumers.
-- **`AuthClient`** — iOS SwiftUI views, ViewModels, Keychain storage; depends on `AuthShared` + iOS-only packages.
+- **`AuthClient`** — iOS + macOS SwiftUI views, ViewModels, direct Keychain storage (Security framework); depends on `AuthShared` + client-only packages.
 - **`AuthServer`** — Vapor 4 routes, JWT middleware, Fluent models; depends on `AuthShared` + Vapor packages.
 
 A fourth **`AuthKit`** umbrella library product re-exports all three for consumers that want a single-import drop-in.
@@ -36,7 +36,7 @@ A fourth **`AuthKit`** umbrella library product re-exports all three for consume
 - Only one Swift module for consumers to import
 
 **Cons:**
-- All dependencies (GoogleSignIn, Vapor, Fluent, KeychainAccess) are pulled in by every consumer regardless of need
+- All dependencies (GoogleSignIn, Vapor, Fluent) are pulled in by every consumer regardless of need
 - Compile conditions scattered throughout the codebase are hard to maintain
 - A Vapor server importing the package would attempt to resolve GoogleSignIn-iOS, which has no Linux support
 

@@ -7,7 +7,7 @@
     "components": {
         "iosApp": {
             "deploymentTarget": "17.0",
-            "swiftVersion": "6.0",
+            "swiftVersion": "6.2",
             "bundleIdentifier": "com.marekloose.Auth",
             "architecturePattern": "MVVM",
             "localBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
@@ -17,7 +17,7 @@
         },
         "macosApp": {
             "deploymentTarget": "14.0",
-            "swiftVersion": "6.0",
+            "swiftVersion": "6.2",
             "bundleIdentifier": "com.marekloose.Auth-macOS",
             "architecturePattern": "MVVM",
             "localBuildTarget": "platform=macOS",
@@ -28,7 +28,7 @@
         "appleApp": {
             "iosDeploymentTarget": "17.0",
             "macosDeploymentTarget": "14.0",
-            "swiftVersion": "6.0",
+            "swiftVersion": "6.2",
             "bundleIdentifier": "com.marekloose.Auth",
             "architecturePattern": "MVVM",
             "iosLocalBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
@@ -72,7 +72,7 @@
             "testTypes": ["unit", "widget", "integration"]
         },
         "api": {
-            "swiftVersion": "6.0",
+            "swiftVersion": "6.2",
             "vaporVersion": "4",
             "port": 8080,
             "hosting": "fly.io",
@@ -96,7 +96,7 @@
         },
         "spm": {
             "packageName": "Auth",
-            "swiftVersion": "6.0",
+            "swiftVersion": "6.2",
             "mode": "multi",
             "platforms": [
                 {
@@ -105,7 +105,7 @@
                     "ciBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro"
                 },
                 {
-                    "deploymentTarget": "macOS 13.0",
+                    "deploymentTarget": "macOS 14.0",
                     "localBuildTarget": "platform=macOS",
                     "ciBuildTarget": "platform=macOS"
                 }
@@ -127,13 +127,7 @@
                             "packageAlias": "GoogleSignIn-iOS",
                             "product": "GoogleSignIn",
                             "url": "https://github.com/google/GoogleSignIn-iOS",
-                            "version": "7.1.0"
-                        },
-                        {
-                            "packageAlias": "KeychainAccess",
-                            "product": "KeychainAccess",
-                            "url": "https://github.com/kishikawakatsumi/KeychainAccess",
-                            "version": "4.2.2"
+                            "version": "9.1.0"
                         },
                         {
                             "packageAlias": "swift-snapshot-testing",
@@ -178,7 +172,7 @@
         "appleTeamId": "XXXXXXXXXX",
         "gitHub": {
             "username": "LooseMarek",
-            "private": false,
+            "private": true,
             "project": true,
             "labels": true,
             "actions": true,

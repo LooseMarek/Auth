@@ -40,7 +40,7 @@ Every iOS + Vapor project requires manually integrating vapor/jwt-kit, vapor/aut
 ## MVP Goals
 
 1. A developer can add Auth to an iOS + Vapor project and get working email/password, Sign in with Apple, Google Sign-In, and guest authentication with zero hand-rolled boilerplate.
-2. The package builds cleanly under Swift 6 strict concurrency mode across all three targets.
+2. The package builds cleanly under Swift 6.2 strict concurrency mode across all three targets.
 3. The full JWT token lifecycle (generation → Keychain storage → auto-refresh → logout invalidation) is handled entirely by the package — the app never manages tokens directly.
 
 ---
@@ -50,7 +50,7 @@ Every iOS + Vapor project requires manually integrating vapor/jwt-kit, vapor/aut
 | Metric | Target | Timeframe |
 |--------|--------|-----------|
 | First successful integration | Package drops into a real iOS + Vapor project with no auth boilerplate | At MVP launch |
-| Swift 6 compatibility | Zero warnings or errors under strict concurrency | At MVP launch |
+| Swift 6.2 compatibility | Zero warnings or errors under strict concurrency | At MVP launch |
 | Auth methods coverage | All four methods (email, Apple, Google, guest) working end-to-end | At MVP launch |
 
 ---
@@ -62,17 +62,19 @@ Every iOS + Vapor project requires manually integrating vapor/jwt-kit, vapor/aut
 - [ ] Shared response types: `AuthResponse` (JWT + refresh token + expiry), `UserDTO` (id, email, display name)
 - [ ] JWT token metadata model (access token, refresh token, expiry date)
 
-### iOS client target (`AuthClient`)
+### iOS + macOS client target (`AuthClient`)
 - [ ] SwiftUI `LoginView` with email/password fields and social sign-in buttons
 - [ ] SwiftUI `RegisterView` with email, password, and confirm-password fields
 - [ ] SwiftUI `ForgotPasswordView` with email field
 - [ ] Sign in with Apple button and flow via `AuthenticationServices`
 - [ ] Sign in with Google button and flow via `GoogleSignIn-iOS`
-- [ ] Guest / anonymous session toggle (configurable on/off)
-- [ ] Guest upgrade flow: prompts a guest user to attach email, Google, or Apple credentials; preserves the existing UUID so no data is lost
-- [ ] Keychain-based JWT and refresh-token storage via `KeychainAccess`
+- [ ] Guest / anonymous session controlled by an `allowGuestAccess: Bool` flag on the Auth configuration object (default: `true`); when the adopting app sets it to `false`, all guest sign-in UI is hidden — this is a developer-time decision, not an end-user setting
+- [ ] Programmatic auth UI presentation: `AuthClient` exposes a method on a shared `AuthManager` object that the adopting app can call from any context (e.g. Profile page, paywall, feature gate) to present the login / register screens as a sheet — the host app is not limited to a single fixed entry point
+- [ ] Guest upgrade flow: when a guest user completes sign-in or registration via the programmatically presented auth UI, their existing UUID is preserved and credentials are attached to it so no app data is lost
+- [ ] Keychain-based JWT and refresh-token storage via the Security framework directly (no third-party wrapper)
 - [ ] Automatic silent token refresh before expiry
 - [ ] Logout: clears Keychain and calls server invalidation endpoint
+- [ ] Account deletion: the adopting app can trigger a confirmation flow programmatically via `AuthManager`; on confirmation, calls the server deletion endpoint, clears the Keychain, and resets auth state to unauthenticated
 - [ ] Theming API: configurable primary color, background color, and font
 - [ ] Full string localisation (all user-facing strings externalized and overridable)
 
@@ -90,19 +92,19 @@ Every iOS + Vapor project requires manually integrating vapor/jwt-kit, vapor/aut
 - [ ] Persistence via Fluent (driver-agnostic): Fluent models for `User` and `RefreshToken`; host app provides the database driver
 - [ ] Configurable JWT signing secret, access token TTL, and refresh token TTL (default: access 1 hour, refresh 1 day; non-rotating — refresh token is reused until it expires)
 - [ ] Email transport: pure Swift async closure `(recipient: String, subject: String, body: String) async throws -> Void` injected at configure time; no default transport bundled
+- [ ] `DELETE /auth/account` — permanently deletes the authenticated user record and all associated refresh tokens; requires valid JWT
 - [ ] Password hashing via BCrypt
 
 ---
 
 ## Out of Scope (Post-MVP)
 
-- macOS client target (iOS only for MVP)
 - Additional OAuth providers: GitHub, Facebook, Microsoft, etc.
 - Biometric authentication (Face ID / Touch ID as a standalone unlock step)
 - Two-factor authentication (TOTP, SMS)
 - Magic link / passwordless login
 - Linking a second auth provider to an already-upgraded (non-guest) account (e.g. adding Google to an existing email account)
-- Admin / user-management Vapor routes (list users, suspend, delete, etc.)
+- Admin / user-management Vapor routes (list users, suspend, force-delete another user, etc.) — self-service account deletion by the authenticated user is in scope; admin-level user management is not
 - Push notification on login / suspicious activity alerts
 - Rate limiting on auth endpoints (left to the host app's Vapor middleware)
 - Example app / demo project (README code samples are sufficient for MVP)
@@ -113,10 +115,10 @@ Every iOS + Vapor project requires manually integrating vapor/jwt-kit, vapor/aut
 
 | Constraint | Detail |
 |------------|--------|
-| Timeline | No hard deadline — ship when feature-complete and Swift 6 clean |
-| Platform | iOS 16+ (client); Vapor 4 + Swift 6 (server) |
+| Timeline | No hard deadline — ship when feature-complete and Swift 6.2 clean |
+| Platform | iOS 17+ + macOS 14+ (client); Vapor 4 + Swift 6.2 (server) |
 | Monetisation | None — personal-use open-source package |
-| Dependencies | vapor/jwt-kit, vapor/auth, google/GoogleSignIn-iOS, Apple AuthenticationServices, kishikawakatsumi/KeychainAccess |
+| Dependencies | vapor/jwt-kit, vapor/auth, google/GoogleSignIn-iOS, Apple AuthenticationServices, Apple Security framework (direct Keychain access) |
 | Known risks | Scope creep (medium) — the auth surface is large; strict adherence to the out-of-scope list is required to ship MVP |
 
 ---

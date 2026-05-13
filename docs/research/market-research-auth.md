@@ -108,4 +108,4 @@ No existing Swift Package unifies iOS client authentication UI and a Vapor serve
 - `vapor/auth` — Vapor middleware integration
 - `google/GoogleSignIn-iOS` — Google login on client
 - `Apple AuthenticationServices` — Sign in with Apple on client
-- A Keychain wrapper (e.g. `kishikawakatsumi/KeychainAccess`) for token storage
+- Apple Security framework (direct Keychain access) for token storage
