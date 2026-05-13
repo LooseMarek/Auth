@@ -7,7 +7,7 @@ platform :ios do
     destination = options[:destination] || "platform=iOS Simulator,name=iPhone 17 Pro"
     run_tests(
       package_path: ".",
-      scheme: "Auth",
+      scheme: "Auth-Package",
       destination: destination,
       result_bundle: true
     )
@@ -22,7 +22,7 @@ platform :mac do
     destination = options[:destination] || "platform=macOS"
     run_tests(
       package_path: ".",
-      scheme: "Auth",
+      scheme: "Auth-Package",
       destination: destination,
       result_bundle: true
     )
