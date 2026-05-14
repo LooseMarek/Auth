@@ -1,4 +1,5 @@
 import Vapor
+import JWTKit
 
 /// Configuration for the AuthServer target.
 ///
@@ -31,17 +32,35 @@ public struct AuthServerConfiguration: Sendable {
     /// Type: `(@Sendable (recipient: String, subject: String, body: String) async throws -> Void)?`
     public let emailTransport: (@Sendable (String, String, String) async throws -> Void)?
 
+    /// Optional JWKS used to verify Apple identity tokens.
+    ///
+    /// The host application is responsible for fetching Apple's public JWKS from
+    /// `https://appleid.apple.com/auth/keys` and supplying it here.
+    /// If `nil`, `POST /auth/apple` will fail at runtime with a 500 error (fail-fast).
+    public let appleJWKS: JWKS?
+
+    /// Optional JWKS used to verify Google identity tokens.
+    ///
+    /// The host application is responsible for fetching Google's public JWKS from
+    /// `https://www.googleapis.com/oauth2/v3/certs` and supplying it here.
+    /// If `nil`, `POST /auth/google` will fail at runtime with a 500 error (fail-fast).
+    public let googleJWKS: JWKS?
+
     // MARK: - Initialiser
 
     public init(
         jwtSigningSecret: String,
         accessTokenTTL: TimeInterval = 3600,
         refreshTokenTTL: TimeInterval = 86400,
-        emailTransport: (@Sendable (String, String, String) async throws -> Void)? = nil
+        emailTransport: (@Sendable (String, String, String) async throws -> Void)? = nil,
+        appleJWKS: JWKS? = nil,
+        googleJWKS: JWKS? = nil
     ) {
         self.jwtSigningSecret = jwtSigningSecret
         self.accessTokenTTL = accessTokenTTL
         self.refreshTokenTTL = refreshTokenTTL
         self.emailTransport = emailTransport
+        self.appleJWKS = appleJWKS
+        self.googleJWKS = googleJWKS
     }
 }
