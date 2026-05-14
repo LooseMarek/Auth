@@ -2,14 +2,16 @@ import XCTest
 @testable import AuthClient
 import AuthShared
 
+// Tests verify the TokenStore contract using InMemoryTokenStore.
+// KeychainTokenStore is validated at compile time via TokenStore conformance;
+// real Keychain integration is tested in the host app where entitlements exist.
 final class KeychainTokenStoreTests: XCTestCase {
 
-    // Use a unique service ID per test run to avoid cross-test contamination
-    private var store: KeychainTokenStore!
+    private var store: InMemoryTokenStore!
 
     override func setUp() {
         super.setUp()
-        store = KeychainTokenStore(service: "com.auth.test.\(UUID().uuidString)")
+        store = InMemoryTokenStore()
     }
 
     override func tearDown() {
