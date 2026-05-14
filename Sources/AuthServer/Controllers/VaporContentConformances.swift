@@ -9,6 +9,7 @@ import AuthShared
 
 extension RegisterRequest: Content {}
 extension LoginRequest: Content {}
+extension LogoutRequest: Content {}
 extension ForgotPasswordRequest: Content {}
 extension ResetPasswordRequest: Content {}
 extension AuthResponse: Content {}
