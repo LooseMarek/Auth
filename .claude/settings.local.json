@@ -37,7 +37,8 @@
       "mcp__MCP_DOCKER__list_issues",
       "Bash(grep -v \"XCTest\\\\|XCTVapor\\\\|JWTKit\\\\|AuthServer\\\\|AuthShared\\\\|Fluent$\\\\|Vapor$\")",
       "Bash(python3 -m json.tool)",
-      "Bash(gh run *)"
+      "Bash(gh run *)",
+      "mcp__MCP_DOCKER__search_issues"
     ],
     "deny": [
       "Bash(git push --force*)",
