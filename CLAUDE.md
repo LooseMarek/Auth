@@ -24,10 +24,20 @@ A multi-target Swift Package that gives any iOS + Vapor project email, Google, A
 
 ```
 Auth/
-├── docs/               # Architecture, ADRs, product, and design docs
+├── docs/                   # Architecture, ADRs, product, and design docs
+├── Sources/
+│   ├── AuthShared/         # Shared Codable request/response types and JWT metadata
+│   ├── AuthClient/         # iOS/macOS SwiftUI auth views and MVVM ViewModels
+│   │   ├── Resources/      # Localizable.strings for all auth UI strings
+│   │   ├── ViewModels/     # @Observable ViewModels (LoginViewModel, …)
+│   │   └── Views/          # SwiftUI Views (LoginView, …)
+│   └── AuthServer/         # Vapor 4 auth routes, JWT middleware, Fluent models
+└── Tests/
+    ├── AuthSharedTests/
+    ├── AuthClientTests/     # Unit tests (XCTest)
+    ├── AuthClientSnapshotTests/ # Snapshot tests (swift-snapshot-testing)
+    └── AuthServerTests/
 ```
-
-> Add component folders here as they are created.
 
 ---
 
@@ -58,6 +68,7 @@ Auth/
 | Component | Test Types |
 |-----------|-----------|
 | AuthShared | Unit (XCTest) |
+| AuthClient | Unit (XCTest), Snapshot (swift-snapshot-testing) |
 | AuthServer | Unit (XCTest) |
 
 ### AuthServer testing constraint
