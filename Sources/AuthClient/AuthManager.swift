@@ -18,4 +18,11 @@ public final class AuthManager {
     public init(configuration: AuthClientConfiguration) {
         self.configuration = configuration
     }
+
+    // MARK: - Session Management
+
+    /// Updates the active session state. Called by ViewModels after a successful auth operation.
+    public func updateSession(to state: AuthSessionState) {
+        session = state
+    }
 }

@@ -32,8 +32,15 @@ let package = Package(
         ),
         .target(
             name: "AuthClient",
-            dependencies: ["AuthShared",.product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),.product(name: "SnapshotTesting", package: "swift-snapshot-testing")],
-            path: "Sources/AuthClient"
+            dependencies: [
+                "AuthShared",
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ],
+            path: "Sources/AuthClient",
+            resources: [
+                .process("Resources"),
+            ]
         ),
         .testTarget(
             name: "AuthClientTests",
