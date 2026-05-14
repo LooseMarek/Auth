@@ -58,6 +58,13 @@ Auth/
 | Component | Test Types |
 |-----------|-----------|
 | AuthShared | Unit (XCTest) |
+| AuthServer | Unit (XCTest) |
+
+### AuthServer testing constraint
+
+`AuthServer` does **not** depend on any Fluent driver (`fluent-sqlite-driver`, `fluent-postgres-driver`, etc.) — the host app provides the driver (see ADR-004). Therefore `AuthServerTests` must **never** add a Fluent driver as a test dependency and must **never** import `FluentSQLiteDriver` or any other driver module.
+
+Write unit tests only: assert schema names, model initialisation, field values, and relationship IDs. Do not write migration or CRUD integration tests inside this package — those belong in the host app's test suite.
 
 
 ---
