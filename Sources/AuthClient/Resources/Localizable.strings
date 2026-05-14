@@ -1,0 +1,23 @@
+/* Login screen */
+"auth.login.title" = "Welcome back";
+"auth.login.field.email.placeholder" = "Email";
+"auth.login.field.password.placeholder" = "Password";
+"auth.login.button.submit" = "Log in";
+"auth.login.link.forgot_password" = "Forgot password?";
+"auth.login.link.register" = "Don't have an account? Register";
+"auth.login.button.guest" = "Continue as Guest";
+"auth.login.error.invalid_credentials" = "Incorrect email or password.";
+
+/* Common */
+"auth.button.google" = "Sign in with Google";
+"auth.button.google.accessibility" = "Sign in with Google";
+"auth.separator.or" = "or";
+"auth.field.password.show" = "Show password";
+"auth.field.password.hide" = "Hide password";
+
+/* Errors */
+"auth.error.required" = "This field is required.";
+"auth.error.email_format" = "Please enter a valid email address.";
+"auth.error.network" = "No internet connection. Please try again.";
+"auth.error.server" = "Something went wrong. Please try again.";
+"auth.social.error.token_invalid" = "Sign-in failed. Please try again.";

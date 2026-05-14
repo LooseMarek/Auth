@@ -18,4 +18,11 @@ public final class AuthManager {
     public init(configuration: AuthClientConfiguration) {
         self.configuration = configuration
     }
+
+    // MARK: - Internal session mutation
+
+    /// Updates the active session. Called by ViewModels after a successful auth operation.
+    func updateSession(_ newSession: AuthSessionState) {
+        session = newSession
+    }
 }
