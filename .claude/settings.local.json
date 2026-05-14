@@ -33,7 +33,11 @@
       "mcp__MCP_DOCKER__issue_read",
       "mcp__MCP_DOCKER__pull_request_read",
       "Bash(gh pr *)",
-      "mcp__MCP_DOCKER__add_issue_comment"
+      "mcp__MCP_DOCKER__add_issue_comment",
+      "mcp__MCP_DOCKER__list_issues",
+      "Bash(grep -v \"XCTest\\\\|XCTVapor\\\\|JWTKit\\\\|AuthServer\\\\|AuthShared\\\\|Fluent$\\\\|Vapor$\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(gh run *)"
     ],
     "deny": [
       "Bash(git push --force*)",
