@@ -62,7 +62,8 @@ A library should not dictate infrastructure choices. A consumer running integrat
 
 **Positive:**
 - Drop-in compatible with any Fluent driver
-- Test targets (including `AuthServer`'s own integration tests) can use `fluent-sqlite-driver` for fast, isolated runs
+- Host-app test targets can freely choose `fluent-sqlite-driver` for fast, in-process runs
+- `AuthServer`'s own test target stays driver-free: unit tests only (schema names, model init, field assertions) — no `fluent-sqlite-driver` or any other driver in `AuthServerTests`
 - No binary blobs or native library transitive dependencies
 
 **Negative / Trade-offs:**
