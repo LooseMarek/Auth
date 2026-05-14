@@ -1,0 +1,47 @@
+import Vapor
+
+/// Configuration for the AuthServer target.
+///
+/// Pass an instance to `JWTMiddleware` and any route controllers that need
+/// access to JWT signing secrets or token TTLs.
+public struct AuthServerConfiguration: Sendable {
+
+    // MARK: - Storage key for Vapor's Application.storage
+
+    public struct StorageKey: Vapor.StorageKey {
+        public typealias Value = AuthServerConfiguration
+    }
+
+    // MARK: - Properties
+
+    /// The secret used to sign and verify HMAC-SHA256 JWTs.
+    public let jwtSigningSecret: String
+
+    /// Lifetime of an access token in seconds. Defaults to 3600 (1 hour).
+    public let accessTokenTTL: TimeInterval
+
+    /// Lifetime of a refresh token in seconds. Defaults to 86400 (1 day).
+    public let refreshTokenTTL: TimeInterval
+
+    /// Optional email transport closure injected by the host application.
+    ///
+    /// The closure is called by the `forgot-password` route to deliver reset emails.
+    /// If `nil`, the route will fail at runtime with a 500 error (fail-fast).
+    ///
+    /// Type: `(@Sendable (recipient: String, subject: String, body: String) async throws -> Void)?`
+    public let emailTransport: (@Sendable (String, String, String) async throws -> Void)?
+
+    // MARK: - Initialiser
+
+    public init(
+        jwtSigningSecret: String,
+        accessTokenTTL: TimeInterval = 3600,
+        refreshTokenTTL: TimeInterval = 86400,
+        emailTransport: (@Sendable (String, String, String) async throws -> Void)? = nil
+    ) {
+        self.jwtSigningSecret = jwtSigningSecret
+        self.accessTokenTTL = accessTokenTTL
+        self.refreshTokenTTL = refreshTokenTTL
+        self.emailTransport = emailTransport
+    }
+}
