@@ -12,4 +12,5 @@ extension LoginRequest: Content {}
 extension LogoutRequest: Content {}
 extension ForgotPasswordRequest: Content {}
 extension ResetPasswordRequest: Content {}
+extension SocialAuthRequest: Content {}
 extension AuthResponse: Content {}
