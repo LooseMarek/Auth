@@ -6,8 +6,8 @@
 public struct UpgradeGuestRequest: Codable, Sendable {
     /// The UUID of the existing guest session to upgrade.
     public let guestUUID: String
-    /// The identity provider being attached (e.g. `"email"`, `"apple"`, `"google"`).
-    public let provider: String
+    /// The identity provider being attached. Use `AuthProvider.email`, `.apple`, or `.google`.
+    public let provider: AuthProvider
     /// The user's email address (required for email upgrades).
     public let email: String?
     /// The user's password (required for email upgrades).
@@ -17,7 +17,7 @@ public struct UpgradeGuestRequest: Codable, Sendable {
 
     public init(
         guestUUID: String,
-        provider: String,
+        provider: AuthProvider,
         email: String?,
         password: String?,
         identityToken: String?
