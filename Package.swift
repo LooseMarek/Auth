@@ -56,7 +56,11 @@ let package = Package(
         ),
         .testTarget(
             name: "AuthServerTests",
-            dependencies: ["AuthServer"],
+            dependencies: [
+                "AuthServer",
+                .product(name: "XCTVapor", package: "vapor"),
+                .product(name: "JWTKit", package: "jwt-kit"),
+            ],
             path: "Tests/AuthServerTests"
         ),
     ]
