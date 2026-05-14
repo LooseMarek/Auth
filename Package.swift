@@ -32,7 +32,7 @@ let package = Package(
         ),
         .target(
             name: "AuthClient",
-            dependencies: ["AuthShared",.product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),.product(name: "SnapshotTesting", package: "swift-snapshot-testing")],
+            dependencies: ["AuthShared", .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")],
             path: "Sources/AuthClient",
             resources: [.process("Resources")]
         ),
