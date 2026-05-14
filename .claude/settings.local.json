@@ -26,7 +26,13 @@
       "Bash(gh pr checkout*)",
       "Bash(gh repo*)",
       "Bash(gh label*)",
-      "Bash(swift*)"
+      "Bash(swift*)",
+      "Skill(phase-4-development:p4-s1-implement-feature)",
+      "Bash(git *)",
+      "Skill(phase-4-development:p4-s2-review-task)",
+      "mcp__MCP_DOCKER__issue_read",
+      "mcp__MCP_DOCKER__pull_request_read",
+      "Bash(gh pr *)"
     ],
     "deny": [
       "Bash(git push --force*)",
@@ -36,5 +42,8 @@
       "Bash(gh pr review*)",
       "Bash(gh pr merge*)"
     ]
+  },
+  "enabledPlugins": {
+    "phase-4-development@mar-claude-plugins": true
   }
 }
