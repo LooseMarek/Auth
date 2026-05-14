@@ -6,7 +6,7 @@ final class UpgradeGuestRequestTests: XCTestCase {
     func testEncodeDecodeRoundTrip() throws {
         let original = UpgradeGuestRequest(
             guestUUID: "guest-uuid-123",
-            provider: "email",
+            provider: .email,
             email: "upgrade@example.com",
             password: "upgradePass",
             identityToken: nil
@@ -23,7 +23,7 @@ final class UpgradeGuestRequestTests: XCTestCase {
     func testGuestUUIDFieldIsPresent() throws {
         let request = UpgradeGuestRequest(
             guestUUID: "uuid-abc",
-            provider: "google",
+            provider: .google,
             email: nil,
             password: nil,
             identityToken: "google-token"

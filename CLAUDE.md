@@ -57,6 +57,7 @@ Auth/
 
 | Component | Test Types |
 |-----------|-----------|
+| AuthShared | Unit (XCTest) |
 
 
 ---
