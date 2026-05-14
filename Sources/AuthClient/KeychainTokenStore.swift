@@ -7,7 +7,7 @@ import AuthShared
 ///
 /// Each instance is scoped to a unique `service` identifier so multiple
 /// apps or test runs can coexist without collisions.
-public struct KeychainTokenStore: Sendable {
+public struct KeychainTokenStore: TokenStore {
 
     // MARK: - Properties
 
@@ -91,11 +91,17 @@ public struct KeychainTokenStore: Sendable {
 
     /// Returns the base query dictionary shared by all Keychain operations.
     private func baseQuery() -> [String: Any] {
-        [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: Self.account,
         ]
+#if os(macOS)
+        // On macOS the legacy file-based keychain requires user interaction; the
+        // data-protection keychain (10.15+) works in headless/CI contexts.
+        query[kSecUseDataProtectionKeychain as String] = true
+#endif
+        return query
     }
 
     /// Returns `true` when an item already exists in the Keychain.
