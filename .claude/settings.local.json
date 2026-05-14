@@ -32,7 +32,8 @@
       "Skill(phase-4-development:p4-s2-review-task)",
       "mcp__MCP_DOCKER__issue_read",
       "mcp__MCP_DOCKER__pull_request_read",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "mcp__MCP_DOCKER__add_issue_comment"
     ],
     "deny": [
       "Bash(git push --force*)",
