@@ -1,4 +1,5 @@
 import AuthenticationServices
+import AuthShared
 import SwiftUI
 
 public struct LoginView: View {
@@ -10,14 +11,16 @@ public struct LoginView: View {
         networkService: any AuthNetworkService,
         prefilledEmail: String = "",
         prefilledPassword: String = "",
-        initialErrorMessage: String? = nil
+        initialErrorMessage: String? = nil,
+        initialIsLoading: Bool = false
     ) {
         self.authManager = authManager
         self._viewModel = State(wrappedValue: LoginViewModel(
             networkService: networkService,
             initialEmail: prefilledEmail,
             initialPassword: prefilledPassword,
-            initialErrorMessage: initialErrorMessage
+            initialErrorMessage: initialErrorMessage,
+            initialIsLoading: initialIsLoading
         ))
     }
 
@@ -48,6 +51,8 @@ public struct LoginView: View {
                 Spacer().frame(height: 32)
             }
             .padding(.horizontal, 24)
+            // Disable all interaction while a login request is in flight.
+            .allowsHitTesting(!viewModel.isLoading)
         }
         .background(authManager.configuration.backgroundColor)
     }
@@ -57,8 +62,7 @@ public struct LoginView: View {
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Welcome back")
-                .font(.title)
-                .bold()
+                .font(.title.bold())
                 .foregroundStyle(Color.primary)
             Text("Sign in to pick up where you left off.")
                 .font(.callout)
@@ -78,7 +82,7 @@ public struct LoginView: View {
             .submitLabel(.next)
             .padding(.horizontal, 16)
             .frame(height: 52)
-            .background(Color(.init(red: 0.96, green: 0.96, blue: 0.97, alpha: 1)))
+            .background(AuthColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
@@ -109,6 +113,7 @@ public struct LoginView: View {
             Button("Forgot password?") {}
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(authManager.configuration.primaryColor)
+                .buttonStyle(.plain)
         }
         .padding(.top, 4)
     }
@@ -119,8 +124,9 @@ public struct LoginView: View {
         } label: {
             Group {
                 if viewModel.isLoading {
+                    // .colorScheme(.dark) renders the spinner in white on both iOS and macOS.
                     ProgressView()
-                        .tint(.white)
+                        .colorScheme(.dark)
                 } else {
                     Text("Log in")
                         .font(.system(size: 16, weight: .semibold))
@@ -129,21 +135,25 @@ public struct LoginView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 52)
+            // Full color when form is valid; muted when empty fields regardless of loading.
+            .background(
+                viewModel.canSubmit
+                    ? authManager.configuration.primaryColor
+                    : authManager.configuration.primaryColor.opacity(0.4)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .background(
-            viewModel.canSubmit && !viewModel.isLoading
-                ? authManager.configuration.primaryColor
-                : authManager.configuration.primaryColor.opacity(0.4)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .disabled(!viewModel.canSubmit || viewModel.isLoading)
+        .buttonStyle(.plain)
+        // Only disable for empty fields — loading is blocked by the parent .allowsHitTesting.
+        // Keeping disabled off during loading preserves the full-colour spinner appearance.
+        .disabled(!viewModel.canSubmit)
     }
 
     private var orDivider: some View {
         HStack(spacing: 12) {
             Rectangle()
                 .frame(height: 1)
-                .foregroundStyle(Color.secondary.opacity(0.2))
+                .foregroundStyle(Color.primary.opacity(0.1))
                 .accessibilityHidden(true)
             Text("or")
                 .font(.footnote)
@@ -152,7 +162,7 @@ public struct LoginView: View {
                 .accessibilityHidden(true)
             Rectangle()
                 .frame(height: 1)
-                .foregroundStyle(Color.secondary.opacity(0.2))
+                .foregroundStyle(Color.primary.opacity(0.1))
                 .accessibilityHidden(true)
         }
     }
@@ -164,37 +174,44 @@ public struct LoginView: View {
     }
 
     private var googleSignInButton: some View {
-        Button {
-        } label: {
+        Button {} label: {
             HStack(spacing: 8) {
-                GoogleLogoView()
+                GoogleLogoMark()
                     .frame(width: 18, height: 18)
                     .accessibilityHidden(true)
                 Text("Sign in with Google")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.primary)
+                    // Google branding: label colour is not themed.
+                    .foregroundStyle(Color(red: 0.122, green: 0.122, blue: 0.122))
             }
             .frame(maxWidth: .infinity)
             .frame(height: 50)
+            .background(Color.white)
+            .clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(AuthColors.googleBorder, lineWidth: 1))
         }
-        .overlay(Capsule().stroke(Color(.init(red: 0.855, green: 0.804, blue: 0.878, alpha: 1)), lineWidth: 1))
+        .buttonStyle(.plain)
         .accessibilityLabel("Sign in with Google")
     }
 
     private var guestButton: some View {
-        Button("Continue as Guest") {}
-            .font(.system(size: 15, weight: .medium))
-            .foregroundStyle(Color.primary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .overlay(Capsule().stroke(Color.primary.opacity(0.2), lineWidth: 1))
+        Button {} label: {
+            Text("Continue as Guest")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color.primary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color.clear)
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 
     private var registerLink: some View {
         HStack {
             Spacer()
-            Button {
-            } label: {
+            Button {} label: {
                 Text("Don't have an account? ")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(Color.secondary)
@@ -202,6 +219,7 @@ public struct LoginView: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(authManager.configuration.primaryColor)
             }
+            .buttonStyle(.plain)
             Spacer()
         }
     }
@@ -234,34 +252,135 @@ private struct PasswordFieldView: View {
                     .foregroundStyle(Color.secondary)
                     .frame(width: 44, height: 44)
             }
+            .buttonStyle(.plain)
             .accessibilityLabel(isVisible ? "Hide password" : "Show password")
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
-        .background(Color(.init(red: 0.96, green: 0.96, blue: 0.97, alpha: 1)))
+        .background(AuthColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
-// Minimal multi-colour Google "G" mark built from SwiftUI shapes.
-private struct GoogleLogoView: View {
+// Google G mark built from Path + solid fills — no Text, no LinearGradient,
+// so rendering is deterministic across Intel and Apple Silicon.
+private struct GoogleLogoMark: View {
     var body: some View {
         GeometryReader { geo in
             let s = min(geo.size.width, geo.size.height)
+            let c = CGPoint(x: s / 2, y: s / 2)
+            let r = s / 2
+
             ZStack {
+                // Quadrant fills (Google brand colours, never themed)
+                // Red — top-left
+                Path { p in
+                    p.move(to: c)
+                    p.addArc(center: c, radius: r, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+                    p.closeSubpath()
+                }.fill(Color(red: 0.918, green: 0.263, blue: 0.208))
+
+                // Blue — top-right
+                Path { p in
+                    p.move(to: c)
+                    p.addArc(center: c, radius: r, startAngle: .degrees(270), endAngle: .degrees(360), clockwise: false)
+                    p.closeSubpath()
+                }.fill(Color(red: 0.259, green: 0.522, blue: 0.957))
+
+                // Yellow — bottom-right
+                Path { p in
+                    p.move(to: c)
+                    p.addArc(center: c, radius: r, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+                    p.closeSubpath()
+                }.fill(Color(red: 0.984, green: 0.737, blue: 0.020))
+
+                // Green — bottom-left
+                Path { p in
+                    p.move(to: c)
+                    p.addArc(center: c, radius: r, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+                    p.closeSubpath()
+                }.fill(Color(red: 0.204, green: 0.659, blue: 0.325))
+
+                // Inner white circle to form a ring
                 Circle()
                     .fill(Color.white)
-                    .frame(width: s, height: s)
-                Text("G")
-                    .font(.system(size: s * 0.65, weight: .semibold))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.red, .orange],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .frame(width: s * 0.54, height: s * 0.54)
+                    .position(c)
+
+                // White bar on the right half — creates the G cutout
+                Rectangle()
+                    .fill(Color.white)
+                    .frame(width: s * 0.48, height: s * 0.24)
+                    .position(CGPoint(x: c.x + s * 0.12, y: c.y))
             }
+            .frame(width: s, height: s)
         }
     }
 }
+
+// MARK: - Internal colour helpers
+
+private enum AuthColors {
+    /// Neutral field fill — matches design token `color.surface`.
+    static let surface = Color(red: 0.961, green: 0.961, blue: 0.969)
+    /// Google brand border — `#DADCE0` light / never themed.
+    static let googleBorder = Color(red: 0.855, green: 0.863, blue: 0.878)
+}
+
+// MARK: - Previews
+
+#if DEBUG
+
+private struct PreviewNetworkService: AuthNetworkService {
+    func login(email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+}
+
+private extension AuthManager {
+    static var preview: AuthManager {
+        AuthManager(configuration: AuthClientConfiguration())
+    }
+}
+
+#Preview("Default — empty") {
+    LoginView(authManager: .preview, networkService: PreviewNetworkService())
+}
+
+#Preview("With inputs") {
+    LoginView(
+        authManager: .preview,
+        networkService: PreviewNetworkService(),
+        prefilledEmail: "user@example.com",
+        prefilledPassword: "secret123"
+    )
+}
+
+#Preview("Loading") {
+    LoginView(
+        authManager: .preview,
+        networkService: PreviewNetworkService(),
+        prefilledEmail: "user@example.com",
+        prefilledPassword: "secret123",
+        initialIsLoading: true
+    )
+}
+
+#Preview("Invalid credentials") {
+    LoginView(
+        authManager: .preview,
+        networkService: PreviewNetworkService(),
+        prefilledEmail: "user@example.com",
+        prefilledPassword: "wrongpass",
+        initialErrorMessage: "Incorrect email or password."
+    )
+}
+
+#Preview("No guest access") {
+    LoginView(
+        authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
+        networkService: PreviewNetworkService()
+    )
+}
+
+#endif
