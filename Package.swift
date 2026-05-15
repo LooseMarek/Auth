@@ -44,6 +44,7 @@ let package = Package(
             name: "AuthClientSnapshotTests",
             dependencies: [
                 "AuthClient",
+                "AuthShared",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing")
             ],
             path: "Tests/AuthClientSnapshotTests",

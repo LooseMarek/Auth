@@ -12,8 +12,16 @@ final class LoginViewModel {
 
     private let networkService: any AuthNetworkService
 
-    init(networkService: any AuthNetworkService) {
+    init(
+        networkService: any AuthNetworkService,
+        initialEmail: String = "",
+        initialPassword: String = "",
+        initialErrorMessage: String? = nil
+    ) {
         self.networkService = networkService
+        self.email = initialEmail
+        self.password = initialPassword
+        self.errorMessage = initialErrorMessage
     }
 
     func login(authManager: AuthManager) async {
