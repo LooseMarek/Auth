@@ -1,5 +1,6 @@
 import Observation
 import Foundation
+import AuthShared
 
 /// Single source of truth for authentication state in the host app.
 ///
@@ -17,5 +18,9 @@ public final class AuthManager {
 
     public init(configuration: AuthClientConfiguration) {
         self.configuration = configuration
+    }
+
+    func signIn(response: AuthResponse) {
+        session = .authenticated(response.user)
     }
 }
