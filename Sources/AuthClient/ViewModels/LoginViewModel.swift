@@ -16,12 +16,14 @@ final class LoginViewModel {
         networkService: any AuthNetworkService,
         initialEmail: String = "",
         initialPassword: String = "",
-        initialErrorMessage: String? = nil
+        initialErrorMessage: String? = nil,
+        initialIsLoading: Bool = false
     ) {
         self.networkService = networkService
         self.email = initialEmail
         self.password = initialPassword
         self.errorMessage = initialErrorMessage
+        self.isLoading = initialIsLoading
     }
 
     func login(authManager: AuthManager) async {

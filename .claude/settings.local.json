@@ -38,7 +38,10 @@
       "Bash(grep -v \"XCTest\\\\|XCTVapor\\\\|JWTKit\\\\|AuthServer\\\\|AuthShared\\\\|Fluent$\\\\|Vapor$\")",
       "Bash(python3 -m json.tool)",
       "Bash(gh run *)",
-      "mcp__MCP_DOCKER__search_issues"
+      "mcp__MCP_DOCKER__search_issues",
+      "Bash(xcodebuild test *)",
+      "Bash(xcodebuild build *)",
+      "Bash(bundle exec *)"
     ],
     "deny": [
       "Bash(git push --force*)",
