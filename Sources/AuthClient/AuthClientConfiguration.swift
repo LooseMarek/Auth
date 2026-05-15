@@ -4,6 +4,12 @@ import SwiftUI
 /// All properties are developer-facing — the end user never sees or changes them.
 public struct AuthClientConfiguration: Sendable {
 
+    /// Base URL of the authentication API (e.g. `https://api.example.com`).
+    public let baseURL: URL
+
+    /// The token store used to persist authentication tokens.
+    public let tokenStore: any TokenStore
+
     /// When `false`, all guest / anonymous sign-in UI is hidden.
     public let allowGuestAccess: Bool
 
@@ -17,11 +23,15 @@ public struct AuthClientConfiguration: Sendable {
     public let font: Font?
 
     public init(
+        baseURL: URL = URL(string: "https://localhost")!,
+        tokenStore: any TokenStore = InMemoryTokenStore(),
         allowGuestAccess: Bool = true,
         primaryColor: Color = .accentColor,
         backgroundColor: Color = .white,
         font: Font? = nil
     ) {
+        self.baseURL = baseURL
+        self.tokenStore = tokenStore
         self.allowGuestAccess = allowGuestAccess
         self.primaryColor = primaryColor
         self.backgroundColor = backgroundColor
