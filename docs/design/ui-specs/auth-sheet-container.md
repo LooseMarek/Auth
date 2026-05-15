@@ -1,10 +1,12 @@
 # UI Spec — Auth Sheet Container
 
+**Version:** 2.0 · **Date:** 2026-05-15
+
 ## Purpose
 
-The sheet container wraps all three auth screens (`LoginView`, `RegisterView`,
-`ForgotPasswordView`) and manages their navigation stack. It is the presentation
-layer that host apps attach once via `.authSheet(manager:)` on their root view.
+The sheet wraps all three auth screens (`LoginView`, `RegisterView`,
+`ForgotPasswordView`) and owns the navigation stack between them. Host apps
+attach it once via `.authSheet(manager:)` on their root view.
 
 ---
 
@@ -12,27 +14,43 @@ layer that host apps attach once via `.authSheet(manager:)` on their root view.
 
 ```
 Sheet (system .sheet modifier)
-  └── NavigationStack
+  └── NavigationStack          ← owned by the container, not host
         └── ScrollView (per screen)
               └── VStack (per screen content)
 ```
 
-The `NavigationStack` is owned by the sheet container, not by individual views.
-This allows `LoginView` to push `RegisterView` or `ForgotPasswordView` without the
-host app's navigation hierarchy being involved.
+The `NavigationStack` is internal — push/pop happens inside the sheet and
+the host app's nav hierarchy is never touched.
 
 ---
 
-## Presentation Spec
+## Presentation · iOS
 
 | Property | Value |
 |----------|-------|
-| Presentation modifier | SwiftUI `.sheet(isPresented:)` |
-| Detents | `.presentationDetents([.medium, .large])` |
+| Modifier | SwiftUI `.sheet(isPresented:)` |
+| Detents | `.presentationDetents([.large])` — `.medium` is **removed** in v2 because the auth fields don't fit |
 | Drag indicator | `.presentationDragIndicator(.visible)` |
-| Background | `color.background` |
-| Corner radius | System default (iOS 16+ applies rounded corners automatically) |
-| macOS | `.sheet` renders as a floating panel; same background and padding tokens apply |
+| Background | `color.bg` |
+| Corner radius | System default (iOS 16+ rounds top corners) |
+| Horizontal edge padding | `space.lg` (24pt) — applied per screen's internal `VStack` |
+| Top padding | `space.lg` |
+| Bottom padding | `space.xl` + safe area |
+| Scrim | System-rendered `color.scrim` over host content |
+
+## Presentation · macOS
+
+| Property | Value |
+|----------|-------|
+| Modifier | SwiftUI `.sheet(isPresented:)` — renders as floating panel |
+| Panel width | 440pt fixed |
+| Panel min height | 540pt; content height drives the panel size up to host window bounds |
+| Background | `color.bg` |
+| Corner radius | 14pt (top + bottom — full window) |
+| Chrome | Traffic-lights row only (36pt tall) at the top; no toolbar, no sidebar |
+| Shadow | `shadow.sheet` |
+| Border | 1pt, `color.separator` |
+| Scrim | Manual — `color.scrim` over host window content |
 
 ---
 
@@ -40,9 +58,9 @@ host app's navigation hierarchy being involved.
 
 | Component | Notes |
 |-----------|-------|
-| `NavigationStack` | Root navigation container inside the sheet |
+| `NavigationStack` | Root navigation inside the sheet |
 | `ScrollView` | Per-screen wrapper — ensures graceful layout under Dynamic Type |
-| Loading overlay | Full-screen `color.background` at 0.8 opacity + centered `ProgressView`; applied over the sheet when social sign-in server call is in flight |
+| `LoadingOverlay` | Full-screen tint + spinner + label; appears over the sheet for social sign-in calls |
 
 ---
 
@@ -50,40 +68,59 @@ host app's navigation hierarchy being involved.
 
 | State | Behaviour |
 |-------|-----------|
-| Hidden | Sheet not presented; `.authSheet` modifier is attached but inactive |
-| Presented — LoginView | Sheet visible; `NavigationStack` at root (LoginView) |
-| Presented — RegisterView | `NavigationStack` has pushed RegisterView |
-| Presented — ForgotPasswordView | `NavigationStack` has pushed ForgotPasswordView |
-| Loading overlay | Shown over the sheet during social sign-in server calls; blocks interaction |
+| Hidden | `.authSheet` modifier attached but `isPresented == false` |
+| Presented — LoginView | Sheet visible; `NavigationStack` at root |
+| Presented — RegisterView | Pushed via `NavigationLink` |
+| Presented — ForgotPasswordView | Pushed via `NavigationLink` |
+| Loading overlay | Covers the sheet; blocks interaction during social SSO server calls |
 
 ---
 
 ## Navigation Rules
 
-| Action | Navigation Outcome |
-|--------|-------------------|
-| Tap "Register" on LoginView | Push `RegisterView` |
-| Tap "Log in" on RegisterView | Pop to `LoginView` |
-| Tap "Forgot password?" on LoginView | Push `ForgotPasswordView` |
-| Tap "Back to login" on ForgotPasswordView | Pop to `LoginView` |
+| Action | Outcome |
+|--------|---------|
+| Tap "Register" on `LoginView` | Push `RegisterView` |
+| Tap "Log in" on `RegisterView` | Pop to `LoginView` |
+| Tap "Forgot password?" on `LoginView` | Push `ForgotPasswordView` |
+| Tap "Back to log in" on `ForgotPasswordView` | Pop to `LoginView` |
 | Successful auth (any method) | Dismiss sheet; `NavigationStack` resets to root |
-| Swipe down / drag to dismiss | Dismiss sheet; `NavigationStack` resets to root |
+| Swipe down / drag to dismiss (iOS) | Dismiss sheet; `NavigationStack` resets |
+| Cmd-W / red traffic light (macOS) | Dismiss sheet; same reset |
+
+---
+
+## Motion
+
+| Moment | Duration | Easing | Properties |
+|--------|----------|--------|-----------|
+| Sheet present | `dur.sheet` (380ms) | System spring | translateY + scrim opacity 0 → 1 |
+| Sheet dismiss | `dur.sheet` | System spring | reverse |
+| Nav push (Register / Forgot) | system (~350ms) | system | `NavigationStack` default — horizontal slide |
+| Loading overlay in / out | 200ms / 160ms | `ease.standard` | backdrop blur + opacity |
 
 ---
 
 ## Accessibility
 
-- The sheet should post `UIAccessibility.post(notification: .screenChanged, ...)` on presentation to announce the auth flow to VoiceOver users.
-- `NavigationStack` back button should have a localised `accessibilityLabel` — SwiftUI provides this automatically from the view title.
-- When the loading overlay is displayed, all underlying interactive elements must have interaction disabled so VoiceOver does not focus them.
+- On presentation, post `UIAccessibility.post(notification: .screenChanged, argument: <title of the root screen>)`.
+- `NavigationStack` back-button label is auto-derived by SwiftUI from the previous screen's title — no manual `accessibilityLabel` needed.
+- When the loading overlay is active, every underlying control must have `.disabled(true)` set so VoiceOver does not focus them.
+- Sheet dismissal posts a `.layoutChanged` notification with the host app's previously-focused element.
 
 ---
 
 ## Design Tokens Used
 
-| Token | Usage |
+| Token | Where |
 |-------|-------|
-| `color.background` | Sheet background, loading overlay tint |
-| `spacing.md` | Horizontal edge padding (applied per screen's internal VStack) |
-| `spacing.lg` | Top padding inside sheet (per screen) |
-| `spacing.xl` | Bottom padding (per screen) |
+| `color.bg` | Sheet & panel background |
+| `color.bg.page` | Visible host surface peeking behind the sheet |
+| `color.scrim` | Backdrop dimming behind sheet (manual on macOS) |
+| `color.overlay` | Loading overlay tint |
+| `color.separator` | macOS panel hairline border |
+| `space.lg` | Per-screen horizontal padding, top padding |
+| `space.xl` | Bottom padding |
+| `radius.lg` (top corners) | Sheet bottom-up corner radius (iOS — system) |
+| `shadow.sheet` | macOS floating panel |
+| `dur.sheet` | Present/dismiss timing |

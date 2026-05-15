@@ -1,48 +1,77 @@
 # App Icon Brief — Auth
 
-**Version:** 1.0
-**Date:** 2026-05-13
-**Usage:** GitHub repository social preview image, package documentation header,
-and any future showcase or demo app icon.
+**Version:** 2.0
+**Date:** 2026-05-15
+**Usage:** GitHub repository social preview image, package documentation
+header, and any future showcase / demo app icon.
+
+This brief sits inside the v2 design system (`design-system.md`). The icon
+mark should read as the same product family — same blue, same restraint,
+same Apple-platform fluency.
 
 ---
 
 ## Concept
 
-The icon should communicate a single idea clearly: **secure, frictionless authentication**.
-It is a developer-facing package icon, so it should read as technical and trustworthy
-without resorting to cliched padlock imagery. A better direction is a combination of
-a key or a shield with a subtle Swift language / SF Symbol aesthetic.
+One idea, told plainly: **secure, frictionless authentication**. A shield
+with a checkmark. Auth is a developer-facing package, so the mark must read
+as technical and trustworthy — not playful, not decorative, not
+illustrative. The product is a quiet utility; the icon should be too.
+
+The shield + check pairing is intentionally familiar — we're not trying to
+be clever here. The differentiator is execution: the blue, the corner
+radius, the weight of the check.
 
 ---
 
 ## Style Direction
 
-**Overall feel:** Clean, minimal, modern. System aesthetic — feels like it belongs in
-the Apple ecosystem. Not playful or decorative. No gradients heavier than a subtle
-top-lit surface tint.
+**Overall feel:** clean, minimal, modern. System aesthetic — feels like it
+belongs on the iOS / macOS home screen alongside System Preferences or
+Keychain Access. Not playful, not decorative. No gradients heavier than a
+single soft top-lit highlight.
 
-**Colour palette:**
-- Background: deep navy / near-black (`#1C1C2E`) — conveys security and authority.
-- Primary accent: vivid blue (`#0A84FF` — iOS system blue in dark mode) — recognition
-  and trustworthiness.
-- Secondary accent: clean white (`#FFFFFF`) — for the icon shape itself.
-- Optional highlight: a single soft electric-blue glow ring around the central mark
-  to suggest "active / live authentication".
+**Palette (locked to the v2 design system):**
 
-**Visual metaphor — option A (preferred):**
-A shield silhouette, minimal and slightly abstracted (not militaristic — more like a
-soft rounded square shield). Inside the shield: a single bold checkmark in white.
-The combination reads: "verified / authenticated".
+| Role | Hex | Token |
+|------|-----|-------|
+| Mark background base | `#0A66FF` | `color.primary` |
+| Mark background highlight | `#4F8BFF` | `color.primary` lightened 30% — used as the top stop of a single linear gradient |
+| Mark glyph | `#FFFFFF` | `color.label.on-primary` |
+| Optional soft shadow | `rgba(10,102,255,0.32)` outside the canvas (GitHub social only) | — |
 
-**Visual metaphor — option B (alternative):**
-A rounded-rectangle key, rotated 45 degrees, rendered as a single line-weight SF
-Symbol style stroke in white against the dark background. Simple, immediately
-legible at small sizes.
+The background tile uses a single 140° linear gradient
+(`#0A66FF → #4F8BFF`) — same recipe as the design-system showcase hero.
+This is the only place in the product where a gradient is allowed; reserve
+it for the icon canvas.
 
-**Typography:** No text on the icon — legibility at 16pt app icon size is the priority.
-If a wordmark is needed for a wider marketing header, "Auth" in SF Pro Display Semibold
-may be added below the icon mark.
+**Visual metaphor — preferred:**
+
+A shield silhouette with rounded shoulders (soft rounded-square shield, not
+militaristic). Inside the shield: a single bold white checkmark, 4pt
+stroke, rounded caps and joins.
+
+Reference proportions (on a 1024 × 1024 canvas):
+
+| Element | Value |
+|---------|-------|
+| Canvas corner radius | 230pt (Apple iOS 17 super-ellipse — let the OS apply it; do not pre-clip) |
+| Shield bounding box | 540 × 580pt, centred (X) at canvas mid, vertical center offset −20pt |
+| Shield stroke | 40pt, `#FFFFFF` |
+| Shield fill | `#FFFFFF` at 16% opacity (subtle inner glow on the gradient) |
+| Check polyline | 3 points: `(380, 540) → (470, 630) → (660, 410)` (relative to canvas) |
+| Check stroke | 64pt, `#FFFFFF`, round cap, round join |
+| Top-lit highlight | Radial gradient from `(30% 20%)`, `rgba(255,255,255,0.4) → transparent`, 55% radius — purely inside the canvas |
+
+**Visual metaphor — alternative:**
+
+A 45-degree rotated rounded-rectangle key, single line-weight stroke in
+white. Simpler silhouette, less metaphorical baggage. Use only if the
+shield-and-check feels too generic in user testing.
+
+**Typography:** no text on the icon. If a wordmark is needed for the
+GitHub social banner, "Auth" set in SF Pro Display Semibold at 96pt,
+`#FFFFFF`, with 16pt left padding from the icon mark.
 
 ---
 
@@ -50,46 +79,48 @@ may be added below the icon mark.
 
 | Platform | Size | Format | Notes |
 |----------|------|--------|-------|
-| GitHub social preview | 1280×640px | PNG, no alpha | Wide banner — icon centred on dark background, optional "Auth" wordmark to the right |
-| iOS app icon (showcase app) | 1024×1024px | PNG, no alpha | App Store submission |
-| macOS app icon (showcase app) | 1024×1024px | PNG, no alpha | OS applies rounded corners; do not pre-clip |
-| README / docs header | 128×128px | PNG or SVG | Smaller format; must be legible at this size |
+| GitHub social preview | 1280 × 640 | PNG, no alpha | Icon mark on the left (centered vertically), "Auth" wordmark to the right; background `#0A66FF → #4F8BFF` gradient |
+| iOS app icon (showcase) | 1024 × 1024 | PNG, no alpha | App Store submission; no pre-clipped corners |
+| macOS app icon (showcase) | 1024 × 1024 | PNG, no alpha | OS applies rounded corners; do not pre-clip |
+| README / docs header | 128 × 128 | PNG or SVG | Smaller format; must remain legible |
+| Favicon | 32 × 32, 16 × 16 | PNG / ICO | Drop the inner shield outline at 16px; keep only the check on solid blue |
 
 ---
 
 ## Compositional Notes
 
-- The central mark should occupy approximately 55–60% of the canvas area.
-- Safe zone: leave at least 10% inset from each edge before the mark begins.
-- The shield or key mark must be legible at 16×16pt (iOS home screen small icon).
-  Test at small sizes before finalising.
-- No outer glow or shadow that extends beyond the icon canvas.
-- The dark navy background works for both light and dark OS appearances.
+- The shield occupies ~55–60% of the canvas area.
+- Safe-zone inset: ≥ 10% of the canvas on each edge (102pt at 1024) before the mark begins.
+- The check must be legible at 16 × 16pt. Test by rendering the export at that size and squinting.
+- No outer glow, drop shadow, or chrome that extends beyond the canvas (Apple's icon spec forbids it).
+- The 140° gradient stays inside the canvas. The radial top-light is part of the canvas, not a layered effect.
+- The mark must read clearly when rendered monochrome (for VoiceOver activation indicator and tinted icon mode).
 
 ---
 
 ## Do
 
-- Use a single bold, simple mark — one metaphor, one idea.
-- Align with SF Symbol visual weight and style for native familiarity.
-- Keep the palette to two or three colours maximum.
-- Ensure the mark reads as a recognisable silhouette in monochrome (for accessibility).
-- Include a 1280×640 GitHub social preview variant with "Auth" wordmark alongside the mark.
+- One bold, simple mark — one metaphor, one idea.
+- Align with SF Symbol visual weight (4pt stroke at 64pt symbol size scales to 64pt stroke at 1024pt canvas — same proportion).
+- Keep the palette to two blues + white.
+- Verify the silhouette reads in monochrome before exporting.
+- Provide a 1280 × 640 GitHub social preview variant with the "Auth" wordmark.
 
 ## Don't
 
-- Don't use a literal padlock (overused in security iconography).
-- Don't add text inside the icon — it will not be legible at small sizes.
-- Don't use gradients with more than two stops.
-- Don't use drop shadows — the dark background with a crisp mark is sufficient.
-- Don't use decorative illustration style — keep it flat or with a single subtle
-  top-lit surface treatment only.
+- No literal padlock — overused in security iconography, and the shield-and-check is more honest about what the package actually does (verifies identity, not encrypts data).
+- No text inside the icon.
+- No gradients with more than two stops, no rainbow / multi-hue gradients.
+- No drop shadow — the canvas blue + crisp white mark is sufficient.
+- No decorative illustration style. No "AI generated" sparkles.
+- Don't deviate from `color.primary` — the icon, the buttons, and the focus rings should all be the same blue.
 
 ---
 
-## Deliverables Expected from Designer / Illustrator
+## Deliverables
 
-1. Master icon mark as SVG (vector, editable).
-2. PNG exports at all platform sizes listed above.
-3. GitHub social preview PNG (1280×640).
-4. Monochrome version of the mark (for favicon or monochrome contexts).
+1. Master icon mark as SVG (vector, editable, single-file).
+2. PNG exports at every size in the platform table above.
+3. GitHub social preview PNG (1280 × 640) with wordmark.
+4. Monochrome variant of the mark (white-on-transparent SVG) for tinted contexts and the favicon.
+5. Figma file with the gradient, mark, and grid construction layers preserved.
