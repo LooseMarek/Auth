@@ -96,6 +96,40 @@ Run once to auto-record (test fails), then run again to confirm (test passes), t
 
 ---
 
+### Adaptive colours in AuthClientConfiguration
+
+`AuthClientConfiguration` stores `Color` values for `primaryColor` and `backgroundColor`. These default to Auth Blue and the system background — both of which must adapt to light and dark mode.
+
+Swift does **not** allow `internal` or `fileprivate` statics as default parameter values in `public init`s (the default expression would be inaccessible to callers). The fix: use `Color?` parameters in the `public init` (nil = use adaptive default) and resolve the adaptive `Color` inside the init body via a `private static let`. The stored properties remain `Color` (non-optional).
+
+Pattern:
+```swift
+public init(primaryColor: Color? = nil, ...) {
+    self.primaryColor = primaryColor ?? Self.adaptivePrimaryColor
+}
+#if canImport(UIKit)
+private static let adaptivePrimaryColor = Color(uiColor: UIColor { ... })
+#else
+private static let adaptivePrimaryColor = Color(nsColor: NSColor(name: nil) { ... })
+#endif
+```
+
+The same `#if canImport(UIKit)` / `#else` pattern applies for all adaptive colours in `AuthColors` inside `LoginView.swift`.
+
+---
+
+### macOS SwiftUI text field styling
+
+On macOS, `TextField` and `SecureField` default to `roundedBorder` style, which draws a native inner border/background. When wrapping a field in a custom `background` + `clipShape` container (the pattern used for our `color.surface` fields), this causes a "container inside container" appearance. Fix: add `.textFieldStyle(.plain)` to remove the native decoration before applying custom styling.
+
+```swift
+TextField("Email", text: $email)
+    .textFieldStyle(.plain)   // removes native macOS border
+    .padding(.horizontal, 16)
+    .frame(height: 52)
+    .background(AuthColors.surface)
+    .clipShape(RoundedRectangle(cornerRadius: 8))
+```
 ### AuthServer testing constraint
 
 `AuthServer` does **not** depend on any Fluent driver (`fluent-sqlite-driver`, `fluent-postgres-driver`, etc.) — the host app provides the driver (see ADR-004). Therefore `AuthServerTests` must **never** add a Fluent driver as a test dependency and must **never** import `FluentSQLiteDriver` or any other driver module.

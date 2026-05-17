@@ -7,7 +7,7 @@ import AuthShared
 @MainActor
 final class LoginViewSnapshotTests: XCTestCase {
 
-    // MARK: - States
+    // MARK: - Light mode
 
     func testDefaultState() {
         snapshot(LoginView(
@@ -52,19 +52,67 @@ final class LoginViewSnapshotTests: XCTestCase {
         ))
     }
 
+    // MARK: - Dark mode
+
+    func testDefaultState_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    func testWithInputsState_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService(),
+            prefilledEmail: "user@example.com",
+            prefilledPassword: "secret123"
+        ), colorScheme: .dark)
+    }
+
+    func testLoadingState_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService(),
+            prefilledEmail: "user@example.com",
+            prefilledPassword: "secret123",
+            initialIsLoading: true
+        ), colorScheme: .dark)
+    }
+
+    func testInvalidCredentialsState_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService(),
+            prefilledEmail: "user@example.com",
+            prefilledPassword: "wrongpass",
+            initialErrorMessage: "Incorrect email or password."
+        ), colorScheme: .dark)
+    }
+
+    func testNoGuestAccessState_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
-    /// Renders `view` as a snapshot on both macOS and iOS (whichever platform this run targets).
-    /// Appearance is forced to light mode so baselines are consistent regardless of system setting.
-    /// File name: `{testFunctionName}.{macOS|iOS}.png`
+    /// Renders `view` as a snapshot for iOS and/or macOS depending on the current test host.
+    /// `colorScheme` forces the appearance so baselines are deterministic regardless of system setting.
     private func snapshot(
         _ view: some View,
-        function: String = #function   // captured at call site — yields the test method name
+        colorScheme: ColorScheme = .light,
+        function: String = #function
     ) {
+        let wrappedView = view.preferredColorScheme(colorScheme)
+
 #if canImport(AppKit)
-        let hosting = NSHostingView(rootView: view.frame(width: 440))
-        // Force Aqua (light mode) regardless of the system appearance.
-        hosting.appearance = NSAppearance(named: .aqua)
+        let hosting = NSHostingView(rootView: wrappedView.frame(width: 440))
+        hosting.appearance = NSAppearance(
+            named: colorScheme == .dark ? .darkAqua : .aqua
+        )
         hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 700)
         assertSnapshot(
             of: hosting,
@@ -73,9 +121,8 @@ final class LoginViewSnapshotTests: XCTestCase {
             testName: function
         )
 #elseif canImport(UIKit)
-        let controller = UIHostingController(rootView: view)
-        // Force light mode so baselines don't depend on the simulator's appearance setting.
-        controller.overrideUserInterfaceStyle = .light
+        let controller = UIHostingController(rootView: wrappedView)
+        controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
         controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 780)
         assertSnapshot(
             of: controller.view,
