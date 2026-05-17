@@ -1,10 +1,16 @@
 import AuthenticationServices
 import AuthShared
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#else
+import AppKit
+#endif
 
 public struct LoginView: View {
     @State private var viewModel: LoginViewModel
     private let authManager: AuthManager
+    @Environment(\.colorScheme) private var colorScheme
 
     public init(
         authManager: AuthManager,
@@ -73,13 +79,14 @@ public struct LoginView: View {
     }
 
     private var emailField: some View {
-        TextField("you@email.com", text: $viewModel.email)
+        TextField("Email", text: $viewModel.email)
 #if canImport(UIKit)
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.never)
 #endif
             .textContentType(.emailAddress)
             .submitLabel(.next)
+            .textFieldStyle(.plain)
             .padding(.horizontal, 16)
             .frame(height: 52)
             .background(AuthColors.surface)
@@ -139,7 +146,7 @@ public struct LoginView: View {
             .background(
                 viewModel.canSubmit
                     ? authManager.configuration.primaryColor
-                    : authManager.configuration.primaryColor.opacity(0.4)
+                    : authManager.configuration.primaryColor.opacity(0.8)
             )
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
@@ -168,27 +175,54 @@ public struct LoginView: View {
     }
 
     private var appleSignInButton: some View {
-        SignInWithAppleButton(.signIn) { _ in } onCompletion: { _ in }
+        Button {
+            let provider = ASAuthorizationAppleIDProvider()
+            let request = provider.createRequest()
+
+            request.requestedScopes = [.fullName, .email]
+
+            let controller = ASAuthorizationController(
+                authorizationRequests: [request]
+            )
+
+            controller.performRequests()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "apple.logo")
+                    .resizable()
+                    .frame(width: 18, height: 18)
+                    .accessibilityHidden(true)
+
+                Text("Sign in with Apple")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.white)
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
             .frame(height: 50)
+            .background(Color.black)
             .clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 
     private var googleSignInButton: some View {
         Button {} label: {
             HStack(spacing: 8) {
-                GoogleLogoMark()
+                Image("google-logo", bundle: .module)
+                    .resizable()
                     .frame(width: 18, height: 18)
                     .accessibilityHidden(true)
                 Text("Sign in with Google")
                     .font(.system(size: 15, weight: .medium))
-                    // Google branding: label colour is not themed.
-                    .foregroundStyle(Color(red: 0.122, green: 0.122, blue: 0.122))
+                    .foregroundStyle(Color.primary)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 50)
-            .background(Color.white)
+            .background(Color.clear)
             .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(AuthColors.googleBorder, lineWidth: 1))
+            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Sign in with Google")
@@ -238,10 +272,12 @@ private struct PasswordFieldView: View {
                     TextField("Password", text: $text)
                         .textContentType(.password)
                         .submitLabel(.go)
+                        .textFieldStyle(.plain)
                 } else {
                     SecureField("Password", text: $text)
                         .textContentType(.password)
                         .submitLabel(.go)
+                        .textFieldStyle(.plain)
                 }
             }
             Button {
@@ -262,69 +298,23 @@ private struct PasswordFieldView: View {
     }
 }
 
-// Google G mark built from Path + solid fills — no Text, no LinearGradient,
-// so rendering is deterministic across Intel and Apple Silicon.
-private struct GoogleLogoMark: View {
-    var body: some View {
-        GeometryReader { geo in
-            let s = min(geo.size.width, geo.size.height)
-            let c = CGPoint(x: s / 2, y: s / 2)
-            let r = s / 2
-
-            ZStack {
-                // Quadrant fills (Google brand colours, never themed)
-                // Red — top-left
-                Path { p in
-                    p.move(to: c)
-                    p.addArc(center: c, radius: r, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
-                    p.closeSubpath()
-                }.fill(Color(red: 0.918, green: 0.263, blue: 0.208))
-
-                // Blue — top-right
-                Path { p in
-                    p.move(to: c)
-                    p.addArc(center: c, radius: r, startAngle: .degrees(270), endAngle: .degrees(360), clockwise: false)
-                    p.closeSubpath()
-                }.fill(Color(red: 0.259, green: 0.522, blue: 0.957))
-
-                // Yellow — bottom-right
-                Path { p in
-                    p.move(to: c)
-                    p.addArc(center: c, radius: r, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
-                    p.closeSubpath()
-                }.fill(Color(red: 0.984, green: 0.737, blue: 0.020))
-
-                // Green — bottom-left
-                Path { p in
-                    p.move(to: c)
-                    p.addArc(center: c, radius: r, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
-                    p.closeSubpath()
-                }.fill(Color(red: 0.204, green: 0.659, blue: 0.325))
-
-                // Inner white circle to form a ring
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: s * 0.54, height: s * 0.54)
-                    .position(c)
-
-                // White bar on the right half — creates the G cutout
-                Rectangle()
-                    .fill(Color.white)
-                    .frame(width: s * 0.48, height: s * 0.24)
-                    .position(CGPoint(x: c.x + s * 0.12, y: c.y))
-            }
-            .frame(width: s, height: s)
-        }
-    }
-}
-
 // MARK: - Internal colour helpers
 
 private enum AuthColors {
-    /// Neutral field fill — matches design token `color.surface`.
-    static let surface = Color(red: 0.961, green: 0.961, blue: 0.969)
-    /// Google brand border — `#DADCE0` light / never themed.
-    static let googleBorder = Color(red: 0.855, green: 0.863, blue: 0.878)
+    /// Field fill — `color.surface` token: #F5F5F7 light / #2C2C2E dark.
+    #if canImport(UIKit)
+    static let surface = Color(uiColor: UIColor { t in
+        t.userInterfaceStyle == .dark
+            ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+            : UIColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
+    })
+    #else
+    static let surface = Color(nsColor: NSColor(name: nil) { a in
+        a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+            : NSColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
+    })
+    #endif
 }
 
 // MARK: - Previews
