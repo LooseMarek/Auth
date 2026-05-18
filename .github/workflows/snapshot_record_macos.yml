@@ -1,0 +1,31 @@
+name: Record Snapshots (macOS)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  record:
+    name: Record Snapshots (macOS)
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Record snapshots via Fastlane
+        continue-on-error: true
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
+          SNAPSHOT_TESTING_RECORD: "all"
+        run: bundle exec fastlane mac record_snapshots
+
+      - name: Upload recorded snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorded-snapshots-macos-${{ github.run_id }}
+          path: Tests/**/__Snapshots__/**
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,67 @@
+name: Commit Snapshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform(s) to record and commit'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - ios
+          - macos
+          - both
+
+jobs:
+  commit:
+    name: Commit Snapshots (${{ inputs.platform }})
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Record iOS snapshots
+        if: inputs.platform == 'ios' || inputs.platform == 'both'
+        continue-on-error: true
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
+          SNAPSHOT_TESTING_RECORD: "all"
+        run: bundle exec fastlane ios record_snapshots
+
+      - name: Record macOS snapshots
+        if: inputs.platform == 'macos' || inputs.platform == 'both'
+        continue-on-error: true
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
+          SNAPSHOT_TESTING_RECORD: "all"
+        run: bundle exec fastlane mac record_snapshots
+
+      - name: Commit and push snapshots
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          SNAPSHOT_FILES=$(find . -not -path './.build/*' -type f -name '*.png' -path '*/__Snapshots__/*')
+          if [ -z "$SNAPSHOT_FILES" ]; then
+            echo "No snapshot files found — nothing to commit"
+            exit 1
+          fi
+
+          echo "$SNAPSHOT_FILES" | xargs git add -f
+
+          if git diff --staged --quiet; then
+            echo "Snapshots are unchanged — no commit needed"
+          else
+            git commit -m "chore: update CI-generated snapshots [${{ inputs.platform }}] on ${{ github.ref_name }}"
+            git push
+          fi
