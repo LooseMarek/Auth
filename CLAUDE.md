@@ -62,31 +62,43 @@ Auth/
 
 ### Snapshot Testing
 
-**Always provide snapshots for both platforms.** Every snapshot test must cover iOS (`UIHostingController`) and macOS (`NSHostingView`) — CI runs separate pipelines for each via `fastlane ios test` and `fastlane mac test`.
+**Two-arch workflow.** Snapshots are split by CPU architecture so M4 development machines and Intel CI never compare against each other's baselines:
 
-**macOS snapshots require `perceptualPrecision: 0.95`.** The CI runner is an Intel MacBook Pro (2018) while development happens on Apple Silicon. Even identical solid-colour views produce a sub-perceptual colour delta between the two due to display colour-space differences. Use:
+- `arm64` suffix — recorded on Apple Silicon (M4), committed by agents
+- `x86_64` suffix — recorded on Intel CI runner, committed by the snapshot-commit pipeline
+
+Add this block at the top of every snapshot test file:
+
 ```swift
-assertSnapshot(of: hostingView, as: .image(perceptualPrecision: 0.95), named: "customTheme-macOS")
+#if arch(arm64)
+private let snapshotArch = "arm64"
+#else
+private let snapshotArch = "x86_64"
+#endif
 ```
 
-**iOS snapshots require `perceptualPrecision: 0.98`.** The CI runner is self-hosted and may run a different iOS simulator version than the local machine. Minor differences in SF Symbol rendering, text antialiasing, or colour profiles between iOS versions cause exact-match failures. Use:
+Then use it in every `assertSnapshot` call:
+
 ```swift
-assertSnapshot(of: hostingController.view, as: .image(perceptualPrecision: 0.98), named: "customTheme-iOS")
+assertSnapshot(of: hostingView, as: .image, named: "macOS-\(snapshotArch)")
+assertSnapshot(of: controller.view, as: .image, named: "iOS-\(snapshotArch)")
 ```
 
-**Design snapshot test views to be cross-architecture stable.** Prefer solid `Rectangle().fill(color)` blocks over elements that involve hardware-specific rendering:
-- No `LinearGradient` — Metal interpolates gradients differently on Intel vs Apple Silicon.
-- No `.cornerRadius()` — GPU anti-aliasing at rounded edges differs between architectures.
-- No `Text` — subpixel antialiasing is present on Intel but absent on Apple Silicon.
+No `perceptualPrecision` needed — each architecture compares only against its own baselines.
 
-**Record snapshot references locally via Fastlane, not `swift test`.** `swift test` renders macOS views using the display's backing scale (2× Retina locally, 1× headless), causing scale mismatches on CI. Always record with:
+**Always provide snapshots for both platforms.** Every snapshot test must cover iOS (`UIHostingController`) and macOS (`NSHostingView`).
+
+**Agent workflow:**
+1. Write the test. Run locally — missing `arm64` references are auto-recorded on first run (test fails with "Recorded snapshot"), pass on the second run.
+2. Commit both the test code and the `arm64` `.png` files alongside it.
+3. Open the PR. CI fails: `x86_64` references are missing.
+4. Reviewer triggers **Record Snapshots (iOS/macOS)** pipeline, inspects artifacts, then triggers **Commit Snapshots** to write `x86_64` references back to the branch. CI goes green.
+
+**Record locally via Fastlane, not `swift test`.** `swift test` renders macOS views using the display's backing scale (2× Retina locally, 1× headless), causing scale mismatches against CI. Always record with:
 ```
-bundle exec fastlane mac test   # records at 2× via xcodebuild, matching CI
+bundle exec fastlane mac test   # records macOS at 2× via xcodebuild
 bundle exec fastlane ios test   # records against the configured simulator
 ```
-Run once to auto-record (test fails), then run again to confirm (test passes), then commit the reference images.
-
-**Commit reference images alongside the test code.** Never push a snapshot test without its reference `.png` files — CI has no way to auto-commit them back to the repo.
 
 ---
 

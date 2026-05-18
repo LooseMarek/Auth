@@ -53,12 +53,6 @@ playground.xcworkspace
 !default.perspectivev3
 
 
-# ── Snapshot Testing (reference images managed by CI) ────────────────────────
-# Use the snapshot_record_* + snapshot_commit CI pipelines to update these.
-# Locally generated snapshots must not be committed directly.
-**/__Snapshots__/
-
-
 # ── Fastlane ──────────────────────────────────────────────────────────────────
 fastlane/report.xml
 fastlane/Preview.html

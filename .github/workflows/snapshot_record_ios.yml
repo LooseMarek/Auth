@@ -12,6 +12,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Delete stale x86_64 snapshots
+        run: find . -not -path './.build/*' -type f -name '*-x86_64.png' -path '*/__Snapshots__/*' -delete
+
       - name: Record snapshots via Fastlane
         continue-on-error: true
         env:
