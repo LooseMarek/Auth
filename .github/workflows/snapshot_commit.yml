@@ -24,6 +24,9 @@ jobs:
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
+      - name: Delete stale x86_64 snapshots
+        run: find . -not -path './.build/*' -type f -name '*-x86_64.png' -path '*/__Snapshots__/*' -delete
+
       - name: Record iOS snapshots
         if: inputs.platform == 'ios' || inputs.platform == 'both'
         continue-on-error: true
@@ -51,17 +54,18 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          SNAPSHOT_FILES=$(find . -not -path './.build/*' -type f -name '*.png' -path '*/__Snapshots__/*')
-          if [ -z "$SNAPSHOT_FILES" ]; then
-            echo "No snapshot files found — nothing to commit"
+          X86_SNAPSHOTS=$(find . -not -path './.build/*' -type f -name '*-x86_64.png' -path '*/__Snapshots__/*')
+          if [ -z "$X86_SNAPSHOTS" ]; then
+            echo "No x86_64 snapshot files found — recording may have failed"
             exit 1
           fi
 
-          echo "$SNAPSHOT_FILES" | xargs git add -f
+          echo "$X86_SNAPSHOTS" | xargs git add
+          git ls-files --deleted Tests/ | grep -- '-x86_64\.png$' | xargs -r git rm
 
           if git diff --staged --quiet; then
-            echo "Snapshots are unchanged — no commit needed"
+            echo "x86_64 snapshots unchanged — no commit needed"
           else
-            git commit -m "chore: update CI-generated snapshots [${{ inputs.platform }}] on ${{ github.ref_name }}"
+            git commit -m "chore: update CI-generated snapshots (x86_64) [${{ inputs.platform }}] on ${{ github.ref_name }}"
             git push
           fi

@@ -4,6 +4,12 @@ import XCTest
 @testable import AuthClient
 import AuthShared
 
+#if arch(arm64)
+private let snapshotArch = "arm64"
+#else
+private let snapshotArch = "x86_64"
+#endif
+
 @MainActor
 final class LoginViewSnapshotTests: XCTestCase {
 
@@ -99,8 +105,6 @@ final class LoginViewSnapshotTests: XCTestCase {
 
     // MARK: - Snapshot helper
 
-    /// Renders `view` as a snapshot for iOS and/or macOS depending on the current test host.
-    /// `colorScheme` forces the appearance so baselines are deterministic regardless of system setting.
     private func snapshot(
         _ view: some View,
         colorScheme: ColorScheme = .light,
@@ -116,8 +120,8 @@ final class LoginViewSnapshotTests: XCTestCase {
         hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 700)
         assertSnapshot(
             of: hosting,
-            as: .image(perceptualPrecision: 0.95),
-            named: "macOS",
+            as: .image,
+            named: "macOS-\(snapshotArch)",
             testName: function
         )
 #elseif canImport(UIKit)
@@ -126,8 +130,8 @@ final class LoginViewSnapshotTests: XCTestCase {
         controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 780)
         assertSnapshot(
             of: controller.view,
-            as: .image(perceptualPrecision: 0.98),
-            named: "iOS",
+            as: .image,
+            named: "iOS-\(snapshotArch)",
             testName: function
         )
 #endif
