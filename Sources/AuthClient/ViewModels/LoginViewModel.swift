@@ -10,7 +10,7 @@ final class LoginViewModel {
 
     var canSubmit: Bool { !email.isEmpty && !password.isEmpty }
 
-    private let networkService: any AuthNetworkService
+    let networkService: any AuthNetworkService
 
     init(
         networkService: any AuthNetworkService,
@@ -38,6 +38,18 @@ final class LoginViewModel {
         } catch AuthNetworkError.networkUnavailable {
             errorMessage = "No internet connection. Please try again."
         } catch {
+            errorMessage = "Something went wrong. Please try again."
+        }
+    }
+
+    /// Sets an inline error message for a failed Apple sign-in attempt.
+    ///
+    /// Cancellations must not call this method — pass the error only for network or server failures.
+    func setAppleSignInError(_ error: AuthNetworkError) {
+        switch error {
+        case .networkUnavailable:
+            errorMessage = "No internet connection. Please try again."
+        default:
             errorMessage = "Something went wrong. Please try again."
         }
     }

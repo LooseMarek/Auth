@@ -1,4 +1,3 @@
-import AuthenticationServices
 import AuthShared
 import SwiftUI
 #if canImport(UIKit)
@@ -9,8 +8,8 @@ import AppKit
 
 public struct LoginView: View {
     @State private var viewModel: LoginViewModel
+    @State private var appleSignInHandler: AppleSignInHandler
     private let authManager: AuthManager
-    @Environment(\.colorScheme) private var colorScheme
 
     public init(
         authManager: AuthManager,
@@ -21,46 +20,62 @@ public struct LoginView: View {
         initialIsLoading: Bool = false
     ) {
         self.authManager = authManager
-        self._viewModel = State(wrappedValue: LoginViewModel(
+        let vm = LoginViewModel(
             networkService: networkService,
             initialEmail: prefilledEmail,
             initialPassword: prefilledPassword,
             initialErrorMessage: initialErrorMessage,
             initialIsLoading: initialIsLoading
+        )
+        self._viewModel = State(wrappedValue: vm)
+        self._appleSignInHandler = State(wrappedValue: AppleSignInHandler(
+            authManager: authManager,
+            viewModel: vm
         ))
     }
 
     public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                titleSection
-                Spacer().frame(height: 24)
-                emailField
-                Spacer().frame(height: 14)
-                passwordField
-                errorRow
-                forgotPasswordLink
-                Spacer().frame(height: 24)
-                loginButton
-                Spacer().frame(height: 16)
-                orDivider
-                Spacer().frame(height: 16)
-                appleSignInButton
-                Spacer().frame(height: 8)
-                googleSignInButton
-                if authManager.configuration.allowGuestAccess {
+        ZStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    titleSection
+                    Spacer().frame(height: 24)
+                    emailField
+                    Spacer().frame(height: 14)
+                    passwordField
+                    errorRow
+                    forgotPasswordLink
+                    Spacer().frame(height: 24)
+                    loginButton
+                    Spacer().frame(height: 16)
+                    orDivider
+                    Spacer().frame(height: 16)
+                    appleSignInButton
                     Spacer().frame(height: 8)
-                    guestButton
+                    googleSignInButton
+                    if authManager.configuration.allowGuestAccess {
+                        Spacer().frame(height: 8)
+                        guestButton
+                    }
+                    Spacer().frame(height: 32)
+                    registerLink
+                    Spacer().frame(height: 32)
                 }
-                Spacer().frame(height: 32)
-                registerLink
-                Spacer().frame(height: 32)
+                .padding(.horizontal, 24)
+                // Disable all interaction while a login request is in flight.
+                .allowsHitTesting(!viewModel.isLoading && !appleSignInHandler.isLoading)
             }
-            .padding(.horizontal, 24)
-            // Disable all interaction while a login request is in flight.
-            .allowsHitTesting(!viewModel.isLoading)
+            .background(authManager.configuration.backgroundColor)
+
+            // Full-screen loading overlay shown while the Apple sign-in server call is in flight.
+            if appleSignInHandler.isLoading {
+                authManager.configuration.backgroundColor
+                    .opacity(0.8)
+                    .ignoresSafeArea()
+                ProgressView()
+                    .scaleEffect(1.5)
+            }
         }
-        .background(authManager.configuration.backgroundColor)
     }
 
     // MARK: - Subviews
@@ -176,23 +191,13 @@ public struct LoginView: View {
 
     private var appleSignInButton: some View {
         Button {
-            let provider = ASAuthorizationAppleIDProvider()
-            let request = provider.createRequest()
-
-            request.requestedScopes = [.fullName, .email]
-
-            let controller = ASAuthorizationController(
-                authorizationRequests: [request]
-            )
-
-            controller.performRequests()
+            appleSignInHandler.performSignIn()
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "apple.logo")
                     .resizable()
                     .frame(width: 18, height: 18)
                     .accessibilityHidden(true)
-
                 Text("Sign in with Apple")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.white)
@@ -205,6 +210,7 @@ public struct LoginView: View {
             .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Sign in with Apple")
     }
 
     private var googleSignInButton: some View {
@@ -343,6 +349,14 @@ private struct PreviewNetworkService: AuthNetworkService {
     }
 
     func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }

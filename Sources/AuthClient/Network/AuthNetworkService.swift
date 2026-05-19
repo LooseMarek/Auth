@@ -1,3 +1,4 @@
+import Foundation
 import AuthShared
 
 public enum AuthNetworkError: Error, Sendable {
@@ -20,4 +21,20 @@ public protocol AuthNetworkService: Sendable {
 
     /// Deletes the authenticated account server-side (DELETE /auth/account).
     func deleteAccount(accessToken: String) async throws
+
+    /// Authenticates with an Apple identity token via POST /auth/apple.
+    ///
+    /// - Parameters:
+    ///   - identityToken: The JWT identity token returned by `ASAuthorizationAppleIDCredential`.
+    ///   - displayName: The user's display name (only provided by Apple on first sign-in).
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse
+
+    /// Upgrades a guest session to a fully-authenticated account via POST /auth/upgrade,
+    /// attaching Apple credentials to the existing guest UUID.
+    ///
+    /// - Parameters:
+    ///   - guestUUID: The UUID of the existing guest session.
+    ///   - identityToken: The JWT identity token returned by `ASAuthorizationAppleIDCredential`.
+    ///   - displayName: The user's display name (only provided by Apple on first sign-in).
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse
 }
