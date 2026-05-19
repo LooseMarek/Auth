@@ -87,6 +87,10 @@ private final class MockAuthNetworkService: AuthNetworkService, @unchecked Senda
         case .failure(let error): throw error
         }
     }
+
+    func register(email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
 }
 
 private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
@@ -100,6 +104,10 @@ private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unche
         for try await response in stream {
             return response
         }
+        throw AuthNetworkError.serverError
+    }
+
+    func register(email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
