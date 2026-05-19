@@ -96,6 +96,18 @@ private struct NoOpForgotPasswordNetworkService: AuthNetworkService {
     func forgotPassword(email: String) async throws {
         throw AuthNetworkError.serverError
     }
+
+    func refreshToken(refreshToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func logout(refreshToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
 }
 
 private extension AuthManager {
