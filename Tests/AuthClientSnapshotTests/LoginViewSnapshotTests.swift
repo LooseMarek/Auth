@@ -1,3 +1,4 @@
+import Foundation
 import SnapshotTesting
 import SwiftUI
 import XCTest
@@ -56,6 +57,23 @@ final class LoginViewSnapshotTests: XCTestCase {
             authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
             networkService: NoOpNetworkService()
         ))
+    }
+
+    /// Verifies that the system `SignInWithAppleButton` is visible in the default (light) login layout.
+    /// The button must use the `.black` style in light mode per the design system and Apple HIG.
+    func testAppleButtonVisible() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    /// Verifies that the system `SignInWithAppleButton` uses the `.white` style in dark mode per Apple HIG.
+    func testAppleButtonVisible_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
     }
 
     // MARK: - Dark mode
@@ -162,6 +180,14 @@ private struct NoOpNetworkService: AuthNetworkService {
     }
 
     func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
