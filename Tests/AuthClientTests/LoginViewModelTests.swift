@@ -12,7 +12,7 @@ final class LoginViewModelTests: XCTestCase {
             expiresAt: .distantFuture,
             user: UserDTO(id: "user-1", email: "test@example.com", displayName: "Test User")
         )
-        let mock = MockAuthNetworkService(result: .success(mockResponse))
+        let mock = LoginMockAuthNetworkService(result: .success(mockResponse))
         let viewModel = LoginViewModel(networkService: mock)
         let authManager = AuthManager(configuration: AuthClientConfiguration())
 
@@ -29,7 +29,7 @@ final class LoginViewModelTests: XCTestCase {
     }
 
     func testFailedLoginSetsErrorMessage() async {
-        let mock = MockAuthNetworkService(result: .failure(AuthNetworkError.invalidCredentials))
+        let mock = LoginMockAuthNetworkService(result: .failure(AuthNetworkError.invalidCredentials))
         let viewModel = LoginViewModel(networkService: mock)
         let authManager = AuthManager(configuration: AuthClientConfiguration())
 
@@ -74,7 +74,7 @@ final class LoginViewModelTests: XCTestCase {
 
 // MARK: - Test doubles
 
-private final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
+private final class LoginMockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     let result: Result<AuthResponse, Error>
 
     init(result: Result<AuthResponse, Error>) {
@@ -93,6 +93,18 @@ private final class MockAuthNetworkService: AuthNetworkService, @unchecked Senda
     }
 
     func forgotPassword(email: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func refreshToken(refreshToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func logout(refreshToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func deleteAccount(accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }
@@ -116,6 +128,18 @@ private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unche
     }
 
     func forgotPassword(email: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func refreshToken(refreshToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func logout(refreshToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func deleteAccount(accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }

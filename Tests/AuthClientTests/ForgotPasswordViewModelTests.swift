@@ -53,4 +53,16 @@ private final class MockForgotPasswordNetworkService: AuthNetworkService, @unche
         case .failure(let error): throw error
         }
     }
+
+    func refreshToken(refreshToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func logout(refreshToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
 }
