@@ -10,4 +10,5 @@ public enum AuthNetworkError: Error, Sendable {
 public protocol AuthNetworkService: Sendable {
     func login(email: String, password: String) async throws -> AuthResponse
     func register(email: String, password: String) async throws -> AuthResponse
+    func forgotPassword(email: String) async throws
 }

@@ -267,6 +267,10 @@ private struct PreviewRegisterNetworkService: AuthNetworkService {
     func register(email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
+
+    func forgotPassword(email: String) async throws {
+        throw AuthNetworkError.serverError
+    }
 }
 
 private extension AuthManager {

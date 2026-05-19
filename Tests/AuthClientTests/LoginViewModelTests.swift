@@ -91,6 +91,10 @@ private final class MockAuthNetworkService: AuthNetworkService, @unchecked Senda
     func register(email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
+
+    func forgotPassword(email: String) async throws {
+        throw AuthNetworkError.serverError
+    }
 }
 
 private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
@@ -108,6 +112,10 @@ private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unche
     }
 
     func register(email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func forgotPassword(email: String) async throws {
         throw AuthNetworkError.serverError
     }
 }

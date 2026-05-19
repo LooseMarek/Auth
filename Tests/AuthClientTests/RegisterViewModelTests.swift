@@ -96,4 +96,8 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
         case .failure(let error): throw error
         }
     }
+
+    func forgotPassword(email: String) async throws {
+        throw AuthNetworkError.serverError
+    }
 }
