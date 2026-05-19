@@ -11,45 +11,39 @@ private let snapshotArch = "x86_64"
 #endif
 
 @MainActor
-final class RegisterViewSnapshotTests: XCTestCase {
+final class ForgotPasswordViewSnapshotTests: XCTestCase {
 
     // MARK: - Light mode
 
     func testDefaultState() {
-        snapshot(RegisterView(
+        snapshot(ForgotPasswordView(
             authManager: .make(),
-            networkService: NoOpRegisterNetworkService()
+            networkService: NoOpForgotPasswordNetworkService()
         ))
     }
 
-    func testPasswordMismatchError() {
-        snapshot(RegisterView(
+    func testSuccessState() {
+        snapshot(ForgotPasswordView(
             authManager: .make(),
-            networkService: NoOpRegisterNetworkService(),
-            prefilledEmail: "user@example.com",
-            prefilledPassword: "password1",
-            prefilledConfirmPassword: "password2",
-            initialConfirmPasswordError: "Passwords do not match."
+            networkService: NoOpForgotPasswordNetworkService(),
+            initialIsSuccess: true
         ))
     }
 
     // MARK: - Dark mode
 
     func testDefaultState_dark() {
-        snapshot(RegisterView(
+        snapshot(ForgotPasswordView(
             authManager: .make(),
-            networkService: NoOpRegisterNetworkService()
+            networkService: NoOpForgotPasswordNetworkService()
         ), colorScheme: .dark)
     }
 
-    func testPasswordMismatchError_dark() {
-        snapshot(RegisterView(
+    func testSuccessState_dark() {
+        snapshot(ForgotPasswordView(
             authManager: .make(),
-            networkService: NoOpRegisterNetworkService(),
-            prefilledEmail: "user@example.com",
-            prefilledPassword: "password1",
-            prefilledConfirmPassword: "password2",
-            initialConfirmPasswordError: "Passwords do not match."
+            networkService: NoOpForgotPasswordNetworkService(),
+            initialIsSuccess: true
         ), colorScheme: .dark)
     }
 
@@ -90,7 +84,7 @@ final class RegisterViewSnapshotTests: XCTestCase {
 
 // MARK: - Test doubles
 
-private struct NoOpRegisterNetworkService: AuthNetworkService {
+private struct NoOpForgotPasswordNetworkService: AuthNetworkService {
     func login(email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
