@@ -1,0 +1,107 @@
+import SnapshotTesting
+import SwiftUI
+import XCTest
+@testable import AuthClient
+import AuthShared
+
+#if arch(arm64)
+private let snapshotArch = "arm64"
+#else
+private let snapshotArch = "x86_64"
+#endif
+
+@MainActor
+final class RegisterViewSnapshotTests: XCTestCase {
+
+    // MARK: - Light mode
+
+    func testDefaultState() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService()
+        ))
+    }
+
+    func testPasswordMismatchError() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService(),
+            prefilledEmail: "user@example.com",
+            prefilledPassword: "password1",
+            prefilledConfirmPassword: "password2",
+            initialConfirmPasswordError: "Passwords do not match."
+        ))
+    }
+
+    // MARK: - Dark mode
+
+    func testDefaultState_dark() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    func testPasswordMismatchError_dark() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService(),
+            prefilledEmail: "user@example.com",
+            prefilledPassword: "password1",
+            prefilledConfirmPassword: "password2",
+            initialConfirmPasswordError: "Passwords do not match."
+        ), colorScheme: .dark)
+    }
+
+    // MARK: - Snapshot helper
+
+    private func snapshot(
+        _ view: some View,
+        colorScheme: ColorScheme = .light,
+        function: String = #function
+    ) {
+        let wrappedView = view.preferredColorScheme(colorScheme)
+
+#if canImport(AppKit)
+        let hosting = NSHostingView(rootView: wrappedView.frame(width: 440))
+        hosting.appearance = NSAppearance(
+            named: colorScheme == .dark ? .darkAqua : .aqua
+        )
+        hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 700)
+        assertSnapshot(
+            of: hosting,
+            as: .image,
+            named: "macOS-\(snapshotArch)",
+            testName: function
+        )
+#elseif canImport(UIKit)
+        let controller = UIHostingController(rootView: wrappedView)
+        controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
+        controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 780)
+        assertSnapshot(
+            of: controller.view,
+            as: .image,
+            named: "iOS-\(snapshotArch)",
+            testName: function
+        )
+#endif
+    }
+}
+
+// MARK: - Test doubles
+
+private struct NoOpRegisterNetworkService: AuthNetworkService {
+    func login(email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func register(email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+}
+
+private extension AuthManager {
+    static func make() -> AuthManager {
+        AuthManager(configuration: AuthClientConfiguration())
+    }
+}
