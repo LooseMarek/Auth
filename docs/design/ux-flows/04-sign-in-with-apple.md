@@ -7,7 +7,8 @@ From `LoginView`, user taps the "Sign in with Apple" button.
 ## Steps
 
 1. **LoginView**
-   - User taps `SignInWithAppleButton`.
+   - User taps the custom Sign in with Apple button.
+   - `AppleSignInHandler.performSignIn()` creates an `ASAuthorizationController` and calls `performRequests()`.
 
 2. **System ASAuthorizationController (presented by OS)**
    - iOS/macOS presents the system-native Sign in with Apple sheet.

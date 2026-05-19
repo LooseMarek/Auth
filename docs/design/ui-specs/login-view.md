@@ -74,7 +74,7 @@ Localisation key: `auth.login.subtitle`.
 | Forgot link | `type.subhead`, `color.primary` | `auth.login.link.forgot_password` | Right-aligned |
 | Login button | Primary Button | `auth.login.button.submit` | Full width, 52pt height |
 | Divider | "Or" Divider component | `auth.separator.or` | Uppercase, tracking 0.08em |
-| Apple button | `SignInWithAppleButton`, `.black` / `.white` | System | `radius.pill`, 50pt |
+| Apple button | Custom button — see § 10.5 of design-system | `auth.button.apple` | `radius.pill`, 50pt |
 | Google button | Custom button — see § 10.6 of design-system | `auth.button.google` | `radius.pill`, 50pt |
 | Guest button | Outline button — see § 10.7 | `auth.login.button.guest` | Hidden when `allowGuestAccess == false` |
 | Register link | `type.subhead`, `color.label.secondary` with bold `color.primary` "Register" run | `auth.login.link.register` | Centred; tap pushes `RegisterView` |
