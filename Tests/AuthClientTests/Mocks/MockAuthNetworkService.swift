@@ -14,18 +14,25 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var refreshTokenCallCount = 0
     var logoutCallCount = 0
     var deleteAccountCallCount = 0
+    var signInWithAppleCallCount = 0
+    var upgradeGuestWithAppleCallCount = 0
 
     // MARK: - Recorded arguments
 
     var lastRefreshTokenArg: String?
     var lastLogoutRefreshTokenArg: String?
     var lastDeleteAccountAccessTokenArg: String?
+    var lastSignInWithAppleToken: String?
+    var lastUpgradeGuestWithAppleToken: String?
+    var lastUpgradeGuestUUID: UUID?
 
     // MARK: - Configurable responses / errors
 
     var loginResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var registerResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var refreshTokenResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
+    var signInWithAppleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
+    var upgradeGuestWithAppleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var logoutShouldThrow: Error? = nil
     var deleteAccountShouldThrow: Error? = nil
 
@@ -65,5 +72,18 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
         if let error = deleteAccountShouldThrow {
             throw error
         }
+    }
+
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
+        signInWithAppleCallCount += 1
+        lastSignInWithAppleToken = identityToken
+        return try signInWithAppleResult.get()
+    }
+
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+        upgradeGuestWithAppleCallCount += 1
+        lastUpgradeGuestUUID = guestUUID
+        lastUpgradeGuestWithAppleToken = identityToken
+        return try upgradeGuestWithAppleResult.get()
     }
 }

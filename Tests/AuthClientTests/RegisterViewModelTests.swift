@@ -1,3 +1,4 @@
+import Foundation
 import XCTest
 @testable import AuthClient
 import AuthShared
@@ -110,6 +111,14 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
     }
 
     func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }

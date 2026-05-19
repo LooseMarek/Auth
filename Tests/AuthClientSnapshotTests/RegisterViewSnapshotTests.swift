@@ -1,3 +1,4 @@
+import Foundation
 import SnapshotTesting
 import SwiftUI
 import XCTest
@@ -112,6 +113,14 @@ private struct NoOpRegisterNetworkService: AuthNetworkService {
     }
 
     func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
