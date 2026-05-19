@@ -59,8 +59,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         ))
     }
 
-    /// Verifies that the system `SignInWithAppleButton` is visible in the default (light) login layout.
-    /// The button must use the `.black` style in light mode per the design system and Apple HIG.
+    /// Verifies that the custom Sign in with Apple button is visible in the default (light) login layout.
     func testAppleButtonVisible() {
         snapshot(LoginView(
             authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
@@ -68,7 +67,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         ))
     }
 
-    /// Verifies that the system `SignInWithAppleButton` uses the `.white` style in dark mode per Apple HIG.
+    /// Verifies that the custom Sign in with Apple button is visible in dark mode.
     func testAppleButtonVisible_dark() {
         snapshot(LoginView(
             authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),

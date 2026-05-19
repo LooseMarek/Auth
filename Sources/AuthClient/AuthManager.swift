@@ -23,9 +23,10 @@ public final class AuthManager {
     /// The configuration supplied at initialisation time.
     public let configuration: AuthClientConfiguration
 
-    // MARK: - Private dependencies
+    // MARK: - Internal dependencies
 
-    private let networkService: any AuthNetworkService
+    /// Package-internal so `AppleSignInHandler` can call social auth endpoints.
+    let networkService: any AuthNetworkService
     private let tokenStore: any TokenStore
 
     // MARK: - Init
@@ -181,6 +182,14 @@ struct NoOpAuthNetworkService: AuthNetworkService {
     }
 
     func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
