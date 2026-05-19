@@ -344,20 +344,21 @@ All components consume semantic tokens. None author raw values.
 
 ### 10.5 Sign in with Apple
 
-Implemented via `SignInWithAppleButton` from `AuthenticationServices`.
-Must comply with Apple HIG for Sign in with Apple.
+Custom SwiftUI button using `AuthenticationServices` under the hood.
+`SignInWithAppleButton` is not used because it renders poorly on macOS
+(double border / native background conflicts with the capsule container).
 
-| Property | Value |
-|----------|-------|
-| Style | `.black` in light mode / `.white` in dark mode |
+| Property | Token / Value |
+|----------|---------------|
+| Background | `color.apple.bg` (`#000000` fixed — not themed) |
+| Label color | `color.apple.label` (`#FFFFFF` fixed) |
+| Icon | SF Symbol `apple.logo`, 18 × 18pt |
+| Label | "Sign in with Apple", `type.body.medium` |
 | Corner radius | `radius.pill` |
 | Height | 50pt |
 | Width | Full available width |
 | Min tap target | 44 × 44pt — compliant at 50pt height |
-| Accessibility | System-provided by `AuthenticationServices` |
-
-> Never replace `SignInWithAppleButton` with a custom-drawn button — Apple
-> review will reject any non-standard implementation.
+| Accessibility label | `auth.button.apple` |
 
 ### 10.6 Sign in with Google
 
