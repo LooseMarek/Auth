@@ -14,6 +14,13 @@ public struct TokenMetadata: Codable, Sendable {
         expiresAt < Date()
     }
 
+    /// Returns `true` when the access token expires within the next `threshold` seconds.
+    ///
+    /// Used by `AuthManager` to trigger a silent refresh before the token actually expires.
+    public func isNearExpiry(threshold: TimeInterval) -> Bool {
+        expiresAt < Date().addingTimeInterval(threshold)
+    }
+
     public init(accessToken: String, refreshToken: String, expiresAt: Date) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
