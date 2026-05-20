@@ -39,7 +39,7 @@ public struct AuthSheetContainer: View {
         NavigationStack {
             LoginView(
                 authManager: authManager,
-                networkService: NoOpAuthNetworkService()
+                networkService: authManager.networkService
             )
 #if canImport(AppKit)
             .frame(width: 440)
