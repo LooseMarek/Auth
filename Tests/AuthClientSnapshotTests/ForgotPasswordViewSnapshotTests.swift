@@ -117,6 +117,14 @@ private struct NoOpForgotPasswordNetworkService: AuthNetworkService {
     func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
+
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
 }
 
 private extension AuthManager {

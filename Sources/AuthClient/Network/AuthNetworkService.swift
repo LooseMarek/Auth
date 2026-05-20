@@ -37,4 +37,17 @@ public protocol AuthNetworkService: Sendable {
     ///   - identityToken: The JWT identity token returned by `ASAuthorizationAppleIDCredential`.
     ///   - displayName: The user's display name (only provided by Apple on first sign-in).
     func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse
+
+    /// Authenticates with a Google identity token via POST /auth/google.
+    ///
+    /// - Parameter identityToken: The JWT identity token returned by the Google Sign-In SDK.
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse
+
+    /// Upgrades a guest session to a fully-authenticated account via POST /auth/upgrade,
+    /// attaching Google credentials to the existing guest UUID.
+    ///
+    /// - Parameters:
+    ///   - guestUUID: The UUID of the existing guest session.
+    ///   - identityToken: The JWT identity token returned by the Google Sign-In SDK.
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse
 }

@@ -53,4 +53,16 @@ final class LoginViewModel {
             errorMessage = "Something went wrong. Please try again."
         }
     }
+
+    /// Sets an inline error message for a failed Google sign-in attempt.
+    ///
+    /// Cancellations must not call this method — pass the error only for network or server failures.
+    func setGoogleSignInError(_ error: AuthNetworkError) {
+        switch error {
+        case .networkUnavailable:
+            errorMessage = "No internet connection. Please try again."
+        default:
+            errorMessage = "Something went wrong. Please try again."
+        }
+    }
 }

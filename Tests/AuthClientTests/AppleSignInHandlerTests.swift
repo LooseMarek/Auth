@@ -166,6 +166,14 @@ final class MockAppleAuthNetworkService: AuthNetworkService, @unchecked Sendable
     func deleteAccount(accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
+
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
 }
 
 /// A minimal stand-in for `ASAuthorizationAppleIDCredential` that avoids importing
