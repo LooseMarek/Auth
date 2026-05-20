@@ -107,6 +107,7 @@ public final class AuthManager {
         )
         try? tokenStore.save(metadata)
         session = .guest(uuid)
+        dismissAuthFlow()
     }
 
     // MARK: - Internal
@@ -126,6 +127,7 @@ public final class AuthManager {
         )
         try? tokenStore.save(metadata)
         session = .authenticated(response.user)
+        dismissAuthFlow()
     }
 
     // MARK: - Silent token refresh
