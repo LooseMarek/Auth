@@ -20,6 +20,12 @@ public final class AuthManager {
     /// The active authentication session state.
     public private(set) var session: AuthSessionState = .unauthenticated
 
+    /// Whether the auth sheet is currently being presented.
+    ///
+    /// Set to `true` by calling ``presentAuthFlow()`` and back to `false` by
+    /// ``dismissAuthFlow()`` or when the user dismisses the sheet via gesture.
+    public private(set) var isPresentingAuthFlow: Bool = false
+
     /// The configuration supplied at initialisation time.
     public let configuration: AuthClientConfiguration
 
@@ -62,6 +68,25 @@ public final class AuthManager {
             networkService: NoOpAuthNetworkService(),
             tokenStore: KeychainTokenStore()
         )
+    }
+
+    // MARK: - Auth flow presentation
+
+    /// Triggers the auth sheet to be presented.
+    ///
+    /// Sets `isPresentingAuthFlow` to `true`, which the `.authSheet(manager:)`
+    /// modifier observes to show the sheet.
+    public func presentAuthFlow() {
+        isPresentingAuthFlow = true
+    }
+
+    /// Dismisses the auth sheet.
+    ///
+    /// Sets `isPresentingAuthFlow` to `false`. Called automatically when the
+    /// user dismisses the sheet via a drag gesture (iOS) or Cmd-W / close
+    /// button (macOS), or when authentication completes successfully.
+    public func dismissAuthFlow() {
+        isPresentingAuthFlow = false
     }
 
     // MARK: - Internal
