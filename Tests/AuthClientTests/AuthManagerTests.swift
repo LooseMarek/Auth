@@ -193,4 +193,31 @@ final class AuthManagerTests: XCTestCase {
             return
         }
     }
+
+    // MARK: Auth flow presentation
+
+    func testPresentAuthFlowSetsPresentingTrue() {
+        // Given: a freshly initialised AuthManager
+        let manager = AuthManager(configuration: AuthClientConfiguration())
+        XCTAssertFalse(manager.isPresentingAuthFlow, "isPresentingAuthFlow should start false")
+
+        // When: presentAuthFlow() is called
+        manager.presentAuthFlow()
+
+        // Then: isPresentingAuthFlow is true
+        XCTAssertTrue(manager.isPresentingAuthFlow, "isPresentingAuthFlow should be true after presentAuthFlow()")
+    }
+
+    func testDismissAuthFlowSetsPresentingFalse() {
+        // Given: an AuthManager with an active auth flow
+        let manager = AuthManager(configuration: AuthClientConfiguration())
+        manager.presentAuthFlow()
+        XCTAssertTrue(manager.isPresentingAuthFlow, "Precondition: isPresentingAuthFlow should be true")
+
+        // When: dismissAuthFlow() is called
+        manager.dismissAuthFlow()
+
+        // Then: isPresentingAuthFlow is false
+        XCTAssertFalse(manager.isPresentingAuthFlow, "isPresentingAuthFlow should be false after dismissAuthFlow()")
+    }
 }
