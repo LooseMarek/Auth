@@ -316,4 +316,49 @@ final class AuthManagerTests: XCTestCase {
         // Then: isPresentingAuthFlow is false
         XCTAssertFalse(manager.isPresentingAuthFlow, "isPresentingAuthFlow should be false after dismissAuthFlow()")
     }
+
+    func testSignInDismissesAuthFlow() {
+        // Given: isPresentingAuthFlow is true (sheet is open)
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: MockAuthNetworkService(),
+            tokenStore: InMemoryTokenStore()
+        )
+        manager.presentAuthFlow()
+        XCTAssertTrue(manager.isPresentingAuthFlow, "Precondition: isPresentingAuthFlow should be true")
+
+        // When: signIn(response:) is called with a valid response
+        manager.signIn(response: makeAuthResponse())
+
+        // Then: isPresentingAuthFlow is false
+        XCTAssertFalse(manager.isPresentingAuthFlow, "isPresentingAuthFlow should be false after successful signIn")
+    }
+
+    func testLoginAsGuestDismissesAuthFlow() async throws {
+        // Given: isPresentingAuthFlow is true (sheet is open)
+        let guestUUIDString = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+        let guestUser = UserDTO(id: guestUUIDString, email: nil, displayName: nil)
+        let guestResponse = AuthResponse(
+            accessToken: "guest-access",
+            refreshToken: "guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: guestUser
+        )
+        let networkService = MockAuthNetworkService()
+        networkService.loginAsGuestResult = .success(guestResponse)
+
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: InMemoryTokenStore()
+        )
+        manager.presentAuthFlow()
+        XCTAssertTrue(manager.isPresentingAuthFlow, "Precondition: isPresentingAuthFlow should be true")
+
+        // When: loginAsGuest() is called and the mock network service returns success
+        try await manager.loginAsGuest()
+
+        // Then: isPresentingAuthFlow is false
+        XCTAssertFalse(manager.isPresentingAuthFlow, "isPresentingAuthFlow should be false after successful loginAsGuest")
+    }
 }
