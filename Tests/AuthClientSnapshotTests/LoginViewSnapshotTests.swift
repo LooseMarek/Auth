@@ -75,6 +75,31 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    /// Verifies Google button brand compliance in light mode:
+    /// white background, Google G logo, dark label, light border, pill shape.
+    /// The button must not change appearance when `primaryColor` is customised.
+    func testGoogleButtonBrandCompliant() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                allowGuestAccess: false,
+                primaryColor: .purple
+            )),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    /// Verifies Google button brand compliance in dark mode:
+    /// dark (#1F1F1F) background, light (#E8EAED) label, dark (#3C4043) border.
+    func testGoogleButtonBrandCompliant_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                allowGuestAccess: false,
+                primaryColor: .purple
+            )),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Dark mode
 
     func testDefaultState_dark() {
