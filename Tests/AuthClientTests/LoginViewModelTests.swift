@@ -116,6 +116,14 @@ private final class LoginMockAuthNetworkService: AuthNetworkService, @unchecked 
     func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
+
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
 }
 
 private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
@@ -157,6 +165,14 @@ private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unche
     }
 
     func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }

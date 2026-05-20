@@ -16,6 +16,8 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var deleteAccountCallCount = 0
     var signInWithAppleCallCount = 0
     var upgradeGuestWithAppleCallCount = 0
+    var signInWithGoogleCallCount = 0
+    var upgradeGuestWithGoogleCallCount = 0
 
     // MARK: - Recorded arguments
 
@@ -25,6 +27,8 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var lastSignInWithAppleToken: String?
     var lastUpgradeGuestWithAppleToken: String?
     var lastUpgradeGuestUUID: UUID?
+    var lastSignInWithGoogleToken: String?
+    var lastUpgradeGuestWithGoogleToken: String?
 
     // MARK: - Configurable responses / errors
 
@@ -33,6 +37,8 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var refreshTokenResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var signInWithAppleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var upgradeGuestWithAppleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
+    var signInWithGoogleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
+    var upgradeGuestWithGoogleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var logoutShouldThrow: Error? = nil
     var deleteAccountShouldThrow: Error? = nil
 
@@ -85,5 +91,17 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
         lastUpgradeGuestUUID = guestUUID
         lastUpgradeGuestWithAppleToken = identityToken
         return try upgradeGuestWithAppleResult.get()
+    }
+
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse {
+        signInWithGoogleCallCount += 1
+        lastSignInWithGoogleToken = identityToken
+        return try signInWithGoogleResult.get()
+    }
+
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+        upgradeGuestWithGoogleCallCount += 1
+        lastUpgradeGuestWithGoogleToken = identityToken
+        return try upgradeGuestWithGoogleResult.get()
     }
 }
