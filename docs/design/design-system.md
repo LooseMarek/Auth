@@ -97,12 +97,14 @@ states cover every interaction.
 |-------|-------|------|--------|
 | `color.apple.bg` | `#000000` | `#FFFFFF` | Apple HIG — Sign in with Apple |
 | `color.apple.label` | `#FFFFFF` | `#000000` | Apple HIG |
-| `color.google.bg` | `#FFFFFF` | `#1F1F1F` | Google Sign-In Branding Guidelines |
-| `color.google.label` | `#1F1F1F` | `#E8EAED` | Google branding |
-| `color.google.border` | `#DADCE0` | `#3C4043` | Google branding |
 
-> Sign in with Apple and Sign in with Google **must** use the vendor swatches
-> above regardless of `AuthClientConfiguration.primaryColor`.
+> Sign in with Apple **must** use the vendor swatches above regardless of
+> `AuthClientConfiguration.primaryColor`.
+>
+> Sign in with Google uses the custom themed button style (see §10.6) — it
+> inherits the app's background and adapts to the active color scheme, making
+> it consistent with the rest of the auth UI rather than applying Google's
+> brand-mandated white.
 
 ---
 
@@ -362,13 +364,14 @@ Custom SwiftUI button using `AuthenticationServices` under the hood.
 
 ### 10.6 Sign in with Google
 
-Custom SwiftUI button following Google's Sign-In Branding Guidelines.
+Custom SwiftUI button. Uses a themed, transparent style consistent with the
+rest of the auth UI — not Google's brand-mandated white background.
 
 | Property | Token / Value |
 |----------|---------------|
-| Background | `color.google.bg` (never themed) |
-| Label color | `color.google.label` |
-| Border | 1pt, `color.google.border` |
+| Background | transparent (`Color.clear` — inherits page background) |
+| Label color | `Color.primary` (adaptive: `color.label.primary`) |
+| Border | 1pt, `Color.primary.opacity(0.2)` |
 | Corner radius | `radius.pill` |
 | Height | 50pt |
 | Icon | Google "G" multi-color SVG, 18pt, leading; gap `space.xs` |
