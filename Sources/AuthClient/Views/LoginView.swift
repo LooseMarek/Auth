@@ -70,6 +70,7 @@ public struct LoginView: View {
                 // Disable all interaction while a login request or social sign-in is in flight.
                 .allowsHitTesting(
                     !viewModel.isLoading
+                    && !viewModel.isGuestLoading
                     && !appleSignInHandler.isLoading
                     && !googleSignInHandler.isLoading
                 )

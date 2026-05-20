@@ -71,6 +71,33 @@ final class LoginViewModelTests: XCTestCase {
         await loginTask.value
         XCTAssertFalse(viewModel.isLoading, "isLoading should be false after request completes")
     }
+
+    func testGuestLoadingStateDuringRequest() async {
+        let (stream, continuation) = AsyncThrowingStream<AuthResponse, Error>.makeStream()
+        let mock = SuspendingGuestMockAuthNetworkService(stream: stream)
+        let viewModel = LoginViewModel(networkService: mock)
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: mock,
+            tokenStore: InMemoryTokenStore()
+        )
+
+        let guestTask = Task { await viewModel.loginAsGuest(authManager: authManager) }
+        await Task.yield()
+        XCTAssertTrue(viewModel.isGuestLoading, "isGuestLoading should be true while guest request is in flight")
+
+        let mockResponse = AuthResponse(
+            accessToken: "guest-access-token",
+            refreshToken: "guest-refresh-token",
+            expiresAt: .distantFuture,
+            user: UserDTO(id: "00000000-0000-0000-0000-000000000001", email: nil, displayName: nil)
+        )
+        continuation.yield(mockResponse)
+        continuation.finish()
+
+        await guestTask.value
+        XCTAssertFalse(viewModel.isGuestLoading, "isGuestLoading should be false after guest request completes")
+    }
 }
 
 // MARK: - Test doubles
@@ -185,6 +212,65 @@ private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unche
     }
 
     func loginAsGuest() async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+}
+
+private final class SuspendingGuestMockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
+    let stream: AsyncThrowingStream<AuthResponse, Error>
+
+    init(stream: AsyncThrowingStream<AuthResponse, Error>) {
+        self.stream = stream
+    }
+
+    func loginAsGuest() async throws -> AuthResponse {
+        for try await response in stream {
+            return response
+        }
+        throw AuthNetworkError.serverError
+    }
+
+    func login(email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func register(email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func forgotPassword(email: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func refreshToken(refreshToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func logout(refreshToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func deleteAccount(accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
