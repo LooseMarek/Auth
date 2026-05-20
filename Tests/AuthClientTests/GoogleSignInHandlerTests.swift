@@ -206,4 +206,12 @@ final class MockGoogleAuthNetworkService: AuthNetworkService, @unchecked Sendabl
     func deleteAccount(accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
+
+    func loginAsGuest() async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
 }

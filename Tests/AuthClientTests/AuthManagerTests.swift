@@ -194,6 +194,102 @@ final class AuthManagerTests: XCTestCase {
         }
     }
 
+    // MARK: Guest session
+
+    func testGuestSessionSetsGuestState() async throws {
+        // Given: a network service that returns a successful AuthResponse for loginAsGuest
+        let guestUUIDString = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+        let guestUser = UserDTO(id: guestUUIDString, email: nil, displayName: nil)
+        let guestResponse = AuthResponse(
+            accessToken: "guest-access",
+            refreshToken: "guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: guestUser
+        )
+        let networkService = MockAuthNetworkService()
+        networkService.loginAsGuestResult = .success(guestResponse)
+
+        let store = InMemoryTokenStore()
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store
+        )
+
+        // When: loginAsGuest() is called
+        try await manager.loginAsGuest()
+
+        // Then: session transitions to .guest with the UUID from the response
+        guard case .guest(let uuid) = manager.session else {
+            XCTFail("Expected session to be .guest, got \(manager.session)")
+            return
+        }
+        XCTAssertEqual(uuid.uuidString.uppercased(), guestUUIDString.uppercased())
+
+        // And: tokens are stored
+        let stored = try store.load()
+        XCTAssertEqual(stored?.accessToken, "guest-access")
+    }
+
+    func testGuestUpgradePreservesUUID() async throws {
+        // Given: a guest session with a known UUID
+        let guestUUIDString = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+        let guestUUID = UUID(uuidString: guestUUIDString)!
+        let guestUser = UserDTO(id: guestUUIDString, email: nil, displayName: nil)
+        let upgradeUser = UserDTO(id: guestUUIDString, email: "test@example.com", displayName: "Test")
+        let upgradeResponse = AuthResponse(
+            accessToken: "upgraded-access",
+            refreshToken: "upgraded-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: upgradeUser
+        )
+        let networkService = MockAuthNetworkService()
+        networkService.upgradeGuestWithEmailResult = .success(upgradeResponse)
+
+        let store = InMemoryTokenStore()
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store
+        )
+        // Seed the guest session directly
+        let guestTokenMetadata = TokenMetadata(
+            accessToken: "guest-access",
+            refreshToken: "guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        try store.save(guestTokenMetadata)
+        manager.setGuestSession(uuid: guestUUID)
+
+        // When: upgradeGuestWithEmail is called (simulating login while in guest state)
+        let viewModel = LoginViewModel(networkService: networkService)
+        viewModel.email = "test@example.com"
+        viewModel.password = "secret123"
+        await viewModel.login(authManager: manager)
+
+        // Then: session transitions to .authenticated
+        guard case .authenticated(let user) = manager.session else {
+            XCTFail("Expected session to be .authenticated, got \(manager.session)")
+            return
+        }
+        // And: the user ID (UUID) is preserved from the guest session
+        XCTAssertEqual(user.id.uppercased(), guestUUIDString.uppercased())
+        // And: upgradeGuestWithEmail was called (not plain login)
+        XCTAssertEqual(networkService.upgradeGuestWithEmailCallCount, 1)
+        XCTAssertEqual(networkService.loginCallCount, 0)
+        XCTAssertEqual(networkService.lastUpgradeGuestWithEmailUUID, guestUUID)
+    }
+
+    func testAllowGuestAccessFalseHidesGuestButton() {
+        // Given: configuration with allowGuestAccess = false
+        let config = AuthClientConfiguration(allowGuestAccess: false)
+        let manager = AuthManager(configuration: config)
+
+        // When: allowGuestAccess is read
+        // Then: it is false
+        XCTAssertFalse(manager.configuration.allowGuestAccess)
+    }
+
     // MARK: Auth flow presentation
 
     func testPresentAuthFlowSetsPresentingTrue() {
