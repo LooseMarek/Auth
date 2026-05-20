@@ -59,6 +59,22 @@ final class LoginViewSnapshotTests: XCTestCase {
         ))
     }
 
+    /// Verifies the 'Continue as Guest' button is rendered when allowGuestAccess is true.
+    func testGuestButtonVisible() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: true)),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    /// Verifies the 'Continue as Guest' button is absent when allowGuestAccess is false.
+    func testGuestButtonHidden() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
     /// Verifies that the custom Sign in with Apple button is visible in the default (light) login layout.
     func testAppleButtonVisible() {
         snapshot(LoginView(
@@ -145,6 +161,20 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    func testGuestButtonVisible_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: true)),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    func testGuestButtonHidden_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGuestAccess: false)),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(
@@ -220,6 +250,14 @@ private struct NoOpNetworkService: AuthNetworkService {
     }
 
     func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func loginAsGuest() async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
