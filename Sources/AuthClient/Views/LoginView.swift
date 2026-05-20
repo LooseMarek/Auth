@@ -9,6 +9,7 @@ import AppKit
 public struct LoginView: View {
     @State private var viewModel: LoginViewModel
     @State private var appleSignInHandler: AppleSignInHandler
+    @State private var googleSignInHandler: GoogleSignInHandler
     private let authManager: AuthManager
 
     public init(
@@ -29,6 +30,10 @@ public struct LoginView: View {
         )
         self._viewModel = State(wrappedValue: vm)
         self._appleSignInHandler = State(wrappedValue: AppleSignInHandler(
+            authManager: authManager,
+            viewModel: vm
+        ))
+        self._googleSignInHandler = State(wrappedValue: GoogleSignInHandler(
             authManager: authManager,
             viewModel: vm
         ))
@@ -62,13 +67,17 @@ public struct LoginView: View {
                     Spacer().frame(height: 32)
                 }
                 .padding(.horizontal, 24)
-                // Disable all interaction while a login request is in flight.
-                .allowsHitTesting(!viewModel.isLoading && !appleSignInHandler.isLoading)
+                // Disable all interaction while a login request or social sign-in is in flight.
+                .allowsHitTesting(
+                    !viewModel.isLoading
+                    && !appleSignInHandler.isLoading
+                    && !googleSignInHandler.isLoading
+                )
             }
             .background(authManager.configuration.backgroundColor)
 
-            // Full-screen loading overlay shown while the Apple sign-in server call is in flight.
-            if appleSignInHandler.isLoading {
+            // Full-screen loading overlay shown while a social sign-in server call is in flight.
+            if appleSignInHandler.isLoading || googleSignInHandler.isLoading {
                 authManager.configuration.backgroundColor
                     .opacity(0.8)
                     .ignoresSafeArea()
@@ -214,7 +223,9 @@ public struct LoginView: View {
     }
 
     private var googleSignInButton: some View {
-        Button {} label: {
+        Button {
+            googleSignInHandler.performSignIn()
+        } label: {
             HStack(spacing: 8) {
                 Image("google-logo", bundle: .module)
                     .resizable()
