@@ -129,4 +129,12 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
     func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
+
+    func loginAsGuest() async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
 }

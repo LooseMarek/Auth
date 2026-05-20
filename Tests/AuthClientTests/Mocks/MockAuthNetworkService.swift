@@ -18,6 +18,8 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var upgradeGuestWithAppleCallCount = 0
     var signInWithGoogleCallCount = 0
     var upgradeGuestWithGoogleCallCount = 0
+    var loginAsGuestCallCount = 0
+    var upgradeGuestWithEmailCallCount = 0
 
     // MARK: - Recorded arguments
 
@@ -29,6 +31,9 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var lastUpgradeGuestUUID: UUID?
     var lastSignInWithGoogleToken: String?
     var lastUpgradeGuestWithGoogleToken: String?
+    var lastUpgradeGuestWithEmailUUID: UUID?
+    var lastUpgradeGuestWithEmailEmail: String?
+    var lastUpgradeGuestWithEmailPassword: String?
 
     // MARK: - Configurable responses / errors
 
@@ -39,6 +44,8 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var upgradeGuestWithAppleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var signInWithGoogleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var upgradeGuestWithGoogleResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
+    var loginAsGuestResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
+    var upgradeGuestWithEmailResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var logoutShouldThrow: Error? = nil
     var deleteAccountShouldThrow: Error? = nil
 
@@ -103,5 +110,18 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
         upgradeGuestWithGoogleCallCount += 1
         lastUpgradeGuestWithGoogleToken = identityToken
         return try upgradeGuestWithGoogleResult.get()
+    }
+
+    func loginAsGuest() async throws -> AuthResponse {
+        loginAsGuestCallCount += 1
+        return try loginAsGuestResult.get()
+    }
+
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+        upgradeGuestWithEmailCallCount += 1
+        lastUpgradeGuestWithEmailUUID = guestUUID
+        lastUpgradeGuestWithEmailEmail = email
+        lastUpgradeGuestWithEmailPassword = password
+        return try upgradeGuestWithEmailResult.get()
     }
 }
