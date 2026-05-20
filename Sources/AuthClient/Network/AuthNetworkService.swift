@@ -50,4 +50,17 @@ public protocol AuthNetworkService: Sendable {
     ///   - guestUUID: The UUID of the existing guest session.
     ///   - identityToken: The JWT identity token returned by the Google Sign-In SDK.
     func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse
+
+    /// Creates an anonymous guest session via POST /auth/guest.
+    ///
+    /// - Returns: An ``AuthResponse`` containing the guest JWT and a stable guest UUID in `user.id`.
+    func loginAsGuest() async throws -> AuthResponse
+
+    /// Upgrades a guest session to a fully-authenticated email/password account via POST /auth/upgrade.
+    ///
+    /// - Parameters:
+    ///   - guestUUID: The UUID of the existing guest session to upgrade.
+    ///   - email: The email address for the new account.
+    ///   - password: The password for the new account.
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse
 }

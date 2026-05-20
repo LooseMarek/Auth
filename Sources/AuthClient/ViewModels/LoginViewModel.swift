@@ -7,6 +7,7 @@ final class LoginViewModel {
     var password: String = ""
     private(set) var errorMessage: String? = nil
     private(set) var isLoading: Bool = false
+    private(set) var isGuestLoading: Bool = false
 
     var canSubmit: Bool { !email.isEmpty && !password.isEmpty }
 
@@ -31,10 +32,37 @@ final class LoginViewModel {
         isLoading = true
         defer { isLoading = false }
         do {
-            let response = try await networkService.login(email: email, password: password)
-            authManager.signIn(response: response)
+            // If the current session is a guest, upgrade rather than performing a fresh login.
+            if case .guest(let guestUUID) = authManager.session {
+                let response = try await networkService.upgradeGuestWithEmail(
+                    guestUUID: guestUUID,
+                    email: email,
+                    password: password
+                )
+                authManager.signIn(response: response)
+            } else {
+                let response = try await networkService.login(email: email, password: password)
+                authManager.signIn(response: response)
+            }
         } catch AuthNetworkError.invalidCredentials {
             errorMessage = "Incorrect email or password."
+        } catch AuthNetworkError.networkUnavailable {
+            errorMessage = "No internet connection. Please try again."
+        } catch {
+            errorMessage = "Something went wrong. Please try again."
+        }
+    }
+
+    /// Starts an anonymous guest session via POST /auth/guest.
+    ///
+    /// Shows a loading indicator on the guest button, calls `authManager.loginAsGuest()`,
+    /// and surfaces any error as an inline message.
+    func loginAsGuest(authManager: AuthManager) async {
+        errorMessage = nil
+        isGuestLoading = true
+        defer { isGuestLoading = false }
+        do {
+            try await authManager.loginAsGuest()
         } catch AuthNetworkError.networkUnavailable {
             errorMessage = "No internet connection. Please try again."
         } catch {

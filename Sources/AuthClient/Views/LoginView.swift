@@ -246,17 +246,27 @@ public struct LoginView: View {
     }
 
     private var guestButton: some View {
-        Button {} label: {
-            Text("Continue as Guest")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(Color.primary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(Color.clear)
-                .clipShape(Capsule())
-                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
+        Button {
+            Task { await viewModel.loginAsGuest(authManager: authManager) }
+        } label: {
+            Group {
+                if viewModel.isGuestLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text("Continue as Guest")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color.primary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .frame(height: 50)
+            .background(Color.clear)
+            .clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Continue as Guest")
     }
 
     private var registerLink: some View {
@@ -376,6 +386,14 @@ private struct PreviewNetworkService: AuthNetworkService {
     }
 
     func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func loginAsGuest() async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
