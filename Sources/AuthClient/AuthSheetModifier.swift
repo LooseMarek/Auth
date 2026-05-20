@@ -18,11 +18,33 @@ import SwiftUI
 ///   fields do not fit a medium-height sheet. Drag indicator is always visible.
 /// - **macOS:** SwiftUI renders `.sheet` as a floating panel. A manual `color.scrim`
 ///   overlay is applied behind the panel using a `ZStack` on the host content.
+///   The scrim fades in when `isPresentingAuthFlow` is `true` and fades out on dismiss.
 struct AuthSheetModifier: ViewModifier {
 
     @Bindable var authManager: AuthManager
 
     func body(content: Content) -> some View {
+#if canImport(AppKit)
+        ZStack {
+            content
+            if authManager.isPresentingAuthFlow {
+                AuthSheetColors.scrim
+                    .ignoresSafeArea()
+            }
+        }
+        .sheet(
+            isPresented: Binding(
+                get: { authManager.isPresentingAuthFlow },
+                set: { presenting in
+                    if !presenting {
+                        authManager.dismissAuthFlow()
+                    }
+                }
+            )
+        ) {
+            AuthSheetContainer(authManager: authManager)
+        }
+#else
         content
             .sheet(
                 isPresented: Binding(
@@ -35,12 +57,31 @@ struct AuthSheetModifier: ViewModifier {
                 )
             ) {
                 AuthSheetContainer(authManager: authManager)
-#if canImport(UIKit)
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
-#endif
             }
+#endif
     }
+}
+
+// MARK: - Adaptive colour helpers
+
+private enum AuthSheetColors {
+    /// `color.scrim` token — `rgba(0,0,0,0.32)` light / `rgba(0,0,0,0.56)` dark.
+    /// Applied manually on macOS because the system does not render a scrim behind `.sheet` panels.
+#if canImport(UIKit)
+    static let scrim = Color(uiColor: UIColor { t in
+        t.userInterfaceStyle == .dark
+            ? UIColor(white: 0, alpha: 0.56)
+            : UIColor(white: 0, alpha: 0.32)
+    })
+#else
+    static let scrim = Color(nsColor: NSColor(name: nil) { a in
+        a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(white: 0, alpha: 0.56)
+            : NSColor(white: 0, alpha: 0.32)
+    })
+#endif
 }
 
 // MARK: - View extension
