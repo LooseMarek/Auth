@@ -89,7 +89,34 @@ public final class AuthManager {
         isPresentingAuthFlow = false
     }
 
+    // MARK: - Guest session
+
+    /// Creates an anonymous guest session via POST /auth/guest.
+    ///
+    /// On success, tokens are persisted to the token store and `session` transitions
+    /// to `.guest(uuid)` where `uuid` is the stable guest identifier returned by the server.
+    ///
+    /// - Throws: Any ``AuthNetworkError`` returned by the server.
+    public func loginAsGuest() async throws {
+        let response = try await networkService.loginAsGuest()
+        let uuid = UUID(uuidString: response.user.id) ?? UUID()
+        let metadata = TokenMetadata(
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresAt: response.expiresAt
+        )
+        try? tokenStore.save(metadata)
+        session = .guest(uuid)
+    }
+
     // MARK: - Internal
+
+    /// Directly sets the session to `.guest(uuid)`.
+    ///
+    /// Package-internal — used by tests to seed a guest state without going through the network.
+    func setGuestSession(uuid: UUID) {
+        session = .guest(uuid)
+    }
 
     func signIn(response: AuthResponse) {
         let metadata = TokenMetadata(
@@ -223,6 +250,14 @@ struct NoOpAuthNetworkService: AuthNetworkService {
     }
 
     func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func loginAsGuest() async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
