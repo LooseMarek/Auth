@@ -25,11 +25,13 @@ public struct UpgradeController: RouteCollection, Sendable {
     private let configuration: AuthServerConfiguration
     private let tokenGenerator: TokenGenerator
 
+    /// Creates the controller with the shared `AuthServerConfiguration`.
     public init(configuration: AuthServerConfiguration) {
         self.configuration = configuration
         self.tokenGenerator = TokenGenerator(configuration: configuration)
     }
 
+    /// Registers the `POST /auth/upgrade` route under the JWT-protected route group.
     public func boot(routes: RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         let protected = auth.grouped(JWTMiddleware(configuration: configuration))

@@ -17,10 +17,15 @@ public struct JWTMiddleware: AsyncMiddleware, Sendable {
 
     private let configuration: AuthServerConfiguration
 
+    /// Creates the middleware with the shared `AuthServerConfiguration` used to verify JWT signatures.
     public init(configuration: AuthServerConfiguration) {
         self.configuration = configuration
     }
 
+    /// Verifies the Bearer JWT on the incoming request before forwarding it to the next responder.
+    ///
+    /// - Throws: `Abort(.unauthorized)` when the `Authorization` header is missing, the token
+    ///   signature is invalid, or the token has expired.
     public func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
         guard
             let bearerHeader = request.headers.bearerAuthorization

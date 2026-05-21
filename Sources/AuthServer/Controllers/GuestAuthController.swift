@@ -25,11 +25,13 @@ public struct GuestAuthController: RouteCollection, Sendable {
     private let configuration: AuthServerConfiguration
     private let tokenGenerator: TokenGenerator
 
+    /// Creates the controller with the shared `AuthServerConfiguration`.
     public init(configuration: AuthServerConfiguration) {
         self.configuration = configuration
         self.tokenGenerator = TokenGenerator(configuration: configuration)
     }
 
+    /// Registers the `POST /auth/guest` route.
     public func boot(routes: RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("guest", use: guestSignIn)

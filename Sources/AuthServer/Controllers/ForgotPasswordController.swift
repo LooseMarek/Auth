@@ -19,10 +19,12 @@ public struct ForgotPasswordController: RouteCollection, Sendable {
     /// Reset token lifetime in seconds (1 hour).
     private static let resetTokenTTL: TimeInterval = 3600
 
+    /// Creates the controller with the shared `AuthServerConfiguration`.
     public init(configuration: AuthServerConfiguration) {
         self.configuration = configuration
     }
 
+    /// Registers the `POST /auth/forgot-password` route.
     public func boot(routes: RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("forgot-password", use: forgotPassword)

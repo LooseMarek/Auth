@@ -8,6 +8,7 @@ public struct TokenGenerator: Sendable {
 
     private let configuration: AuthServerConfiguration
 
+    /// Creates the token generator using signing secrets and TTLs from `configuration`.
     public init(configuration: AuthServerConfiguration) {
         self.configuration = configuration
     }
