@@ -41,7 +41,10 @@
       "mcp__MCP_DOCKER__search_issues",
       "Bash(xcodebuild test *)",
       "Bash(xcodebuild build *)",
-      "Bash(bundle exec *)"
+      "Bash(bundle exec *)",
+      "Bash(gh milestone *)",
+      "Bash(xargs ls -la)",
+      "Bash(gh api *)"
     ],
     "deny": [
       "Bash(git push --force*)",
