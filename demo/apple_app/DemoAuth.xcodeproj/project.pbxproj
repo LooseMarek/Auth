@@ -1,0 +1,374 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		797FC8029B385D063F9AD164 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
+		ADBAE9559B32299A297BBEE8 /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
+		B275228DCF2F65256164B8B4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
+		F28C76D5646BB379984B0322 /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		77037612B5E38ACDA8360DB6 /* DemoAuthmacOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAuthmacOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		80ECFF3AE47A6DA7E6F07E1B /* DemoAuth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DemoAuth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BD45418B3B0372D510503D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B041BEAD33B8B765DCC6852C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		38E920562EA71F3EC128C8CD /* DemoAuth */ = {
+			isa = PBXGroup;
+			children = (
+				8BD45418B3B0372D510503D7 /* ContentView.swift */,
+				D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */,
+				B041BEAD33B8B765DCC6852C /* Info.plist */,
+			);
+			path = DemoAuth;
+			sourceTree = "<group>";
+		};
+		7A7213783383812B0ABFD6E4 = {
+			isa = PBXGroup;
+			children = (
+				38E920562EA71F3EC128C8CD /* DemoAuth */,
+				8E4C35AEF7C4AAF40C2EFCD3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		8E4C35AEF7C4AAF40C2EFCD3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				80ECFF3AE47A6DA7E6F07E1B /* DemoAuth.app */,
+				77037612B5E38ACDA8360DB6 /* DemoAuthmacOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		17B49D7D8A2E4B6ACB4683F9 /* DemoAuth */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5B16B64A138A72D414EB6DF1 /* Build configuration list for PBXNativeTarget "DemoAuth" */;
+			buildPhases = (
+				BE17CCF5ED8D499AC428E53E /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DemoAuth;
+			packageProductDependencies = (
+			);
+			productName = DemoAuth;
+			productReference = 80ECFF3AE47A6DA7E6F07E1B /* DemoAuth.app */;
+			productType = "com.apple.product-type.application";
+		};
+		22DBB17B0341E71E6F79BB4C /* DemoAuthmacOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 64943EED8DC8B013D5D7B788 /* Build configuration list for PBXNativeTarget "DemoAuthmacOS" */;
+			buildPhases = (
+				9A40EB4E149277FE264190BC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DemoAuthmacOS;
+			packageProductDependencies = (
+			);
+			productName = DemoAuthmacOS;
+			productReference = 77037612B5E38ACDA8360DB6 /* DemoAuthmacOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		258D18AEF6DF26323470E558 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					17B49D7D8A2E4B6ACB4683F9 = {
+						DevelopmentTeam = XXXXXXXXXX;
+					};
+					22DBB17B0341E71E6F79BB4C = {
+						DevelopmentTeam = XXXXXXXXXX;
+					};
+				};
+			};
+			buildConfigurationList = 4EA1A45BA305425F2F1ED889 /* Build configuration list for PBXProject "DemoAuth" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7A7213783383812B0ABFD6E4;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8E4C35AEF7C4AAF40C2EFCD3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				17B49D7D8A2E4B6ACB4683F9 /* DemoAuth */,
+				22DBB17B0341E71E6F79BB4C /* DemoAuthmacOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9A40EB4E149277FE264190BC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				797FC8029B385D063F9AD164 /* ContentView.swift in Sources */,
+				ADBAE9559B32299A297BBEE8 /* DemoAuthApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BE17CCF5ED8D499AC428E53E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B275228DCF2F65256164B8B4 /* ContentView.swift in Sources */,
+				F28C76D5646BB379984B0322 /* DemoAuthApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		12D51973ABDC468F8DDF893A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = XXXXXXXXXX;
+				INFOPLIST_FILE = DemoAuth/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.marekloose.DemoAuth;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		295BC9DDC085E43E70353817 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = XXXXXXXXXX;
+				INFOPLIST_FILE = DemoAuth/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.marekloose.DemoAuth;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		768CDDAF8226451A1CAAB086 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		7C0EB0CC59BF9E4B21F0C4EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A56DA98679953A63A7A851A2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = XXXXXXXXXX;
+				INFOPLIST_FILE = DemoAuth/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.marekloose.DemoAuth-macos";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.2;
+			};
+			name = Debug;
+		};
+		F52EA2D6A6E91B0B91734AF0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = XXXXXXXXXX;
+				INFOPLIST_FILE = DemoAuth/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.marekloose.DemoAuth-macos";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4EA1A45BA305425F2F1ED889 /* Build configuration list for PBXProject "DemoAuth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7C0EB0CC59BF9E4B21F0C4EE /* Debug */,
+				768CDDAF8226451A1CAAB086 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5B16B64A138A72D414EB6DF1 /* Build configuration list for PBXNativeTarget "DemoAuth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12D51973ABDC468F8DDF893A /* Debug */,
+				295BC9DDC085E43E70353817 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		64943EED8DC8B013D5D7B788 /* Build configuration list for PBXNativeTarget "DemoAuthmacOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A56DA98679953A63A7A851A2 /* Debug */,
+				F52EA2D6A6E91B0B91734AF0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 258D18AEF6DF26323470E558 /* Project object */;
+}

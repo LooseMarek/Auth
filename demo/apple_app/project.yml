@@ -1,0 +1,60 @@
+name: DemoAuth
+options:
+  bundleIdPrefix: com.marekloose
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+
+
+targets:
+  DemoAuth:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: ["DemoAuth"]
+    info:
+      path: "DemoAuth/Info.plist"
+      properties:
+        UILaunchScreen: {}
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth
+        DEVELOPMENT_TEAM: XXXXXXXXXX
+
+  DemoAuthmacOS:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources: ["DemoAuth"]
+    info:
+      path: "DemoAuth/Info.plist"
+      properties: {}
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth-macos
+        DEVELOPMENT_TEAM: XXXXXXXXXX
+
+
+
+
+schemes:
+  DemoAuth:
+    build:
+      targets:
+        DemoAuth: all
+    test:
+      targets:
+    run:
+      config: Debug
+    archive:
+      config: Release
+  DemoAuthmacOS:
+    build:
+      targets:
+        DemoAuthmacOS: all
+    run:
+      config: Debug
+    archive:
+      config: Release

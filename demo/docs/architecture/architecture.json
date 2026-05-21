@@ -1,0 +1,192 @@
+{
+    "metadata": {
+        "name": "DemoAuth",
+        "projectDescription": "Demo for a multi-target Swift Package that gives any iOS + Vapor project email, Google, Apple, and guest authentication with a shared token lifecycle — no manual wiring required."
+    },
+    "activeComponents": ["appleApp", "api"],
+    "components": {
+        "iosApp": {
+            "deploymentTarget": "17.0",
+            "swiftVersion": "6.2",
+            "bundleIdentifier": "com.marekloose.DemoAuth",
+            "architecturePattern": "MVVM",
+            "localBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
+            "ciBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
+            "dependencies": [],
+            "testTypes": []
+        },
+        "macosApp": {
+            "deploymentTarget": "14.0",
+            "swiftVersion": "6.2",
+            "bundleIdentifier": "com.marekloose.DemoAuth-macOS",
+            "architecturePattern": "MVVM",
+            "localBuildTarget": "platform=macOS",
+            "ciBuildTarget": "platform=macOS",
+            "dependencies": [],
+            "testTypes": []
+        },
+        "appleApp": {
+            "iosDeploymentTarget": "17.0",
+            "macosDeploymentTarget": "14.0",
+            "swiftVersion": "6.2",
+            "bundleIdentifier": "com.marekloose.DemoAuth",
+            "architecturePattern": "MVVM",
+            "iosLocalBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
+            "iosCiBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
+            "macosLocalBuildTarget": "platform=macOS",
+            "macosCiBuildTarget": "platform=macOS",
+            "dependencies": [],
+            "testTypes": []
+        },
+        "androidApp": {
+            "minSdk": 26,
+            "targetSdk": 34,
+            "compileSdk": 34,
+            "applicationId": "com.marekloose.Demoauth",
+            "kotlinVersion": "1.9.0",
+            "architecturePattern": "MVVM",
+            "dependencies": [],
+            "testTypes": []
+        },
+        "mobileApp": {
+            "flutterVersion": "3.16.0",
+            "dartVersion": "3.2.0",
+            "androidApplicationId": "com.marekloose.demoauth",
+            "iosBundleIdentifier": "com.marekloose.DemoAuth",
+            "iosDeploymentTarget": "17.0",
+            "architecturePattern": "BLoC",
+            "iosLocalBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
+            "iosCiBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
+            "dependencies": [],
+            "testTypes": []
+        },
+        "crossPlatformApp": {
+            "flutterVersion": "3.16.0",
+            "dartVersion": "3.2.0",
+            "androidApplicationId": "com.marekloose.Demoauth",
+            "iosBundleIdentifier": "com.marekloose.DemoAuth",
+            "iosDeploymentTarget": "17.0",
+            "webPort": 3000,
+            "architecturePattern": "BLoC",
+            "dependencies": [],
+            "testTypes": []
+        },
+        "api": {
+            "swiftVersion": "6.2",
+            "vaporVersion": "4.121.4",
+            "port": 8080,
+            "hosting": "127.0.0.1",
+            "environments": ["staging", "production"],
+            "databaseUrl": "postgres://user:password@localhost:5432/dbname",
+            "dependencies": [],
+            "testTypes": []
+        },
+        "webApp": {
+            "framework": "nextjs",
+            "nodeVersion": "20",
+            "port": 3000,
+            "dependencies": [],
+            "testTypes": []
+        },
+        "promoWeb": {
+            "techStack": "html",
+            "hosting": "github-pages",
+            "customDomain": null,
+            "dependencies": []
+        },
+        "spm": {
+            "packageName": "Auth",
+            "swiftVersion": "6.2",
+            "mode": "multi",
+            "platforms": [
+                {
+                    "deploymentTarget": "iOS 17.0",
+                    "localBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro",
+                    "ciBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro"
+                },
+                {
+                    "deploymentTarget": "macOS 14.0",
+                    "localBuildTarget": "platform=macOS",
+                    "ciBuildTarget": "platform=macOS"
+                }
+            ],
+            "targets": [
+                {
+                    "name": "AuthShared",
+                    "role": "shared",
+                    "targetDependencies": [],
+                    "externalDependencies": [],
+                    "testTypes": ["unit"]
+                },
+                {
+                    "name": "AuthClient",
+                    "role": "client",
+                    "targetDependencies": ["AuthShared"],
+                    "externalDependencies": [
+                        {
+                            "packageAlias": "GoogleSignIn-iOS",
+                            "product": "GoogleSignIn",
+                            "url": "https://github.com/google/GoogleSignIn-iOS",
+                            "version": "9.1.0"
+                        },
+                        {
+                            "packageAlias": "swift-snapshot-testing",
+                            "product": "SnapshotTesting",
+                            "url": "https://github.com/pointfreeco/swift-snapshot-testing",
+                            "version": "1.19.2",
+                            "testOnly": true
+                        }
+                    ],
+                    "testTypes": ["unit", "snapshot"]
+                },
+                {
+                    "name": "AuthServer",
+                    "role": "server",
+                    "targetDependencies": ["AuthShared"],
+                    "externalDependencies": [
+                        {
+                            "packageAlias": "vapor",
+                            "product": "Vapor",
+                            "url": "https://github.com/vapor/vapor",
+                            "version": "4.121.4"
+                        },
+                        {
+                            "packageAlias": "jwt-kit",
+                            "product": "JWTKit",
+                            "url": "https://github.com/vapor/jwt-kit",
+                            "version": "5.5.0"
+                        },
+                        {
+                            "packageAlias": "fluent",
+                            "product": "Fluent",
+                            "url": "https://github.com/vapor/fluent",
+                            "version": "4.13.0"
+                        }
+                    ],
+                    "testTypes": ["unit", "integration"]
+                }
+            ]
+        }
+    },
+    "infrastructure": {
+        "appleTeamId": "XXXXXXXXXX",
+        "gitHub": {
+            "username": "LooseMarek",
+            "private": true,
+            "project": false,
+            "labels": false,
+            "actions": false,
+            "gitignore": false
+        },
+        "fastlane": {
+            "enabled": false,
+            "components": [],
+            "appleId": "loose.marek@gmail.com"
+        },
+        "readme": false,
+        "claude": {
+            "claudeMd": false,
+            "settingsLocal": false
+        }
+    }
+}
