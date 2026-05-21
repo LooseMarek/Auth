@@ -45,11 +45,11 @@ final class LoginViewModel {
                 authManager.signIn(response: response)
             }
         } catch AuthNetworkError.invalidCredentials {
-            errorMessage = "Incorrect email or password."
+            errorMessage = String(localized: "auth.login.error.invalid_credentials", bundle: .module)
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = "No internet connection. Please try again."
+            errorMessage = String(localized: "auth.error.network", bundle: .module)
         } catch {
-            errorMessage = "Something went wrong. Please try again."
+            errorMessage = String(localized: "auth.error.server", bundle: .module)
         }
     }
 
@@ -64,9 +64,9 @@ final class LoginViewModel {
         do {
             try await authManager.loginAsGuest()
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = "No internet connection. Please try again."
+            errorMessage = String(localized: "auth.error.network", bundle: .module)
         } catch {
-            errorMessage = "Something went wrong. Please try again."
+            errorMessage = String(localized: "auth.error.server", bundle: .module)
         }
     }
 
@@ -76,9 +76,9 @@ final class LoginViewModel {
     func setAppleSignInError(_ error: AuthNetworkError) {
         switch error {
         case .networkUnavailable:
-            errorMessage = "No internet connection. Please try again."
+            errorMessage = String(localized: "auth.error.network", bundle: .module)
         default:
-            errorMessage = "Something went wrong. Please try again."
+            errorMessage = String(localized: "auth.error.server", bundle: .module)
         }
     }
 
@@ -88,9 +88,9 @@ final class LoginViewModel {
     func setGoogleSignInError(_ error: AuthNetworkError) {
         switch error {
         case .networkUnavailable:
-            errorMessage = "No internet connection. Please try again."
+            errorMessage = String(localized: "auth.error.network", bundle: .module)
         default:
-            errorMessage = "Something went wrong. Please try again."
+            errorMessage = String(localized: "auth.error.server", bundle: .module)
         }
     }
 }

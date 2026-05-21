@@ -70,6 +70,26 @@ final class ForgotPasswordViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    /// Snapshot with a custom rounded system font applied — verifies all text uses the
+    /// configured font when AuthClientConfiguration.font is non-nil.
+    func testCustomFont() {
+        snapshot(ForgotPasswordView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                font: .system(.body, design: .rounded)
+            )),
+            networkService: NoOpForgotPasswordNetworkService()
+        ))
+    }
+
+    func testCustomFont_dark() {
+        snapshot(ForgotPasswordView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                font: .system(.body, design: .rounded)
+            )),
+            networkService: NoOpForgotPasswordNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(
