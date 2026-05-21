@@ -15,10 +15,12 @@ public struct LogoutController: RouteCollection, Sendable {
 
     private let configuration: AuthServerConfiguration
 
+    /// Creates the controller with the shared `AuthServerConfiguration`.
     public init(configuration: AuthServerConfiguration) {
         self.configuration = configuration
     }
 
+    /// Registers the `POST /auth/logout` route under the JWT-protected route group.
     public func boot(routes: RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         let protected = auth.grouped(JWTMiddleware(configuration: configuration))
