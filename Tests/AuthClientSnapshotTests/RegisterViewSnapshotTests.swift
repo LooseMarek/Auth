@@ -76,6 +76,26 @@ final class RegisterViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    /// Snapshot with a custom rounded system font applied — verifies all text uses the
+    /// configured font when AuthClientConfiguration.font is non-nil.
+    func testCustomFont() {
+        snapshot(RegisterView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                font: .system(.body, design: .rounded)
+            )),
+            networkService: NoOpRegisterNetworkService()
+        ))
+    }
+
+    func testCustomFont_dark() {
+        snapshot(RegisterView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                font: .system(.body, design: .rounded)
+            )),
+            networkService: NoOpRegisterNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(

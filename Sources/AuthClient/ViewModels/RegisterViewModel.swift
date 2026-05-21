@@ -44,7 +44,7 @@ final class RegisterViewModel {
 
         // Client-side validation: passwords must match.
         guard password == confirmPassword else {
-            confirmPasswordError = "Passwords do not match."
+            confirmPasswordError = String(localized: "auth.register.error.password_mismatch", bundle: .module)
             return
         }
 
@@ -55,11 +55,11 @@ final class RegisterViewModel {
             let response = try await networkService.register(email: email, password: password)
             authManager.signIn(response: response)
         } catch AuthNetworkError.emailTaken {
-            emailError = "An account with this email already exists."
+            emailError = String(localized: "auth.register.error.email_taken", bundle: .module)
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = "No internet connection. Please try again."
+            errorMessage = String(localized: "auth.error.network", bundle: .module)
         } catch {
-            errorMessage = "Something went wrong. Please try again."
+            errorMessage = String(localized: "auth.error.server", bundle: .module)
         }
     }
 }

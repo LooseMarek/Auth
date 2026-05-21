@@ -34,9 +34,9 @@ final class ForgotPasswordViewModel {
             try await networkService.forgotPassword(email: email)
             isSuccess = true
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = "No internet connection. Please try again."
+            errorMessage = String(localized: "auth.error.network", bundle: .module)
         } catch {
-            errorMessage = "Something went wrong. Please try again."
+            errorMessage = String(localized: "auth.error.server", bundle: .module)
         }
     }
 }
