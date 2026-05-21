@@ -44,6 +44,11 @@ struct AuthTheme {
     /// Resolved style parameters for the "Sign in with Google" button.
     let googleButtonStyle: GoogleButtonStyle
 
+    // MARK: - Background colour token
+
+    /// Screen / sheet background colour — `color.bg` token, passed through from configuration.
+    let backgroundColor: Color
+
     // MARK: - Typography
 
     /// Custom base font from `AuthClientConfiguration.font`; `nil` → SF Pro (system default).
@@ -83,6 +88,9 @@ struct AuthTheme {
             cornerRadius: 9999.0,
             height: 50.0
         )
+
+        // Background colour pass-through — no derivation needed.
+        self.backgroundColor = configuration.backgroundColor
 
         // Typography pass-through.
         self.font = configuration.font

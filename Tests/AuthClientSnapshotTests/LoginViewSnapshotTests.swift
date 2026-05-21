@@ -175,6 +175,69 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Custom theming
+
+    /// Snapshot with a vivid orange-red primary color applied — verifies all primary buttons,
+    /// links, and focus rings reflect the custom brand color via AuthTheme.
+    func testCustomPrimaryColor() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
+            )),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testCustomPrimaryColor_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
+            )),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    /// Snapshot with a custom rounded system font applied — verifies all text uses the
+    /// configured font when AuthClientConfiguration.font is non-nil.
+    func testCustomFont() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                font: .system(.body, design: .rounded)
+            )),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testCustomFont_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                font: .system(.body, design: .rounded)
+            )),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    /// Snapshot verifying Google button uses themed transparent style (clear background,
+    /// primary-tinted border) and NOT Google's brand-mandated white background.
+    /// Purple primary color makes the border tint clearly non-default in the snapshot.
+    func testGoogleButtonTransparentStyle() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: .purple
+            )),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testGoogleButtonTransparentStyle_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: .purple
+            )),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(

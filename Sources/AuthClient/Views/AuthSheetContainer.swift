@@ -31,11 +31,14 @@ public struct AuthSheetContainer: View {
 
     private let authManager: AuthManager
 
+    @Environment(\.colorScheme) private var colorScheme
+
     public init(authManager: AuthManager) {
         self.authManager = authManager
     }
 
     public var body: some View {
+        let theme = AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
         NavigationStack {
             LoginView(
                 authManager: authManager,
@@ -46,10 +49,11 @@ public struct AuthSheetContainer: View {
             .frame(minHeight: 540)
 #endif
         }
+        .environment(\.authTheme, theme)
 #if canImport(AppKit)
         .frame(width: 440)
         .frame(minHeight: 540)
-        .background(authManager.configuration.backgroundColor)
+        .background(theme.backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
