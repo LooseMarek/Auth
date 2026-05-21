@@ -256,11 +256,52 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Accessibility Large Text
+
+    /// Verifies that LoginView remains usable at the largest iOS Dynamic Type category
+    /// (accessibilityExtraExtraExtraLarge). All text must scale and the ScrollView must
+    /// prevent content from being clipped — per design-system.md §12.
+    ///
+    /// On iOS the trait collection is overridden to `.accessibilityExtraExtraExtraLarge`.
+    /// On macOS (no equivalent Dynamic Type system) the standard scale is captured at the
+    /// same taller frame height used for the iOS variant.
+    func testAccessibilityLargeText_iOS() {
+#if canImport(UIKit)
+        snapshotLargeText(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ))
+#elseif canImport(AppKit)
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ), frameHeight: 1200)
+#endif
+    }
+
+    /// macOS-side companion to `testAccessibilityLargeText_iOS`. On macOS there is no
+    /// iOS-style Dynamic Type category, so this captures the view at the taller frame
+    /// used for large-text testing (1200pt) to verify no layout breakage at extended heights.
+    func testAccessibilityLargeText_macOS() {
+#if canImport(AppKit)
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ), frameHeight: 1200)
+#elseif canImport(UIKit)
+        snapshotLargeText(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ))
+#endif
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(
         _ view: some View,
         colorScheme: ColorScheme = .light,
+        frameHeight: CGFloat = 700,
         function: String = #function
     ) {
         let wrappedView = view.preferredColorScheme(colorScheme)
@@ -270,7 +311,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         hosting.appearance = NSAppearance(
             named: colorScheme == .dark ? .darkAqua : .aqua
         )
-        hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 700)
+        hosting.frame = NSRect(x: 0, y: 0, width: 440, height: frameHeight)
         assertSnapshot(
             of: hosting,
             as: .image,
@@ -280,11 +321,50 @@ final class LoginViewSnapshotTests: XCTestCase {
 #elseif canImport(UIKit)
         let controller = UIHostingController(rootView: wrappedView)
         controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
-        controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 780)
+        controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: frameHeight == 700 ? 780 : frameHeight)
         assertSnapshot(
             of: controller.view,
             as: .image,
             named: "iOS-\(snapshotArch)",
+            testName: function
+        )
+#endif
+    }
+
+    /// Snapshot helper that applies the largest iOS Dynamic Type category
+    /// (`accessibilityExtraExtraExtraLarge`) via trait collection override.
+    /// On macOS (where this category doesn't apply) the standard frame is used.
+    private func snapshotLargeText(
+        _ view: some View,
+        colorScheme: ColorScheme = .light,
+        function: String = #function
+    ) {
+        let wrappedView = view.preferredColorScheme(colorScheme)
+
+#if canImport(UIKit)
+        let controller = UIHostingController(rootView: wrappedView)
+        controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
+        // Apply the largest accessibility Dynamic Type category.
+        let largeTypeTraits = UITraitCollection(traitsFrom: [
+            UITraitCollection(userInterfaceStyle: colorScheme == .dark ? .dark : .light),
+            UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+        ])
+        controller.setOverrideTraitCollection(largeTypeTraits, forChild: controller)
+        controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 1200)
+        assertSnapshot(
+            of: controller.view,
+            as: .image,
+            named: "iOS-\(snapshotArch)",
+            testName: function
+        )
+#elseif canImport(AppKit)
+        let hosting = NSHostingView(rootView: wrappedView.frame(width: 440))
+        hosting.appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua)
+        hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 1200)
+        assertSnapshot(
+            of: hosting,
+            as: .image,
+            named: "macOS-\(snapshotArch)",
             testName: function
         )
 #endif
