@@ -173,6 +173,7 @@ import AuthServer
 // Both endpoints return a JSON object that JWTKit decodes as `JWKS`.
 // Apple:  GET https://appleid.apple.com/auth/keys
 // Google: GET https://www.googleapis.com/oauth2/v3/certs
+// Note: Apple and Google rotate their signing keys periodically — refresh these on a schedule (e.g. every 24 hours) in production.
 let appleJWKS = try await app.client.get("https://appleid.apple.com/auth/keys")
     .content.decode(JWKS.self)
 let googleJWKS = try await app.client.get("https://www.googleapis.com/oauth2/v3/certs")
@@ -182,6 +183,7 @@ let config = AuthServerConfiguration(
     jwtSigningSecret: Environment.get("JWT_SECRET") ?? "change-me",
     emailTransport: { recipient, subject, body in
         // Deliver via your preferred email provider (SendGrid, SES, etc.)
+        // Replace the line below with your actual email SDK call.
         try await myEmailProvider.send(to: recipient, subject: subject, body: body)
     },
     appleJWKS: appleJWKS,
@@ -207,6 +209,7 @@ try app.register(collection: AppleAuthController(configuration: config))
 try app.register(collection: GoogleAuthController(configuration: config))
 try app.register(collection: ForgotPasswordController(configuration: config))
 try app.register(collection: ResetPasswordController(configuration: config))
+try app.register(collection: RefreshTokenController(configuration: config))
 try app.register(collection: LogoutController(configuration: config))
 try app.register(collection: AccountDeletionController(configuration: config))
 try app.register(collection: UpgradeController(configuration: config))
@@ -223,6 +226,7 @@ This registers the following routes under the `/auth` prefix:
 | `POST` | `/auth/google` | Sign in with Google |
 | `POST` | `/auth/forgot-password` | Send password reset email |
 | `POST` | `/auth/reset-password` | Apply password reset token |
+| `POST` | `/auth/refresh` | Exchange refresh token for new tokens (token rotated) |
 | `POST` | `/auth/logout` | Invalidate refresh token (JWT required) |
 | `DELETE` | `/auth/account` | Delete account (JWT required) |
 | `POST` | `/auth/upgrade` | Upgrade guest to full account (JWT required) |
