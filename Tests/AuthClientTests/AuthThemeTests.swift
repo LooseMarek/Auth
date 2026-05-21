@@ -225,5 +225,81 @@ final class AuthThemeTests: XCTestCase {
         XCTAssertEqual(googleStyle.cornerRadius, 9999.0, accuracy: 0.001, "Google button corner radius should be radius.pill (9999)")
         XCTAssertEqual(googleStyle.height, 50.0, accuracy: 0.001, "Google button height should be 50pt")
     }
+
+    // MARK: - testPrimaryStateDerivation_hover
+
+    /// Verifies hover color derivation: ΔL −10% in light mode (Test AC alias for testHoverDerivationLightMode).
+    func testPrimaryStateDerivation_hover() {
+        let knownColor = Color(red: 0.039, green: 0.400, blue: 1.0)
+        let config = AuthClientConfiguration(primaryColor: knownColor)
+        let theme = AuthTheme(configuration: config, colorScheme: .light)
+
+        let primaryHSBA = hsba(of: theme.primaryColor)
+        let hoverHSBA = hsba(of: theme.primaryHover)
+
+        // Hover in light mode: brightness decreases by 0.10 (ΔL −10%)
+        XCTAssertEqual(hoverHSBA.h, primaryHSBA.h, accuracy: 0.001, "Hover hue should equal primary hue")
+        XCTAssertEqual(hoverHSBA.s, primaryHSBA.s, accuracy: 0.01, "Hover saturation should equal primary saturation")
+        let expectedBrightness = max(0, primaryHSBA.b - 0.10)
+        XCTAssertEqual(hoverHSBA.b, expectedBrightness, accuracy: 0.01, "Hover brightness should be primary brightness − 0.10")
+        XCTAssertEqual(hoverHSBA.a, 1.0, accuracy: 0.001)
+    }
+
+    // MARK: - testPrimaryStateDerivation_disabled
+
+    /// Verifies disabled = 40% alpha of primaryColor (Test AC alias for testDisabledAlpha).
+    func testPrimaryStateDerivation_disabled() {
+        let primaryColor = Color(red: 0.039, green: 0.400, blue: 1.0)
+        let config = AuthClientConfiguration(primaryColor: primaryColor)
+        let theme = AuthTheme(configuration: config, colorScheme: .light)
+
+        let primaryRGBA = rgba(of: theme.primaryColor)
+        let disabledRGBA = rgba(of: theme.primaryDisabled)
+
+        // RGB values should match primary; only alpha differs.
+        XCTAssertEqual(disabledRGBA.r, primaryRGBA.r, accuracy: 0.01)
+        XCTAssertEqual(disabledRGBA.g, primaryRGBA.g, accuracy: 0.01)
+        XCTAssertEqual(disabledRGBA.b, primaryRGBA.b, accuracy: 0.01)
+        XCTAssertEqual(disabledRGBA.a, 0.40, accuracy: 0.01, "Disabled alpha should be 40%")
+    }
+
+    // MARK: - testAppleButtonColorsImmutable
+
+    /// Apple bg/label are vendor-fixed regardless of primaryColor (Test AC alias for testAppleColorsImmutable).
+    func testAppleButtonColorsImmutable() {
+        let config1 = AuthClientConfiguration(primaryColor: .orange)
+        let config2 = AuthClientConfiguration(primaryColor: .green)
+
+        let lightTheme1 = AuthTheme(configuration: config1, colorScheme: .light)
+        let lightTheme2 = AuthTheme(configuration: config2, colorScheme: .light)
+        let darkTheme1  = AuthTheme(configuration: config1, colorScheme: .dark)
+        let darkTheme2  = AuthTheme(configuration: config2, colorScheme: .dark)
+
+        // Light: bg = #000000 (black), label = #FFFFFF (white)
+        let lightBg1 = rgba(of: lightTheme1.appleButtonBackground)
+        let lightBg2 = rgba(of: lightTheme2.appleButtonBackground)
+        XCTAssertEqual(lightBg1.r, 0.0, accuracy: 0.01, "Apple bg R in light should be 0 (black)")
+        XCTAssertEqual(lightBg1.g, 0.0, accuracy: 0.01)
+        XCTAssertEqual(lightBg1.b, 0.0, accuracy: 0.01)
+        XCTAssertEqual(lightBg1.r, lightBg2.r, accuracy: 0.01, "Apple bg must not vary with primaryColor")
+
+        let lightLabel1 = rgba(of: lightTheme1.appleButtonLabel)
+        XCTAssertEqual(lightLabel1.r, 1.0, accuracy: 0.01, "Apple label in light should be white")
+        XCTAssertEqual(lightLabel1.g, 1.0, accuracy: 0.01)
+        XCTAssertEqual(lightLabel1.b, 1.0, accuracy: 0.01)
+
+        // Dark: bg = #FFFFFF (white), label = #000000 (black)
+        let darkBg1 = rgba(of: darkTheme1.appleButtonBackground)
+        let darkBg2 = rgba(of: darkTheme2.appleButtonBackground)
+        XCTAssertEqual(darkBg1.r, 1.0, accuracy: 0.01, "Apple bg R in dark should be 1 (white)")
+        XCTAssertEqual(darkBg1.g, 1.0, accuracy: 0.01)
+        XCTAssertEqual(darkBg1.b, 1.0, accuracy: 0.01)
+        XCTAssertEqual(darkBg1.r, darkBg2.r, accuracy: 0.01, "Apple bg must not vary with primaryColor")
+
+        let darkLabel1 = rgba(of: darkTheme1.appleButtonLabel)
+        XCTAssertEqual(darkLabel1.r, 0.0, accuracy: 0.01, "Apple label in dark should be black")
+        XCTAssertEqual(darkLabel1.g, 0.0, accuracy: 0.01)
+        XCTAssertEqual(darkLabel1.b, 0.0, accuracy: 0.01)
+    }
 }
 // swiftlint:enable file_length

@@ -10,6 +10,7 @@ public struct RegisterView: View {
     @State private var viewModel: RegisterViewModel
     private let authManager: AuthManager
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.authTheme) private var theme
 
     public init(
         authManager: AuthManager,
@@ -32,6 +33,15 @@ public struct RegisterView: View {
     }
 
     public var body: some View {
+        content
+            .environment(
+                \.authTheme,
+                AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
+            )
+    }
+
+    @ViewBuilder
+    private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 titleSection
@@ -51,9 +61,11 @@ public struct RegisterView: View {
                 Spacer().frame(height: 32)
             }
             .padding(.horizontal, 24)
+            // Apply custom base font when configured; child modifiers override as needed.
+            .font(theme.font)
             .allowsHitTesting(!viewModel.isLoading)
         }
-        .background(authManager.configuration.backgroundColor)
+        .background(theme.backgroundColor)
     }
 
     // MARK: - Subviews
@@ -166,8 +178,8 @@ public struct RegisterView: View {
             .frame(height: 52)
             .background(
                 viewModel.canSubmit
-                    ? authManager.configuration.primaryColor
-                    : authManager.configuration.primaryColor.opacity(0.8)
+                    ? theme.primaryColor
+                    : theme.primaryDisabled
             )
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
@@ -184,7 +196,7 @@ public struct RegisterView: View {
                     .foregroundStyle(Color.secondary)
                 + Text("Log in")
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(authManager.configuration.primaryColor)
+                    .foregroundStyle(theme.primaryColor)
             }
             .buttonStyle(.plain)
             Spacer()

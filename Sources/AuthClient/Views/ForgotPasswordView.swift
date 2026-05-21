@@ -10,6 +10,8 @@ public struct ForgotPasswordView: View {
     @State private var viewModel: ForgotPasswordViewModel
     private let authManager: AuthManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.authTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
 
     public init(
         authManager: AuthManager,
@@ -30,6 +32,15 @@ public struct ForgotPasswordView: View {
     }
 
     public var body: some View {
+        content
+            .environment(
+                \.authTheme,
+                AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
+            )
+    }
+
+    @ViewBuilder
+    private var content: some View {
         ScrollView {
             ZStack {
                 if !viewModel.isSuccess {
@@ -52,8 +63,10 @@ public struct ForgotPasswordView: View {
                 value: viewModel.isSuccess
             )
             .padding(.horizontal, 24)
+            // Apply custom base font when configured; child modifiers override as needed.
+            .font(theme.font)
         }
-        .background(authManager.configuration.backgroundColor)
+        .background(theme.backgroundColor)
     }
 
     // MARK: - Form content
@@ -142,8 +155,8 @@ public struct ForgotPasswordView: View {
             .frame(height: 52)
             .background(
                 viewModel.canSubmit
-                    ? authManager.configuration.primaryColor
-                    : authManager.configuration.primaryColor.opacity(0.8)
+                    ? theme.primaryColor
+                    : theme.primaryDisabled
             )
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
@@ -156,7 +169,7 @@ public struct ForgotPasswordView: View {
             Spacer()
             Button("Back to log in") {}
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(authManager.configuration.primaryColor)
+                .foregroundStyle(theme.primaryColor)
                 .buttonStyle(.plain)
             Spacer()
         }
@@ -222,7 +235,7 @@ public struct ForgotPasswordView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(authManager.configuration.primaryColor)
+                .background(theme.primaryColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)

@@ -48,6 +48,28 @@ final class ForgotPasswordViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Custom theming
+
+    /// Snapshot with a vivid orange-red primary color — verifies submit button and back links
+    /// reflect the custom brand color via AuthTheme.
+    func testCustomPrimaryColor() {
+        snapshot(ForgotPasswordView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
+            )),
+            networkService: NoOpForgotPasswordNetworkService()
+        ))
+    }
+
+    func testCustomPrimaryColor_dark() {
+        snapshot(ForgotPasswordView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
+            )),
+            networkService: NoOpForgotPasswordNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(

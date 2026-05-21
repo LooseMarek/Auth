@@ -54,6 +54,28 @@ final class RegisterViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Custom theming
+
+    /// Snapshot with a vivid orange-red primary color — verifies primary button and links
+    /// reflect the custom brand color via AuthTheme.
+    func testCustomPrimaryColor() {
+        snapshot(RegisterView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
+            )),
+            networkService: NoOpRegisterNetworkService()
+        ))
+    }
+
+    func testCustomPrimaryColor_dark() {
+        snapshot(RegisterView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
+            )),
+            networkService: NoOpRegisterNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(

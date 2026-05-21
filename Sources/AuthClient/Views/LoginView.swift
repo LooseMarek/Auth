@@ -12,6 +12,9 @@ public struct LoginView: View {
     @State private var googleSignInHandler: GoogleSignInHandler
     private let authManager: AuthManager
 
+    @Environment(\.authTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
+
     public init(
         authManager: AuthManager,
         networkService: any AuthNetworkService,
@@ -40,6 +43,15 @@ public struct LoginView: View {
     }
 
     public var body: some View {
+        content
+            .environment(
+                \.authTheme,
+                AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
+            )
+    }
+
+    @ViewBuilder
+    private var content: some View {
         ZStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -67,6 +79,8 @@ public struct LoginView: View {
                     Spacer().frame(height: 32)
                 }
                 .padding(.horizontal, 24)
+                // Apply custom base font when configured; child modifiers override as needed.
+                .font(theme.font)
                 // Disable all interaction while a login request or social sign-in is in flight.
                 .allowsHitTesting(
                     !viewModel.isLoading
@@ -75,11 +89,11 @@ public struct LoginView: View {
                     && !googleSignInHandler.isLoading
                 )
             }
-            .background(authManager.configuration.backgroundColor)
+            .background(theme.backgroundColor)
 
             // Full-screen loading overlay shown while a social sign-in server call is in flight.
             if appleSignInHandler.isLoading || googleSignInHandler.isLoading {
-                authManager.configuration.backgroundColor
+                theme.backgroundColor
                     .opacity(0.8)
                     .ignoresSafeArea()
                 ProgressView()
@@ -144,7 +158,7 @@ public struct LoginView: View {
             Spacer()
             Button("Forgot password?") {}
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(authManager.configuration.primaryColor)
+                .foregroundStyle(theme.primaryColor)
                 .buttonStyle(.plain)
         }
         .padding(.top, 4)
@@ -170,8 +184,8 @@ public struct LoginView: View {
             // Full color when form is valid; muted when empty fields regardless of loading.
             .background(
                 viewModel.canSubmit
-                    ? authManager.configuration.primaryColor
-                    : authManager.configuration.primaryColor.opacity(0.8)
+                    ? theme.primaryColor
+                    : theme.primaryDisabled
             )
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
@@ -210,14 +224,13 @@ public struct LoginView: View {
                     .accessibilityHidden(true)
                 Text("Sign in with Apple")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.white)
+                    .foregroundStyle(theme.appleButtonLabel)
             }
-            .foregroundColor(.white)
+            .foregroundColor(theme.appleButtonLabel)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
-            .background(Color.black)
+            .background(theme.appleButtonBackground)
             .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Sign in with Apple")
@@ -237,10 +250,15 @@ public struct LoginView: View {
                     .foregroundStyle(Color.primary)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(Color.clear)
+            .frame(height: theme.googleButtonStyle.height)
+            .background(theme.googleButtonStyle.background)
             .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
+            .overlay(
+                Capsule().strokeBorder(
+                    theme.googleButtonStyle.borderColor,
+                    lineWidth: theme.googleButtonStyle.borderWidth
+                )
+            )
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Sign in with Google")
@@ -279,7 +297,7 @@ public struct LoginView: View {
                     .foregroundStyle(Color.secondary)
                 + Text("Register")
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(authManager.configuration.primaryColor)
+                    .foregroundStyle(theme.primaryColor)
             }
             .buttonStyle(.plain)
             Spacer()
