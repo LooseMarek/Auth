@@ -238,6 +238,24 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Localisation
+
+    /// Verifies that default English localisation strings are rendered correctly
+    /// in the login screen — title, subtitle, placeholders, buttons, and links.
+    func testDefaultStrings() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testDefaultStrings_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(
