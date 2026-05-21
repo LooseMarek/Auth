@@ -14,6 +14,7 @@ public struct LoginView: View {
 
     @Environment(\.authTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     public init(
         authManager: AuthManager,
@@ -92,9 +93,10 @@ public struct LoginView: View {
             .background(theme.backgroundColor)
 
             // Full-screen loading overlay shown while a social sign-in server call is in flight.
+            // Under accessibilityReduceTransparency an opaque background is used instead of the
+            // semi-transparent one — per design-system.md §12 and §10.10.
             if appleSignInHandler.isLoading || googleSignInHandler.isLoading {
-                theme.backgroundColor
-                    .opacity(0.8)
+                (reduceTransparency ? theme.backgroundColor : theme.backgroundColor.opacity(0.8))
                     .ignoresSafeArea()
                 ProgressView()
                     .scaleEffect(1.5)
