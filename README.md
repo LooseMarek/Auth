@@ -97,6 +97,22 @@ struct MyApp: App {
 }
 ```
 
+> **Warning:** `AuthManager.init(configuration:)` injects a no-op stub for `networkService`
+> — all auth calls will silently do nothing. For real network calls, inject your own
+> `AuthNetworkService` implementation and a `KeychainTokenStore`:
+>
+> ```swift
+> @State private var authManager = AuthManager(
+>     configuration: AuthClientConfiguration(),
+>     networkService: MyAuthNetworkService(baseURL: URL(string: "https://api.example.com")!),
+>     tokenStore: KeychainTokenStore()
+> )
+> ```
+>
+> `AuthNetworkService` is a protocol your host app implements. Each method maps to an
+> Auth server endpoint (e.g. `login(email:password:)` → `POST /auth/login`). See the
+> `AuthNetworkService` protocol documentation for the full list of required methods.
+
 ### 2. Trigger the auth flow
 
 From any screen, inject the `AuthManager` from the environment and call
@@ -153,16 +169,23 @@ Button("Sign Out") {
 import Vapor
 import AuthServer
 
+// Fetch JWKS from Apple and Google once at startup.
+// Both endpoints return a JSON object that JWTKit decodes as `JWKS`.
+// Apple:  GET https://appleid.apple.com/auth/keys
+// Google: GET https://www.googleapis.com/oauth2/v3/certs
+let appleJWKS = try await app.client.get("https://appleid.apple.com/auth/keys")
+    .content.decode(JWKS.self)
+let googleJWKS = try await app.client.get("https://www.googleapis.com/oauth2/v3/certs")
+    .content.decode(JWKS.self)
+
 let config = AuthServerConfiguration(
     jwtSigningSecret: Environment.get("JWT_SECRET") ?? "change-me",
-    accessTokenTTL: 3600,    // 1 hour (default)
-    refreshTokenTTL: 86400,  // 1 day (default)
     emailTransport: { recipient, subject, body in
         // Deliver via your preferred email provider (SendGrid, SES, etc.)
         try await myEmailProvider.send(to: recipient, subject: subject, body: body)
     },
-    appleJWKS: try await fetchAppleJWKS(),   // https://appleid.apple.com/auth/keys
-    googleJWKS: try await fetchGoogleJWKS()  // https://www.googleapis.com/oauth2/v3/certs
+    appleJWKS: appleJWKS,
+    googleJWKS: googleJWKS
 )
 ```
 
@@ -223,14 +246,15 @@ app.databases.use(.sqlite(.memory), as: .sqlite)
 
 ## `AuthClientConfiguration` Reference
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `allowGuestAccess` | `Bool` | `true` | When `false`, guest/anonymous sign-in UI is hidden |
-| `primaryColor` | `Color?` | Auth Blue (`#0A66FF` light / `#3D8BFF` dark) | Tint applied to buttons and interactive elements |
-| `backgroundColor` | `Color?` | System background (adapts to light/dark) | Screen background colour |
-| `font` | `Font?` | `nil` (system default) | Custom font applied to all auth screens |
+| Property | Stored Type | Init Parameter Type | Default | Description |
+|----------|-------------|---------------------|---------|-------------|
+| `allowGuestAccess` | `Bool` | `Bool` | `true` | When `false`, guest/anonymous sign-in UI is hidden |
+| `primaryColor` | `Color` | `Color?` | Auth Blue (`#0A66FF` light / `#3D8BFF` dark) | Tint applied to buttons and interactive elements |
+| `backgroundColor` | `Color` | `Color?` | System background (adapts to light/dark) | Screen background colour |
+| `font` | `Font?` | `Font?` | `nil` (system default) | Custom font applied to all auth screens |
 
-All colour parameters accept `nil` to use the built-in adaptive defaults. Pass `nil` to
+The colour init parameters accept `nil` to use the built-in adaptive defaults. The stored
+properties are always non-optional `Color` values resolved inside the init. Pass `nil` to
 use Auth Blue and the system background:
 
 ```swift
