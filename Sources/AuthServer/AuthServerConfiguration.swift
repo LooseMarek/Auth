@@ -9,6 +9,12 @@ public struct AuthServerConfiguration: Sendable {
 
     // MARK: - Storage key for Vapor's Application.storage
 
+    /// Vapor `StorageKey` used to attach `AuthServerConfiguration` to `Application.storage`.
+    ///
+    /// Access the stored configuration via:
+    /// ```swift
+    /// app.storage[AuthServerConfiguration.StorageKey.self]
+    /// ```
     public struct StorageKey: Vapor.StorageKey {
         public typealias Value = AuthServerConfiguration
     }
@@ -48,6 +54,21 @@ public struct AuthServerConfiguration: Sendable {
 
     // MARK: - Initialiser
 
+    /// Creates an `AuthServerConfiguration`.
+    ///
+    /// - Parameters:
+    ///   - jwtSigningSecret: The secret used to sign and verify HMAC-SHA256 access tokens.
+    ///     Keep this value in a secret store (e.g. environment variable) — never commit it.
+    ///   - accessTokenTTL: Lifetime of an access token in seconds. Defaults to 3600 (1 hour).
+    ///   - refreshTokenTTL: Lifetime of a refresh token in seconds. Defaults to 86400 (1 day).
+    ///   - emailTransport: A closure the server calls to deliver password-reset emails.
+    ///     Parameters are `(recipient, subject, body)`. Pass `nil` to defer configuration —
+    ///     the forgot-password route will fail at runtime with HTTP 500 until this is set.
+    ///   - appleJWKS: Apple's public JWKS for verifying Sign in with Apple tokens.
+    ///     Fetch from `https://appleid.apple.com/auth/keys`. Pass `nil` to defer — the
+    ///     Apple sign-in route will fail at runtime with HTTP 500 until this is set.
+    ///   - googleJWKS: Google's public JWKS for verifying Google Sign-In tokens.
+    ///     Fetch from `https://www.googleapis.com/oauth2/v3/certs`. Pass `nil` to defer.
     public init(
         jwtSigningSecret: String,
         accessTokenTTL: TimeInterval = 3600,

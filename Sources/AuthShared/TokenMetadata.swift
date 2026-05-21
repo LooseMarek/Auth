@@ -21,6 +21,12 @@ public struct TokenMetadata: Codable, Sendable {
         expiresAt < Date().addingTimeInterval(threshold)
     }
 
+    /// Creates a `TokenMetadata` with the given token strings and expiry date.
+    ///
+    /// - Parameters:
+    ///   - accessToken: The signed JWT access token string.
+    ///   - refreshToken: The opaque refresh token string.
+    ///   - expiresAt: The date at which `accessToken` expires.
     public init(accessToken: String, refreshToken: String, expiresAt: Date) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken

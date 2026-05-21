@@ -6,12 +6,30 @@ import UIKit
 import AppKit
 #endif
 
+/// The registration screen of the Auth flow.
+///
+/// `RegisterView` is pushed onto the `AuthSheetContainer` navigation stack from `LoginView`.
+/// It collects an email address, a password, and a confirm-password field, performs
+/// client-side mismatch validation, and registers a new account via the injected
+/// `AuthNetworkService`.
+///
+/// On successful registration, `AuthManager.session` transitions to `.authenticated`.
 public struct RegisterView: View {
     @State private var viewModel: RegisterViewModel
     private let authManager: AuthManager
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.authTheme) private var theme
 
+    /// Creates a `RegisterView`.
+    ///
+    /// - Parameters:
+    ///   - authManager: The shared authentication state manager.
+    ///   - networkService: The network layer used for the registration request.
+    ///   - prefilledEmail: Optional email to pre-populate the email field (e.g. for Xcode Previews).
+    ///   - prefilledPassword: Optional password to pre-populate the password field.
+    ///   - prefilledConfirmPassword: Optional value to pre-populate the confirm-password field.
+    ///   - initialConfirmPasswordError: Optional mismatch error to display immediately on appear.
+    ///   - initialIsLoading: When `true`, the register button shows a loading indicator on appear.
     public init(
         authManager: AuthManager,
         networkService: any AuthNetworkService,

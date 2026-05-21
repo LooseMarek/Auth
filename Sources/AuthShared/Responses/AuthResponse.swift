@@ -11,6 +11,13 @@ public struct AuthResponse: Codable, Sendable {
     /// The authenticated user's information.
     public let user: UserDTO
 
+    /// Creates an `AuthResponse` with the given tokens and user information.
+    ///
+    /// - Parameters:
+    ///   - accessToken: The signed JWT access token string.
+    ///   - refreshToken: The opaque refresh token string.
+    ///   - expiresAt: The date at which `accessToken` expires.
+    ///   - user: The authenticated user's information.
     public init(accessToken: String, refreshToken: String, expiresAt: Date, user: UserDTO) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken

@@ -6,6 +6,17 @@ import UIKit
 import AppKit
 #endif
 
+/// The login screen of the Auth flow.
+///
+/// `LoginView` is the root screen of the `AuthSheetContainer` navigation stack. It provides:
+/// - Email/password login (or guest-to-email upgrade when a guest session is active)
+/// - Sign in with Apple
+/// - Sign in with Google
+/// - Optional "Continue as Guest" button (shown when `AuthClientConfiguration.allowGuestAccess` is `true`)
+/// - Navigation links to `RegisterView` and `ForgotPasswordView`
+///
+/// Host apps do not instantiate `LoginView` directly — it is presented automatically by
+/// the `.authSheet(manager:)` modifier via `AuthSheetContainer`.
 public struct LoginView: View {
     @State private var viewModel: LoginViewModel
     @State private var appleSignInHandler: AppleSignInHandler
@@ -16,6 +27,15 @@ public struct LoginView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
+    /// Creates a `LoginView`.
+    ///
+    /// - Parameters:
+    ///   - authManager: The shared authentication state manager.
+    ///   - networkService: The network layer used for login and social auth requests.
+    ///   - prefilledEmail: Optional email to pre-populate the email field (e.g. for Xcode Previews).
+    ///   - prefilledPassword: Optional password to pre-populate the password field.
+    ///   - initialErrorMessage: Optional error message to display immediately on appear.
+    ///   - initialIsLoading: When `true`, the login button shows a loading indicator on appear.
     public init(
         authManager: AuthManager,
         networkService: any AuthNetworkService,
