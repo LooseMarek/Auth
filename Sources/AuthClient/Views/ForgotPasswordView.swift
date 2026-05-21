@@ -87,10 +87,10 @@ public struct ForgotPasswordView: View {
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Reset password")
+            Text(String(localized: "auth.forgot.title", bundle: .module))
                 .font(.title.bold())
                 .foregroundStyle(Color.primary)
-            Text("Enter your email and we'll send you a link to reset your password.")
+            Text(String(localized: "auth.forgot.subtitle", bundle: .module))
                 .font(.callout)
                 .foregroundStyle(Color.secondary)
                 .frame(maxWidth: 340, alignment: .leading)
@@ -100,7 +100,7 @@ public struct ForgotPasswordView: View {
 
     private var emailFieldSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            TextField("you@email.com", text: $viewModel.email)
+            TextField(String(localized: "auth.forgot.field.email.placeholder", bundle: .module), text: $viewModel.email)
 #if canImport(UIKit)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
@@ -146,7 +146,7 @@ public struct ForgotPasswordView: View {
                     ProgressView()
                         .colorScheme(.dark)
                 } else {
-                    Text("Send reset link")
+                    Text(String(localized: "auth.forgot.button.submit", bundle: .module))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
                 }
@@ -167,7 +167,7 @@ public struct ForgotPasswordView: View {
     private var backLink: some View {
         HStack {
             Spacer()
-            Button("Back to log in") {}
+            Button(String(localized: "auth.forgot.link.back", bundle: .module)) {}
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(theme.primaryColor)
                 .buttonStyle(.plain)
@@ -202,14 +202,14 @@ public struct ForgotPasswordView: View {
 
             Spacer().frame(height: 12)
 
-            Text("Check your inbox")
+            Text(String(localized: "auth.forgot.success.title", bundle: .module))
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(Color.primary)
                 .multilineTextAlignment(.center)
 
             Spacer().frame(height: 4)
 
-            Text("We've sent a password reset link to your email. It may take a few minutes to arrive.")
+            Text(String(localized: "auth.forgot.success.body", bundle: .module))
                 .font(.body)
                 .foregroundStyle(Color.secondary)
                 .multilineTextAlignment(.center)
@@ -230,7 +230,7 @@ public struct ForgotPasswordView: View {
 
     private var backToLoginButton: some View {
         Button {} label: {
-            Text("Back to log in")
+            Text(String(localized: "auth.forgot.link.back", bundle: .module))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

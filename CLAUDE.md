@@ -142,6 +142,26 @@ TextField("Email", text: $email)
     .background(AuthColors.surface)
     .clipShape(RoundedRectangle(cornerRadius: 8))
 ```
+### Localisation — SPM bundle access and defaultLocalization
+
+SPM requires `defaultLocalization: "en"` in `Package.swift` the moment any `.lproj` folder is added to a processed resource directory. Without it, `swift build` / `swift test` fail with `manifest property 'defaultLocalization' not set`.
+
+All user-facing strings in `AuthClient` are externalised to `Sources/AuthClient/Resources/en.lproj/Localizable.strings`. Access them in views with:
+
+```swift
+String(localized: "auth.login.title", bundle: .module)
+```
+
+Do **not** use `NSLocalizedString` — it defaults to the main bundle and will not find the SPM module's strings in host apps.
+
+Key convention: `auth.{screen}.{element}` (e.g. `auth.login.title`, `auth.register.error.password_too_short`). The full key inventory lives in `docs/design/ui-specs/`.
+
+**Snapshot re-recording after string changes.** Replacing inline strings with localised lookups changes the rendered placeholder text (e.g. `"Email"` → `"you@email.com"`), which invalidates all existing arm64 baselines. When this happens:
+1. Delete the stale arm64 `.png` files for each affected snapshot folder.
+2. Re-record via Fastlane: `bundle exec fastlane ios test` then `bundle exec fastlane mac test`.
+3. Run each Fastlane lane a second time — first run records, second run verifies.
+4. Do **not** use `swift test` to record macOS baselines — it renders at display backing scale, producing files that mismatch Fastlane-recorded CI baselines.
+
 ### AuthServer testing constraint
 
 `AuthServer` does **not** depend on any Fluent driver (`fluent-sqlite-driver`, `fluent-postgres-driver`, etc.) — the host app provides the driver (see ADR-004). Therefore `AuthServerTests` must **never** add a Fluent driver as a test dependency and must **never** import `FluentSQLiteDriver` or any other driver module.

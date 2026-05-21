@@ -72,10 +72,10 @@ public struct RegisterView: View {
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Create account")
+            Text(String(localized: "auth.register.title", bundle: .module))
                 .font(.title.bold())
                 .foregroundStyle(Color.primary)
-            Text("Takes about 20 seconds. No payment needed.")
+            Text(String(localized: "auth.register.subtitle", bundle: .module))
                 .font(.callout)
                 .foregroundStyle(Color.secondary)
                 .frame(maxWidth: 340, alignment: .leading)
@@ -85,7 +85,7 @@ public struct RegisterView: View {
 
     private var emailFieldSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            TextField("you@email.com", text: $viewModel.email)
+            TextField(String(localized: "auth.register.field.email.placeholder", bundle: .module), text: $viewModel.email)
 #if canImport(UIKit)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
@@ -108,7 +108,7 @@ public struct RegisterView: View {
         VStack(alignment: .leading, spacing: 0) {
             RegisterPasswordFieldView(
                 text: $viewModel.password,
-                placeholder: "At least 8 characters",
+                placeholder: String(localized: "auth.register.field.password.placeholder", bundle: .module),
                 isConfirmField: false
             )
             if let error = viewModel.passwordError {
@@ -121,7 +121,7 @@ public struct RegisterView: View {
         VStack(alignment: .leading, spacing: 0) {
             RegisterPasswordFieldView(
                 text: $viewModel.confirmPassword,
-                placeholder: "Re-enter password",
+                placeholder: String(localized: "auth.register.field.confirm_password.placeholder", bundle: .module),
                 isConfirmField: true
             )
             if let error = viewModel.confirmPasswordError {
@@ -169,7 +169,7 @@ public struct RegisterView: View {
                     ProgressView()
                         .colorScheme(.dark)
                 } else {
-                    Text("Create account")
+                    Text(String(localized: "auth.register.button.submit", bundle: .module))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
                 }
@@ -191,7 +191,13 @@ public struct RegisterView: View {
         HStack {
             Spacer()
             Button {} label: {
-                Text("Already have an account? ")
+                // The full localised string is "Already have an account? Log in".
+                // We split it on "Log in" at runtime so the "Log in" word can be
+                // styled with the primary colour while keeping the full phrase localizable.
+                let fullString = String(localized: "auth.register.link.login", bundle: .module)
+                let components = fullString.components(separatedBy: "Log in")
+                let prefix = components.first ?? ""
+                Text(prefix)
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(Color.secondary)
                 + Text("Log in")
@@ -239,7 +245,11 @@ private struct RegisterPasswordFieldView: View {
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(isVisible ? "Hide password" : "Show password")
+            .accessibilityLabel(
+                isVisible
+                    ? String(localized: "auth.field.password.hide", bundle: .module)
+                    : String(localized: "auth.field.password.show", bundle: .module)
+            )
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
