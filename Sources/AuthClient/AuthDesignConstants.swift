@@ -1,5 +1,4 @@
-import CoreFoundation
-
+import Foundation
 /// Static layout constants derived from the design system token table.
 ///
 /// These values are not theme-dependent — they encode structural constraints from

@@ -135,7 +135,9 @@ public struct LoginView: View {
     }
 
     private var passwordField: some View {
-        PasswordFieldView(text: $viewModel.password)
+        PasswordFieldView(text: $viewModel.password) {
+            Task { await viewModel.login(authManager: authManager) }
+        }
     }
 
     @ViewBuilder
@@ -317,6 +319,7 @@ public struct LoginView: View {
 
 private struct PasswordFieldView: View {
     @Binding var text: String
+    var onSubmit: () -> Void = {}
     @State private var isVisible: Bool = false
 
     var body: some View {
@@ -330,6 +333,7 @@ private struct PasswordFieldView: View {
                     .textContentType(.password)
                     .submitLabel(.go)
                     .textFieldStyle(.plain)
+                    .onSubmit { onSubmit() }
                 } else {
                     SecureField(
                         String(localized: "auth.login.field.password.placeholder", bundle: .module),
@@ -338,6 +342,7 @@ private struct PasswordFieldView: View {
                     .textContentType(.password)
                     .submitLabel(.go)
                     .textFieldStyle(.plain)
+                    .onSubmit { onSubmit() }
                 }
             }
             Button {
