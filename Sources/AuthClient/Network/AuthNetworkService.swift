@@ -1,16 +1,52 @@
 import Foundation
 import AuthShared
 
+/// Errors that can be thrown by ``AuthNetworkService`` operations.
 public enum AuthNetworkError: Error, Sendable {
+    /// The supplied credentials (email/password or identity token) were rejected by the server.
     case invalidCredentials
+    /// Registration failed because the email address is already associated with an account.
     case emailTaken
+    /// The request could not reach the server (e.g. no internet connection).
     case networkUnavailable
+    /// The server returned an unexpected error response.
     case serverError
 }
 
+/// Defines the network contract between `AuthManager` and the host app's backend.
+///
+/// Implement this protocol in your host app (or use a pre-built implementation) and
+/// pass it to `AuthManager.init(configuration:networkService:tokenStore:)`.
+/// Each method maps to a specific Auth server endpoint.
+///
+/// The default dependency injected by `AuthManager.init(configuration:)` is a
+/// no-op stub (`NoOpAuthNetworkService`) — you must replace it with a real
+/// implementation before any network calls succeed.
 public protocol AuthNetworkService: Sendable {
+    /// Authenticates an existing user via POST /auth/login.
+    ///
+    /// - Parameters:
+    ///   - email: The user's email address.
+    ///   - password: The user's plaintext password.
+    /// - Returns: An ``AuthResponse`` with fresh tokens and user info.
+    /// - Throws: ``AuthNetworkError/invalidCredentials`` when the credentials are wrong.
     func login(email: String, password: String) async throws -> AuthResponse
+
+    /// Registers a new user account via POST /auth/register.
+    ///
+    /// - Parameters:
+    ///   - email: The desired email address for the new account.
+    ///   - password: The desired plaintext password (hashed server-side).
+    /// - Returns: An ``AuthResponse`` with fresh tokens and user info.
+    /// - Throws: ``AuthNetworkError/emailTaken`` when the email is already registered.
     func register(email: String, password: String) async throws -> AuthResponse
+
+    /// Initiates a password reset for the given email via POST /auth/forgot-password.
+    ///
+    /// The server sends a reset email if the address is registered. Always returns
+    /// without error regardless of whether the email exists (prevents user enumeration).
+    ///
+    /// - Parameter email: The email address for the account to reset.
     func forgotPassword(email: String) async throws
 
     /// Exchanges a refresh token for a new ``AuthResponse`` containing fresh tokens.

@@ -9,6 +9,11 @@ public struct SocialAuthRequest: Codable, Sendable {
     /// The identity token returned by the social provider's SDK.
     public let identityToken: String
 
+    /// Creates a social authentication request.
+    ///
+    /// - Parameters:
+    ///   - provider: The identity provider for this request (`.apple` or `.google`).
+    ///   - identityToken: The JWT identity token returned by the provider's SDK.
     public init(provider: AuthProvider, identityToken: String) {
         self.provider = provider
         self.identityToken = identityToken

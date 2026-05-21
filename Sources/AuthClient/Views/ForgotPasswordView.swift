@@ -6,6 +6,15 @@ import UIKit
 import AppKit
 #endif
 
+/// The forgot-password screen of the Auth flow.
+///
+/// `ForgotPasswordView` is pushed onto the `AuthSheetContainer` navigation stack from
+/// `LoginView`. It collects the user's email address and calls the injected
+/// `AuthNetworkService.forgotPassword(email:)` endpoint to trigger a password-reset email.
+///
+/// On success, the view transitions to a confirmation card with an animated checkmark.
+/// The transition respects `accessibilityReduceMotion` — a simple opacity fade is used
+/// instead of the default spring-scale animation when reduce-motion is enabled.
 public struct ForgotPasswordView: View {
     @State private var viewModel: ForgotPasswordViewModel
     private let authManager: AuthManager
@@ -13,6 +22,15 @@ public struct ForgotPasswordView: View {
     @Environment(\.authTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
 
+    /// Creates a `ForgotPasswordView`.
+    ///
+    /// - Parameters:
+    ///   - authManager: The shared authentication state manager (used for theming).
+    ///   - networkService: The network layer used for the forgot-password request.
+    ///   - prefilledEmail: Optional email to pre-populate the email field (e.g. for Xcode Previews).
+    ///   - initialIsLoading: When `true`, the submit button shows a loading indicator on appear.
+    ///   - initialIsSuccess: When `true`, the success card is shown immediately on appear.
+    ///   - initialErrorMessage: Optional error message to display immediately on appear.
     public init(
         authManager: AuthManager,
         networkService: any AuthNetworkService,
