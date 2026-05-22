@@ -263,6 +263,46 @@ final class AuthThemeTests: XCTestCase {
         XCTAssertEqual(disabledRGBA.a, 0.40, accuracy: 0.01, "Disabled alpha should be 40%")
     }
 
+    // MARK: - testSurfaceColorResolvesToCustomWhenProvided
+
+    /// AuthTheme.surfaceColor equals the custom Color passed via configuration.
+    func testSurfaceColorResolvesToCustomWhenProvided() {
+        let customSurface = Color(red: 1.0, green: 0.9, blue: 0.7)
+        let config = AuthClientConfiguration(surfaceColor: customSurface)
+        let theme = AuthTheme(configuration: config, colorScheme: .light)
+
+        let themeSurfaceRGBA = rgba(of: theme.surfaceColor)
+        let customSurfaceRGBA = rgba(of: customSurface)
+
+        XCTAssertEqual(themeSurfaceRGBA.r, customSurfaceRGBA.r, accuracy: 0.01, "surfaceColor R should match custom color R")
+        XCTAssertEqual(themeSurfaceRGBA.g, customSurfaceRGBA.g, accuracy: 0.01, "surfaceColor G should match custom color G")
+        XCTAssertEqual(themeSurfaceRGBA.b, customSurfaceRGBA.b, accuracy: 0.01, "surfaceColor B should match custom color B")
+        XCTAssertEqual(themeSurfaceRGBA.a, customSurfaceRGBA.a, accuracy: 0.01, "surfaceColor A should match custom color A")
+    }
+
+    // MARK: - testSurfaceColorFallsBackToDefaultWhenNil
+
+    /// AuthTheme.surfaceColor falls back to the hardcoded default (#F5F5F7 light / #2C2C2E dark) when surfaceColor is nil.
+    func testSurfaceColorFallsBackToDefaultWhenNil() {
+        let config = AuthClientConfiguration() // surfaceColor is nil
+        let lightTheme = AuthTheme(configuration: config, colorScheme: .light)
+        let darkTheme = AuthTheme(configuration: config, colorScheme: .dark)
+
+        // Light default: #F5F5F7 → R=0.961, G=0.961, B=0.969
+        let lightRGBA = rgba(of: lightTheme.surfaceColor)
+        XCTAssertEqual(lightRGBA.r, 0.961, accuracy: 0.01, "Light surface R should be ~0.961 (#F5F5F7)")
+        XCTAssertEqual(lightRGBA.g, 0.961, accuracy: 0.01, "Light surface G should be ~0.961 (#F5F5F7)")
+        XCTAssertEqual(lightRGBA.b, 0.969, accuracy: 0.01, "Light surface B should be ~0.969 (#F5F5F7)")
+        XCTAssertEqual(lightRGBA.a, 1.000, accuracy: 0.001)
+
+        // Dark default: #2C2C2E → R=0.173, G=0.173, B=0.180
+        let darkRGBA = rgba(of: darkTheme.surfaceColor)
+        XCTAssertEqual(darkRGBA.r, 0.173, accuracy: 0.01, "Dark surface R should be ~0.173 (#2C2C2E)")
+        XCTAssertEqual(darkRGBA.g, 0.173, accuracy: 0.01, "Dark surface G should be ~0.173 (#2C2C2E)")
+        XCTAssertEqual(darkRGBA.b, 0.180, accuracy: 0.01, "Dark surface B should be ~0.180 (#2C2C2E)")
+        XCTAssertEqual(darkRGBA.a, 1.000, accuracy: 0.001)
+    }
+
     // MARK: - testAppleButtonColorsImmutable
 
     /// Apple bg/label are vendor-fixed regardless of primaryColor (Test AC alias for testAppleColorsImmutable).

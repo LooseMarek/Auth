@@ -133,10 +133,10 @@ public struct LoginView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(String(localized: "auth.login.title", bundle: bundle))
                 .font(.title.bold())
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(theme.primaryTextColor)
             Text(String(localized: "auth.login.subtitle", bundle: bundle))
                 .font(.callout)
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(theme.secondaryTextColor)
                 .frame(maxWidth: 340, alignment: .leading)
         }
         .padding(.top, 24)
@@ -153,7 +153,7 @@ public struct LoginView: View {
             .textFieldStyle(.plain)
             .padding(.horizontal, 16)
             .frame(height: 52)
-            .background(AuthColors.surface)
+            .background(theme.surfaceColor)
             .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
@@ -171,11 +171,11 @@ public struct LoginView: View {
             HStack(spacing: 6) {
                 Image(systemName: "exclamationmark.circle.fill")
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.red)
+                    .foregroundStyle(theme.errorColor)
                     .accessibilityHidden(true)
                 Text(message)
                     .font(.footnote)
-                    .foregroundStyle(Color.red)
+                    .foregroundStyle(theme.errorColor)
             }
             .padding(.top, 4)
             .accessibilityAddTraits(.updatesFrequently)
@@ -205,7 +205,7 @@ public struct LoginView: View {
                 } else {
                     Text(String(localized: "auth.login.button.submit", bundle: bundle))
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(theme.buttonTextColor)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -228,16 +228,16 @@ public struct LoginView: View {
         HStack(spacing: 12) {
             Rectangle()
                 .frame(height: 1)
-                .foregroundStyle(Color.primary.opacity(0.1))
+                .foregroundStyle(theme.primaryTextColor.opacity(0.1))
                 .accessibilityHidden(true)
             Text(String(localized: "auth.separator.or", bundle: bundle))
                 .font(.footnote)
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(theme.secondaryTextColor)
                 .textCase(.uppercase)
                 .accessibilityHidden(true)
             Rectangle()
                 .frame(height: 1)
-                .foregroundStyle(Color.primary.opacity(0.1))
+                .foregroundStyle(theme.primaryTextColor.opacity(0.1))
                 .accessibilityHidden(true)
         }
     }
@@ -276,7 +276,7 @@ public struct LoginView: View {
                     .accessibilityHidden(true)
                 Text(String(localized: "auth.button.google", bundle: bundle))
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.primary)
+                    .foregroundStyle(theme.primaryTextColor)
             }
             .frame(maxWidth: .infinity)
             .frame(height: theme.googleButtonStyle.height)
@@ -304,14 +304,14 @@ public struct LoginView: View {
                 } else {
                     Text(String(localized: "auth.login.button.guest", bundle: bundle))
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(theme.primaryTextColor)
                         .frame(maxWidth: .infinity)
                 }
             }
             .frame(height: 50)
             .background(Color.clear)
             .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
+            .overlay(Capsule().strokeBorder(theme.primaryTextColor.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(String(localized: "auth.login.button.guest", bundle: bundle))
@@ -329,7 +329,7 @@ public struct LoginView: View {
                 let prefix = components.first ?? ""
                 Text(prefix)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Color.secondary)
+                    .foregroundStyle(theme.secondaryTextColor)
                 + Text("Register")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(theme.primaryColor)
@@ -347,6 +347,7 @@ private struct PasswordFieldView: View {
     var onSubmit: () -> Void = {}
     var bundle: Bundle = .module
     @State private var isVisible: Bool = false
+    @Environment(\.authTheme) private var theme
 
     var body: some View {
         HStack {
@@ -388,28 +389,9 @@ private struct PasswordFieldView: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
-        .background(AuthColors.surface)
+        .background(theme.surfaceColor)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
-}
-
-// MARK: - Internal colour helpers
-
-private enum AuthColors {
-    /// Field fill — `color.surface` token: #F5F5F7 light / #2C2C2E dark.
-    #if canImport(UIKit)
-    static let surface = Color(uiColor: UIColor { t in
-        t.userInterfaceStyle == .dark
-            ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
-            : UIColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
-    })
-    #else
-    static let surface = Color(nsColor: NSColor(name: nil) { a in
-        a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            ? NSColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
-            : NSColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
-    })
-    #endif
 }
 
 // MARK: - Previews

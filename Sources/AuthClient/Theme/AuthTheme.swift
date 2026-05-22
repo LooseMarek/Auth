@@ -49,6 +49,25 @@ struct AuthTheme {
     /// Screen / sheet background colour — `color.bg` token, passed through from configuration.
     let backgroundColor: Color
 
+    // MARK: - Surface & text colour tokens
+
+    /// Text field / input background colour — `color.surface` token.
+    /// Resolved from `AuthClientConfiguration.surfaceColor` when provided;
+    /// falls back to #F5F5F7 (light) / #2C2C2E (dark).
+    let surfaceColor: Color
+
+    /// Primary body text colour. Resolved from configuration or falls back to `Color.primary`.
+    let primaryTextColor: Color
+
+    /// Secondary / hint text colour. Resolved from configuration or falls back to `Color.secondary`.
+    let secondaryTextColor: Color
+
+    /// Primary action button label colour. Resolved from configuration or falls back to `.white`.
+    let buttonTextColor: Color
+
+    /// Error message and icon colour. Resolved from configuration or falls back to `Color.red`.
+    let errorColor: Color
+
     // MARK: - Typography
 
     /// Custom base font from `AuthClientConfiguration.font`; `nil` → SF Pro (system default).
@@ -92,11 +111,37 @@ struct AuthTheme {
         // Background colour pass-through — no derivation needed.
         self.backgroundColor = configuration.backgroundColor
 
+        // Surface colour — use provided value or adaptive default.
+        self.surfaceColor = configuration.surfaceColor ?? AuthTheme.defaultSurfaceColor(isDark: isDark)
+
+        // Text colour tokens — use provided value or semantic SwiftUI defaults.
+        self.primaryTextColor   = configuration.primaryTextColor   ?? Color.primary
+        self.secondaryTextColor = configuration.secondaryTextColor ?? Color.secondary
+        self.buttonTextColor    = configuration.buttonTextColor    ?? Color.white
+        self.errorColor         = configuration.errorColor         ?? Color.red
+
         // Typography pass-through.
         self.font = configuration.font
     }
 
     // MARK: - Private colour derivation helpers
+
+    /// Returns the default surface colour (#F5F5F7 light / #2C2C2E dark).
+    private static func defaultSurfaceColor(isDark: Bool) -> Color {
+#if canImport(UIKit)
+        Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+                : UIColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
+        })
+#else
+        Color(nsColor: NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+                ? NSColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+                : NSColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
+        })
+#endif
+    }
 
     /// Resolves the `primaryColor` from `AuthClientConfiguration` for a given colour scheme.
     ///
