@@ -22,6 +22,8 @@ public struct ForgotPasswordView: View {
     @Environment(\.authTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
 
+    private var bundle: Bundle { authManager.configuration.localizationBundle ?? .module }
+
     /// Creates a `ForgotPasswordView`.
     ///
     /// - Parameters:
@@ -42,6 +44,7 @@ public struct ForgotPasswordView: View {
         self.authManager = authManager
         self._viewModel = State(wrappedValue: ForgotPasswordViewModel(
             networkService: networkService,
+            localizationBundle: authManager.configuration.localizationBundle,
             initialEmail: prefilledEmail,
             initialIsLoading: initialIsLoading,
             initialIsSuccess: initialIsSuccess,
@@ -105,10 +108,10 @@ public struct ForgotPasswordView: View {
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "auth.forgot.title", bundle: .module))
+            Text(String(localized: "auth.forgot.title", bundle: bundle))
                 .font(.title.bold())
                 .foregroundStyle(Color.primary)
-            Text(String(localized: "auth.forgot.subtitle", bundle: .module))
+            Text(String(localized: "auth.forgot.subtitle", bundle: bundle))
                 .font(.callout)
                 .foregroundStyle(Color.secondary)
                 .frame(maxWidth: 340, alignment: .leading)
@@ -118,7 +121,7 @@ public struct ForgotPasswordView: View {
 
     private var emailFieldSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            TextField(String(localized: "auth.forgot.field.email.placeholder", bundle: .module), text: $viewModel.email)
+            TextField(String(localized: "auth.forgot.field.email.placeholder", bundle: bundle), text: $viewModel.email)
 #if canImport(UIKit)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
@@ -164,7 +167,7 @@ public struct ForgotPasswordView: View {
                     ProgressView()
                         .colorScheme(.dark)
                 } else {
-                    Text(String(localized: "auth.forgot.button.submit", bundle: .module))
+                    Text(String(localized: "auth.forgot.button.submit", bundle: bundle))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
                 }
@@ -185,7 +188,7 @@ public struct ForgotPasswordView: View {
     private var backLink: some View {
         HStack {
             Spacer()
-            Button(String(localized: "auth.forgot.link.back", bundle: .module)) {}
+            Button(String(localized: "auth.forgot.link.back", bundle: bundle)) {}
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(theme.primaryColor)
                 .buttonStyle(.plain)
@@ -220,14 +223,14 @@ public struct ForgotPasswordView: View {
 
             Spacer().frame(height: 12)
 
-            Text(String(localized: "auth.forgot.success.title", bundle: .module))
+            Text(String(localized: "auth.forgot.success.title", bundle: bundle))
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(Color.primary)
                 .multilineTextAlignment(.center)
 
             Spacer().frame(height: 4)
 
-            Text(String(localized: "auth.forgot.success.body", bundle: .module))
+            Text(String(localized: "auth.forgot.success.body", bundle: bundle))
                 .font(.body)
                 .foregroundStyle(Color.secondary)
                 .multilineTextAlignment(.center)
@@ -248,7 +251,7 @@ public struct ForgotPasswordView: View {
 
     private var backToLoginButton: some View {
         Button {} label: {
-            Text(String(localized: "auth.forgot.link.back", bundle: .module))
+            Text(String(localized: "auth.forgot.link.back", bundle: bundle))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

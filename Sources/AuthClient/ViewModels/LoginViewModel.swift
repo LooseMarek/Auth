@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 
 @Observable
@@ -12,19 +13,26 @@ final class LoginViewModel {
     var canSubmit: Bool { !email.isEmpty && !password.isEmpty }
 
     let networkService: any AuthNetworkService
+    private let localizationBundle: Bundle?
 
     init(
         networkService: any AuthNetworkService,
+        localizationBundle: Bundle? = nil,
         initialEmail: String = "",
         initialPassword: String = "",
         initialErrorMessage: String? = nil,
         initialIsLoading: Bool = false
     ) {
         self.networkService = networkService
+        self.localizationBundle = localizationBundle
         self.email = initialEmail
         self.password = initialPassword
         self.errorMessage = initialErrorMessage
         self.isLoading = initialIsLoading
+    }
+
+    private func localizedString(_ key: String) -> String {
+        String(localized: String.LocalizationValue(key), bundle: localizationBundle ?? .module)
     }
 
     func login(authManager: AuthManager) async {
@@ -45,11 +53,11 @@ final class LoginViewModel {
                 authManager.signIn(response: response)
             }
         } catch AuthNetworkError.invalidCredentials {
-            errorMessage = String(localized: "auth.login.error.invalid_credentials", bundle: .module)
+            errorMessage = localizedString("auth.login.error.invalid_credentials")
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = String(localized: "auth.error.network", bundle: .module)
+            errorMessage = localizedString("auth.error.network")
         } catch {
-            errorMessage = String(localized: "auth.error.server", bundle: .module)
+            errorMessage = localizedString("auth.error.server")
         }
     }
 
@@ -64,9 +72,9 @@ final class LoginViewModel {
         do {
             try await authManager.loginAsGuest()
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = String(localized: "auth.error.network", bundle: .module)
+            errorMessage = localizedString("auth.error.network")
         } catch {
-            errorMessage = String(localized: "auth.error.server", bundle: .module)
+            errorMessage = localizedString("auth.error.server")
         }
     }
 
@@ -76,9 +84,9 @@ final class LoginViewModel {
     func setAppleSignInError(_ error: AuthNetworkError) {
         switch error {
         case .networkUnavailable:
-            errorMessage = String(localized: "auth.error.network", bundle: .module)
+            errorMessage = localizedString("auth.error.network")
         default:
-            errorMessage = String(localized: "auth.error.server", bundle: .module)
+            errorMessage = localizedString("auth.error.server")
         }
     }
 
@@ -88,9 +96,9 @@ final class LoginViewModel {
     func setGoogleSignInError(_ error: AuthNetworkError) {
         switch error {
         case .networkUnavailable:
-            errorMessage = String(localized: "auth.error.network", bundle: .module)
+            errorMessage = localizedString("auth.error.network")
         default:
-            errorMessage = String(localized: "auth.error.server", bundle: .module)
+            errorMessage = localizedString("auth.error.server")
         }
     }
 }
