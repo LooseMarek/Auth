@@ -126,7 +126,7 @@ private static let adaptivePrimaryColor = Color(nsColor: NSColor(name: nil) { ..
 #endif
 ```
 
-The same `#if canImport(UIKit)` / `#else` pattern applies for all adaptive colours in `AuthColors` inside `LoginView.swift`.
+The same `#if canImport(UIKit)` / `#else` pattern applies for all adaptive colour defaults in `AuthTheme` (e.g. `defaultSurfaceColor(isDark:)`).
 
 ---
 
@@ -139,7 +139,7 @@ TextField("Email", text: $email)
     .textFieldStyle(.plain)   // removes native macOS border
     .padding(.horizontal, 16)
     .frame(height: 52)
-    .background(AuthColors.surface)
+    .background(theme.surfaceColor)
     .clipShape(RoundedRectangle(cornerRadius: 8))
 ```
 ### Localisation — SPM bundle access and defaultLocalization

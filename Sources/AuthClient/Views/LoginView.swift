@@ -23,9 +23,19 @@ public struct LoginView: View {
     @State private var googleSignInHandler: GoogleSignInHandler
     private let authManager: AuthManager
 
-    @Environment(\.authTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    /// Resolved theme for the current colour scheme and configuration.
+    ///
+    /// Computed directly from `authManager.configuration` and `colorScheme` rather than read
+    /// from the SwiftUI environment. This ensures that LoginView's own computed properties
+    /// (emailField, titleSection, etc.) use the same resolved theme that is injected into child
+    /// views — the `@Environment` value on `LoginView` itself would come from its parent, which
+    /// has no injected `authTheme` and would return the default (unconfigured) theme.
+    private var theme: AuthTheme {
+        AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
+    }
 
     private var bundle: Bundle { authManager.configuration.localizationBundle ?? .module }
 
@@ -68,10 +78,7 @@ public struct LoginView: View {
 
     public var body: some View {
         content
-            .environment(
-                \.authTheme,
-                AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
-            )
+            .environment(\.authTheme, theme)
     }
 
     @ViewBuilder
@@ -150,6 +157,7 @@ public struct LoginView: View {
 #endif
             .textContentType(.emailAddress)
             .submitLabel(.next)
+            .foregroundStyle(theme.primaryTextColor)
             .textFieldStyle(.plain)
             .padding(.horizontal, 16)
             .frame(height: 52)
@@ -359,6 +367,7 @@ private struct PasswordFieldView: View {
                     )
                     .textContentType(.password)
                     .submitLabel(.go)
+                    .foregroundStyle(theme.primaryTextColor)
                     .textFieldStyle(.plain)
                     .onSubmit { onSubmit() }
                 } else {
@@ -368,6 +377,7 @@ private struct PasswordFieldView: View {
                     )
                     .textContentType(.password)
                     .submitLabel(.go)
+                    .foregroundStyle(theme.primaryTextColor)
                     .textFieldStyle(.plain)
                     .onSubmit { onSubmit() }
                 }

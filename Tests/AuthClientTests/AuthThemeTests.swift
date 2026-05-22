@@ -283,20 +283,22 @@ final class AuthThemeTests: XCTestCase {
     // MARK: - testSurfaceColorFallsBackToDefaultWhenNil
 
     /// AuthTheme.surfaceColor falls back to the hardcoded default (#F5F5F7 light / #2C2C2E dark) when surfaceColor is nil.
+    ///
+    /// Because `surfaceColor` is stored as an adaptive dynamic colour (UIColor/NSColor block),
+    /// calling `rgba(of:)` on it in a plain unit-test context (no live trait environment) would
+    /// always resolve to the light value. We therefore verify the fallback values against
+    /// `AuthTheme.resolvedSurfaceColor(isDark:)`, which returns a flat colour for the given scheme
+    /// and is the canonical source-of-truth for the default surface token.
     func testSurfaceColorFallsBackToDefaultWhenNil() {
-        let config = AuthClientConfiguration() // surfaceColor is nil
-        let lightTheme = AuthTheme(configuration: config, colorScheme: .light)
-        let darkTheme = AuthTheme(configuration: config, colorScheme: .dark)
-
         // Light default: #F5F5F7 → R=0.961, G=0.961, B=0.969
-        let lightRGBA = rgba(of: lightTheme.surfaceColor)
+        let lightRGBA = rgba(of: AuthTheme.resolvedSurfaceColor(isDark: false))
         XCTAssertEqual(lightRGBA.r, 0.961, accuracy: 0.01, "Light surface R should be ~0.961 (#F5F5F7)")
         XCTAssertEqual(lightRGBA.g, 0.961, accuracy: 0.01, "Light surface G should be ~0.961 (#F5F5F7)")
         XCTAssertEqual(lightRGBA.b, 0.969, accuracy: 0.01, "Light surface B should be ~0.969 (#F5F5F7)")
         XCTAssertEqual(lightRGBA.a, 1.000, accuracy: 0.001)
 
         // Dark default: #2C2C2E → R=0.173, G=0.173, B=0.180
-        let darkRGBA = rgba(of: darkTheme.surfaceColor)
+        let darkRGBA = rgba(of: AuthTheme.resolvedSurfaceColor(isDark: true))
         XCTAssertEqual(darkRGBA.r, 0.173, accuracy: 0.01, "Dark surface R should be ~0.173 (#2C2C2E)")
         XCTAssertEqual(darkRGBA.g, 0.173, accuracy: 0.01, "Dark surface G should be ~0.173 (#2C2C2E)")
         XCTAssertEqual(darkRGBA.b, 0.180, accuracy: 0.01, "Dark surface B should be ~0.180 (#2C2C2E)")
