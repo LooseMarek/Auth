@@ -23,19 +23,28 @@ public struct AuthClientConfiguration: Sendable {
     /// Custom font applied to all auth screens. `nil` uses the system default.
     public let font: Font?
 
+    /// Custom bundle used to resolve all localised strings in Auth screens.
+    ///
+    /// Pass a `Bundle` from your host app (e.g. `Bundle.main`) to supply custom or translated
+    /// `Localizable.strings`. When `nil` (the default), the Auth module bundle is used.
+    public let localizationBundle: Bundle?
+
     /// - Parameters:
     ///   - primaryColor: Pass `nil` to use Auth Blue (adapts to light / dark).
     ///   - backgroundColor: Pass `nil` to use the system background (adapts to light / dark).
+    ///   - localizationBundle: Pass a bundle to override Auth's built-in localisation. Defaults to `nil` (uses Auth module bundle).
     public init(
         allowGuestAccess: Bool = true,
         primaryColor: Color? = nil,
         backgroundColor: Color? = nil,
-        font: Font? = nil
+        font: Font? = nil,
+        localizationBundle: Bundle? = nil
     ) {
         self.allowGuestAccess = allowGuestAccess
         self.primaryColor = primaryColor ?? Self.adaptivePrimaryColor
         self.backgroundColor = backgroundColor ?? Self.adaptiveBackgroundColor
         self.font = font
+        self.localizationBundle = localizationBundle
     }
 
     // MARK: - Adaptive defaults (private — resolved inside the init body)

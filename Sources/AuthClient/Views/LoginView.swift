@@ -27,6 +27,8 @@ public struct LoginView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
+    private var bundle: Bundle { authManager.configuration.localizationBundle ?? .module }
+
     /// Creates a `LoginView`.
     ///
     /// - Parameters:
@@ -47,6 +49,7 @@ public struct LoginView: View {
         self.authManager = authManager
         let vm = LoginViewModel(
             networkService: networkService,
+            localizationBundle: authManager.configuration.localizationBundle,
             initialEmail: prefilledEmail,
             initialPassword: prefilledPassword,
             initialErrorMessage: initialErrorMessage,
@@ -128,10 +131,10 @@ public struct LoginView: View {
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "auth.login.title", bundle: .module))
+            Text(String(localized: "auth.login.title", bundle: bundle))
                 .font(.title.bold())
                 .foregroundStyle(Color.primary)
-            Text(String(localized: "auth.login.subtitle", bundle: .module))
+            Text(String(localized: "auth.login.subtitle", bundle: bundle))
                 .font(.callout)
                 .foregroundStyle(Color.secondary)
                 .frame(maxWidth: 340, alignment: .leading)
@@ -140,7 +143,7 @@ public struct LoginView: View {
     }
 
     private var emailField: some View {
-        TextField(String(localized: "auth.login.field.email.placeholder", bundle: .module), text: $viewModel.email)
+        TextField(String(localized: "auth.login.field.email.placeholder", bundle: bundle), text: $viewModel.email)
 #if canImport(UIKit)
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.never)
@@ -155,9 +158,11 @@ public struct LoginView: View {
     }
 
     private var passwordField: some View {
-        PasswordFieldView(text: $viewModel.password) {
-            Task { await viewModel.login(authManager: authManager) }
-        }
+        PasswordFieldView(
+            text: $viewModel.password,
+            onSubmit: { Task { await viewModel.login(authManager: authManager) } },
+            bundle: bundle
+        )
     }
 
     @ViewBuilder
@@ -180,7 +185,7 @@ public struct LoginView: View {
     private var forgotPasswordLink: some View {
         HStack {
             Spacer()
-            Button(String(localized: "auth.login.link.forgot_password", bundle: .module)) {}
+            Button(String(localized: "auth.login.link.forgot_password", bundle: bundle)) {}
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(theme.primaryColor)
                 .buttonStyle(.plain)
@@ -198,7 +203,7 @@ public struct LoginView: View {
                     ProgressView()
                         .colorScheme(.dark)
                 } else {
-                    Text(String(localized: "auth.login.button.submit", bundle: .module))
+                    Text(String(localized: "auth.login.button.submit", bundle: bundle))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
                 }
@@ -225,7 +230,7 @@ public struct LoginView: View {
                 .frame(height: 1)
                 .foregroundStyle(Color.primary.opacity(0.1))
                 .accessibilityHidden(true)
-            Text(String(localized: "auth.separator.or", bundle: .module))
+            Text(String(localized: "auth.separator.or", bundle: bundle))
                 .font(.footnote)
                 .foregroundStyle(Color.secondary)
                 .textCase(.uppercase)
@@ -246,7 +251,7 @@ public struct LoginView: View {
                     .resizable()
                     .frame(width: 18, height: 18)
                     .accessibilityHidden(true)
-                Text(String(localized: "auth.button.apple", bundle: .module))
+                Text(String(localized: "auth.button.apple", bundle: bundle))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(theme.appleButtonLabel)
             }
@@ -257,7 +262,7 @@ public struct LoginView: View {
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(String(localized: "auth.button.apple.accessibility", bundle: .module))
+        .accessibilityLabel(String(localized: "auth.button.apple.accessibility", bundle: bundle))
     }
 
     private var googleSignInButton: some View {
@@ -269,7 +274,7 @@ public struct LoginView: View {
                     .resizable()
                     .frame(width: 18, height: 18)
                     .accessibilityHidden(true)
-                Text(String(localized: "auth.button.google", bundle: .module))
+                Text(String(localized: "auth.button.google", bundle: bundle))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.primary)
             }
@@ -285,7 +290,7 @@ public struct LoginView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(String(localized: "auth.button.google.accessibility", bundle: .module))
+        .accessibilityLabel(String(localized: "auth.button.google.accessibility", bundle: bundle))
     }
 
     private var guestButton: some View {
@@ -297,7 +302,7 @@ public struct LoginView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                 } else {
-                    Text(String(localized: "auth.login.button.guest", bundle: .module))
+                    Text(String(localized: "auth.login.button.guest", bundle: bundle))
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color.primary)
                         .frame(maxWidth: .infinity)
@@ -309,7 +314,7 @@ public struct LoginView: View {
             .overlay(Capsule().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(String(localized: "auth.login.button.guest", bundle: .module))
+        .accessibilityLabel(String(localized: "auth.login.button.guest", bundle: bundle))
     }
 
     private var registerLink: some View {
@@ -319,7 +324,7 @@ public struct LoginView: View {
                 // The full localised string is "Don't have an account? Register".
                 // We split it on "Register" at runtime so the "Register" word can be
                 // styled with the primary colour while keeping the full phrase localizable.
-                let fullString = String(localized: "auth.login.link.register", bundle: .module)
+                let fullString = String(localized: "auth.login.link.register", bundle: bundle)
                 let components = fullString.components(separatedBy: "Register")
                 let prefix = components.first ?? ""
                 Text(prefix)
@@ -340,6 +345,7 @@ public struct LoginView: View {
 private struct PasswordFieldView: View {
     @Binding var text: String
     var onSubmit: () -> Void = {}
+    var bundle: Bundle = .module
     @State private var isVisible: Bool = false
 
     var body: some View {
@@ -347,7 +353,7 @@ private struct PasswordFieldView: View {
             Group {
                 if isVisible {
                     TextField(
-                        String(localized: "auth.login.field.password.placeholder", bundle: .module),
+                        String(localized: "auth.login.field.password.placeholder", bundle: bundle),
                         text: $text
                     )
                     .textContentType(.password)
@@ -356,7 +362,7 @@ private struct PasswordFieldView: View {
                     .onSubmit { onSubmit() }
                 } else {
                     SecureField(
-                        String(localized: "auth.login.field.password.placeholder", bundle: .module),
+                        String(localized: "auth.login.field.password.placeholder", bundle: bundle),
                         text: $text
                     )
                     .textContentType(.password)
@@ -376,8 +382,8 @@ private struct PasswordFieldView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(
                 isVisible
-                    ? String(localized: "auth.field.password.hide", bundle: .module)
-                    : String(localized: "auth.field.password.show", bundle: .module)
+                    ? String(localized: "auth.field.password.hide", bundle: bundle)
+                    : String(localized: "auth.field.password.show", bundle: bundle)
             )
         }
         .padding(.horizontal, 16)

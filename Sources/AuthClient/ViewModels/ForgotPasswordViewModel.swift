@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 
 @Observable
@@ -11,19 +12,26 @@ final class ForgotPasswordViewModel {
     var canSubmit: Bool { !email.isEmpty }
 
     private let networkService: any AuthNetworkService
+    private let localizationBundle: Bundle?
 
     init(
         networkService: any AuthNetworkService,
+        localizationBundle: Bundle? = nil,
         initialEmail: String = "",
         initialIsLoading: Bool = false,
         initialIsSuccess: Bool = false,
         initialErrorMessage: String? = nil
     ) {
         self.networkService = networkService
+        self.localizationBundle = localizationBundle
         self.email = initialEmail
         self.isLoading = initialIsLoading
         self.isSuccess = initialIsSuccess
         self.errorMessage = initialErrorMessage
+    }
+
+    private func localizedString(_ key: String) -> String {
+        String(localized: String.LocalizationValue(key), bundle: localizationBundle ?? .module)
     }
 
     func submit() async {
@@ -34,9 +42,9 @@ final class ForgotPasswordViewModel {
             try await networkService.forgotPassword(email: email)
             isSuccess = true
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = String(localized: "auth.error.network", bundle: .module)
+            errorMessage = localizedString("auth.error.network")
         } catch {
-            errorMessage = String(localized: "auth.error.server", bundle: .module)
+            errorMessage = localizedString("auth.error.server")
         }
     }
 }

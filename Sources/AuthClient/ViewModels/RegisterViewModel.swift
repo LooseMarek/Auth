@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 
 @Observable
@@ -18,9 +19,11 @@ final class RegisterViewModel {
     }
 
     private let networkService: any AuthNetworkService
+    private let localizationBundle: Bundle?
 
     init(
         networkService: any AuthNetworkService,
+        localizationBundle: Bundle? = nil,
         initialEmail: String = "",
         initialPassword: String = "",
         initialConfirmPassword: String = "",
@@ -28,11 +31,16 @@ final class RegisterViewModel {
         initialIsLoading: Bool = false
     ) {
         self.networkService = networkService
+        self.localizationBundle = localizationBundle
         self.email = initialEmail
         self.password = initialPassword
         self.confirmPassword = initialConfirmPassword
         self.confirmPasswordError = initialConfirmPasswordError
         self.isLoading = initialIsLoading
+    }
+
+    private func localizedString(_ key: String) -> String {
+        String(localized: String.LocalizationValue(key), bundle: localizationBundle ?? .module)
     }
 
     func register(authManager: AuthManager) async {
@@ -44,7 +52,7 @@ final class RegisterViewModel {
 
         // Client-side validation: passwords must match.
         guard password == confirmPassword else {
-            confirmPasswordError = String(localized: "auth.register.error.password_mismatch", bundle: .module)
+            confirmPasswordError = localizedString("auth.register.error.password_mismatch")
             return
         }
 
@@ -55,11 +63,11 @@ final class RegisterViewModel {
             let response = try await networkService.register(email: email, password: password)
             authManager.signIn(response: response)
         } catch AuthNetworkError.emailTaken {
-            emailError = String(localized: "auth.register.error.email_taken", bundle: .module)
+            emailError = localizedString("auth.register.error.email_taken")
         } catch AuthNetworkError.networkUnavailable {
-            errorMessage = String(localized: "auth.error.network", bundle: .module)
+            errorMessage = localizedString("auth.error.network")
         } catch {
-            errorMessage = String(localized: "auth.error.server", bundle: .module)
+            errorMessage = localizedString("auth.error.server")
         }
     }
 }
