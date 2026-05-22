@@ -29,22 +29,59 @@ public struct AuthClientConfiguration: Sendable {
     /// `Localizable.strings`. When `nil` (the default), the Auth module bundle is used.
     public let localizationBundle: Bundle?
 
+    // MARK: - Color tokens (optional — nil = use AuthTheme adaptive defaults)
+
+    /// Text field / input background colour.
+    /// When `nil`, `AuthTheme` falls back to the `color.surface` token (#F5F5F7 light / #2C2C2E dark).
+    public let surfaceColor: Color?
+
+    /// Primary body text colour.
+    /// When `nil`, `AuthTheme` falls back to SwiftUI's `Color.primary`.
+    public let primaryTextColor: Color?
+
+    /// Secondary / hint text colour.
+    /// When `nil`, `AuthTheme` falls back to SwiftUI's `Color.secondary`.
+    public let secondaryTextColor: Color?
+
+    /// Label colour for the primary action button.
+    /// When `nil`, `AuthTheme` falls back to `.white`.
+    public let buttonTextColor: Color?
+
+    /// Colour used for error messages and icons.
+    /// When `nil`, `AuthTheme` falls back to `Color.red`.
+    public let errorColor: Color?
+
     /// - Parameters:
     ///   - primaryColor: Pass `nil` to use Auth Blue (adapts to light / dark).
     ///   - backgroundColor: Pass `nil` to use the system background (adapts to light / dark).
     ///   - localizationBundle: Pass a bundle to override Auth's built-in localisation. Defaults to `nil` (uses Auth module bundle).
+    ///   - surfaceColor: Pass `nil` to use the `color.surface` adaptive default (#F5F5F7 / #2C2C2E).
+    ///   - primaryTextColor: Pass `nil` to use SwiftUI's `Color.primary`.
+    ///   - secondaryTextColor: Pass `nil` to use SwiftUI's `Color.secondary`.
+    ///   - buttonTextColor: Pass `nil` to use `.white`.
+    ///   - errorColor: Pass `nil` to use `Color.red`.
     public init(
         allowGuestAccess: Bool = true,
         primaryColor: Color? = nil,
         backgroundColor: Color? = nil,
         font: Font? = nil,
-        localizationBundle: Bundle? = nil
+        localizationBundle: Bundle? = nil,
+        surfaceColor: Color? = nil,
+        primaryTextColor: Color? = nil,
+        secondaryTextColor: Color? = nil,
+        buttonTextColor: Color? = nil,
+        errorColor: Color? = nil
     ) {
         self.allowGuestAccess = allowGuestAccess
         self.primaryColor = primaryColor ?? Self.adaptivePrimaryColor
         self.backgroundColor = backgroundColor ?? Self.adaptiveBackgroundColor
         self.font = font
         self.localizationBundle = localizationBundle
+        self.surfaceColor = surfaceColor
+        self.primaryTextColor = primaryTextColor
+        self.secondaryTextColor = secondaryTextColor
+        self.buttonTextColor = buttonTextColor
+        self.errorColor = errorColor
     }
 
     // MARK: - Adaptive defaults (private — resolved inside the init body)
