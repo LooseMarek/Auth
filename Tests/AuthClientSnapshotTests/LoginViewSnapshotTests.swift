@@ -238,6 +238,73 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Full color token set (Task #71)
+
+    /// Verifies no visual regression with all new color tokens at nil (defaults).
+    func testLoginViewDefaultTheme() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testLoginViewDefaultTheme_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    /// Verifies custom surfaceColor renders in text field backgrounds.
+    ///
+    /// A contrasting `primaryTextColor` is paired with the bright surface so that field text
+    /// remains legible — callers who set a custom `surfaceColor` should always supply a
+    /// matching `primaryTextColor` for adequate contrast.
+    func testLoginViewCustomSurfaceColor() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                surfaceColor: Color(red: 1.0, green: 0.9, blue: 0.7),
+                primaryTextColor: Color(red: 0.1, green: 0.1, blue: 0.1)
+            )),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testLoginViewCustomSurfaceColor_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                surfaceColor: Color(red: 1.0, green: 0.9, blue: 0.7),
+                primaryTextColor: Color(red: 0.1, green: 0.1, blue: 0.1)
+            )),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    /// Verifies custom errorColor renders on the error row.
+    func testLoginViewCustomErrorColor() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                errorColor: Color.orange
+            )),
+            networkService: NoOpNetworkService(),
+            prefilledEmail: "user@example.com",
+            prefilledPassword: "wrongpass",
+            initialErrorMessage: "Incorrect email or password."
+        ))
+    }
+
+    func testLoginViewCustomErrorColor_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                errorColor: Color.orange
+            )),
+            networkService: NoOpNetworkService(),
+            prefilledEmail: "user@example.com",
+            prefilledPassword: "wrongpass",
+            initialErrorMessage: "Incorrect email or password."
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Localisation
 
     /// Verifies that default English localisation strings are rendered correctly

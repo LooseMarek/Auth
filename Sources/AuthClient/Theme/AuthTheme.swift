@@ -112,7 +112,7 @@ struct AuthTheme {
         self.backgroundColor = configuration.backgroundColor
 
         // Surface colour — use provided value or adaptive default.
-        self.surfaceColor = configuration.surfaceColor ?? AuthTheme.defaultSurfaceColor(isDark: isDark)
+        self.surfaceColor = configuration.surfaceColor ?? AuthTheme.defaultSurfaceColor
 
         // Text colour tokens — use provided value or semantic SwiftUI defaults.
         self.primaryTextColor   = configuration.primaryTextColor   ?? Color.primary
@@ -126,20 +126,48 @@ struct AuthTheme {
 
     // MARK: - Private colour derivation helpers
 
-    /// Returns the default surface colour (#F5F5F7 light / #2C2C2E dark).
-    private static func defaultSurfaceColor(isDark: Bool) -> Color {
+    /// Returns the default surface colour as an adaptive dynamic colour.
+    /// #F5F5F7 (light) / #2C2C2E (dark).
+    ///
+    /// Uses a UIColor/NSColor dynamic provider block so that the colour adapts to the
+    /// trait environment at render time. This ensures dark-mode snapshot tests capture
+    /// the correct dark surface colour regardless of when `AuthTheme` is initialised
+    /// relative to the colour-scheme environment propagation.
+    ///
+    /// For unit tests that need to assert exact RGBA values, resolve the colour using
+    /// `resolvedSurfaceColor(isDark:)` instead.
+    private static let defaultSurfaceColor: Color = {
 #if canImport(UIKit)
-        Color(uiColor: UIColor { traits in
+        return Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
                 ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
                 : UIColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
         })
 #else
-        Color(nsColor: NSColor(name: nil) { appearance in
+        return Color(nsColor: NSColor(name: nil) { appearance in
             appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
                 ? NSColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
                 : NSColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
         })
+#endif
+    }()
+
+    /// Returns the default surface colour eagerly resolved for the given scheme.
+    /// #F5F5F7 (light) / #2C2C2E (dark).
+    ///
+    /// Use this in unit tests when calling `rgba(of:)` requires a flat (non-dynamic)
+    /// colour value. Views should use `defaultSurfaceColor` (the adaptive property) instead.
+    static func resolvedSurfaceColor(isDark: Bool) -> Color {
+#if canImport(UIKit)
+        let uiColor = isDark
+            ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+            : UIColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
+        return Color(uiColor: uiColor)
+#else
+        let nsColor = isDark
+            ? NSColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+            : NSColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
+        return Color(nsColor: nsColor)
 #endif
     }
 
