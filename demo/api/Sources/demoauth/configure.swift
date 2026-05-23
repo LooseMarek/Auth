@@ -1,24 +1,20 @@
-import NIOSSL
 import Fluent
-import FluentPostgresDriver
+import FluentSQLiteDriver
+import AuthServer
 import Vapor
 
-// configures your application
+/// Configures the Vapor application with SQLite persistence and AuthServer integration.
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    app.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
 
-    app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
-        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-        port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
-        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-        database: Environment.get("DATABASE_NAME") ?? "vapor_database",
-        tls: .prefer(try .init(configuration: .clientDefault)))
-    ), as: .psql)
+    let authConfig = AuthServerConfiguration(
+        jwtSigningSecret: Environment.get("JWT_SIGNING_SECRET") ?? "demo-secret-change-in-production"
+    )
+    app.storage[AuthServerConfiguration.StorageKey.self] = authConfig
 
-    app.migrations.add(CreateTodo())
+    app.migrations.add(CreateUser())
+    app.migrations.add(CreateRefreshToken())
+    app.migrations.add(CreatePasswordResetToken())
 
-    // register routes
     try routes(app)
 }

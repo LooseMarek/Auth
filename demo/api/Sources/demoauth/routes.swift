@@ -1,4 +1,4 @@
-import Fluent
+import AuthServer
 import Vapor
 
 func routes(_ app: Application) throws {
@@ -10,5 +10,10 @@ func routes(_ app: Application) throws {
         "Hello, world!"
     }
 
-    try app.register(collection: TodoController())
+    guard let authConfig = app.storage[AuthServerConfiguration.StorageKey.self] else {
+        throw Abort(.internalServerError, reason: "AuthServerConfiguration not set in app.storage")
+    }
+
+    try app.register(collection: AuthController(configuration: authConfig))
+    try app.register(collection: RefreshTokenController(configuration: authConfig))
 }
