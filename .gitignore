@@ -53,6 +53,11 @@ playground.xcworkspace
 !default.perspectivev3
 
 
+# ── demo/api — Vapor SQLite runtime files ─────────────────────────────────────
+demo/api/db.sqlite
+demo/api/db.sqlite-shm
+demo/api/db.sqlite-wal
+
 # ── Fastlane ──────────────────────────────────────────────────────────────────
 fastlane/report.xml
 fastlane/Preview.html
