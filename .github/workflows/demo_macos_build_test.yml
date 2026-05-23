@@ -1,0 +1,41 @@
+name: Build and Test Demo App (macOS)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Package.swift'
+      - 'demo/apple_app/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Package.swift'
+      - 'demo/apple_app/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test Demo App (macOS)
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests via Fastlane
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
+        run: bundle exec fastlane mac demo_mac_test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures-demo-macos-${{ github.run_id }}
+          path: fastlane/test_output/
+          retention-days: 14

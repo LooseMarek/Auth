@@ -1,0 +1,35 @@
+name: Build and Test Demo API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Package.swift'
+      - 'demo/api/**'
+      - '.github/workflows/demo_api_build_test.yml'
+      - 'fastlane/Fastfile'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Package.swift'
+      - 'demo/api/**'
+      - '.github/workflows/demo_api_build_test.yml'
+      - 'fastlane/Fastfile'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test Demo API
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests via Fastlane
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+        run: bundle exec fastlane mac demo_api_test

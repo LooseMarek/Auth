@@ -7,18 +7,41 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		142A3E75A23261C615A07B2B /* DemoAuthmacOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6724C386B29B26E603A1D2 /* DemoAuthmacOSTests.swift */; };
 		797FC8029B385D063F9AD164 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
 		ADBAE9559B32299A297BBEE8 /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
 		B275228DCF2F65256164B8B4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
+		ECE1FD9CDD8509DF28951C12 /* DemoAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D7D261B0133D236965ACC0 /* DemoAuthTests.swift */; };
 		F28C76D5646BB379984B0322 /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		56A750A564A38EB634332F8F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 258D18AEF6DF26323470E558 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 22DBB17B0341E71E6F79BB4C;
+			remoteInfo = DemoAuthmacOS;
+		};
+		B470E63FA9E76E1478C9A585 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 258D18AEF6DF26323470E558 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17B49D7D8A2E4B6ACB4683F9;
+			remoteInfo = DemoAuth;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		18D7D261B0133D236965ACC0 /* DemoAuthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthTests.swift; sourceTree = "<group>"; };
 		77037612B5E38ACDA8360DB6 /* DemoAuthmacOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAuthmacOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		80ECFF3AE47A6DA7E6F07E1B /* DemoAuth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DemoAuth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BD45418B3B0372D510503D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9ACBFCE6F98860C8A96D2932 /* DemoAuthmacOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DemoAuthmacOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B041BEAD33B8B765DCC6852C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthApp.swift; sourceTree = "<group>"; };
+		E200BD79CDAB9D156470DE55 /* DemoAuthTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DemoAuthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB6724C386B29B26E603A1D2 /* DemoAuthmacOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthmacOSTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -36,8 +59,26 @@
 			isa = PBXGroup;
 			children = (
 				38E920562EA71F3EC128C8CD /* DemoAuth */,
+				8C1C67D46CA131E1952F479F /* DemoAuthmacOSTests */,
+				876E467C343E56C8FBF5EBA2 /* DemoAuthTests */,
 				8E4C35AEF7C4AAF40C2EFCD3 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		876E467C343E56C8FBF5EBA2 /* DemoAuthTests */ = {
+			isa = PBXGroup;
+			children = (
+				18D7D261B0133D236965ACC0 /* DemoAuthTests.swift */,
+			);
+			path = DemoAuthTests;
+			sourceTree = "<group>";
+		};
+		8C1C67D46CA131E1952F479F /* DemoAuthmacOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				EB6724C386B29B26E603A1D2 /* DemoAuthmacOSTests.swift */,
+			);
+			path = DemoAuthmacOSTests;
 			sourceTree = "<group>";
 		};
 		8E4C35AEF7C4AAF40C2EFCD3 /* Products */ = {
@@ -45,6 +86,8 @@
 			children = (
 				80ECFF3AE47A6DA7E6F07E1B /* DemoAuth.app */,
 				77037612B5E38ACDA8360DB6 /* DemoAuthmacOS.app */,
+				9ACBFCE6F98860C8A96D2932 /* DemoAuthmacOSTests.xctest */,
+				E200BD79CDAB9D156470DE55 /* DemoAuthTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -86,6 +129,42 @@
 			productReference = 77037612B5E38ACDA8360DB6 /* DemoAuthmacOS.app */;
 			productType = "com.apple.product-type.application";
 		};
+		5205EF7BA72D2AA5F595B2A7 /* DemoAuthTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C87E9621FE22C5CE6F16F187 /* Build configuration list for PBXNativeTarget "DemoAuthTests" */;
+			buildPhases = (
+				DAB55E0D6B78D06A4E9BE1E0 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				60F0AAB94F01ACBB3FD55C73 /* PBXTargetDependency */,
+			);
+			name = DemoAuthTests;
+			packageProductDependencies = (
+			);
+			productName = DemoAuthTests;
+			productReference = E200BD79CDAB9D156470DE55 /* DemoAuthTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		6037B85ACE7284FBE93E7EC4 /* DemoAuthmacOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8E44A7FCFDB3F5FE11C72779 /* Build configuration list for PBXNativeTarget "DemoAuthmacOSTests" */;
+			buildPhases = (
+				0F94F30508ECF9EBC69E81B7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5BDCF093C9ADBC11A8CF72D7 /* PBXTargetDependency */,
+			);
+			name = DemoAuthmacOSTests;
+			packageProductDependencies = (
+			);
+			productName = DemoAuthmacOSTests;
+			productReference = 9ACBFCE6F98860C8A96D2932 /* DemoAuthmacOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -100,6 +179,12 @@
 					};
 					22DBB17B0341E71E6F79BB4C = {
 						DevelopmentTeam = XXXXXXXXXX;
+					};
+					5205EF7BA72D2AA5F595B2A7 = {
+						DevelopmentTeam = "";
+					};
+					6037B85ACE7284FBE93E7EC4 = {
+						DevelopmentTeam = "";
 					};
 				};
 			};
@@ -118,12 +203,22 @@
 			projectRoot = "";
 			targets = (
 				17B49D7D8A2E4B6ACB4683F9 /* DemoAuth */,
+				5205EF7BA72D2AA5F595B2A7 /* DemoAuthTests */,
 				22DBB17B0341E71E6F79BB4C /* DemoAuthmacOS */,
+				6037B85ACE7284FBE93E7EC4 /* DemoAuthmacOSTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0F94F30508ECF9EBC69E81B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				142A3E75A23261C615A07B2B /* DemoAuthmacOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9A40EB4E149277FE264190BC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -142,7 +237,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DAB55E0D6B78D06A4E9BE1E0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ECE1FD9CDD8509DF28951C12 /* DemoAuthTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5BDCF093C9ADBC11A8CF72D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 22DBB17B0341E71E6F79BB4C /* DemoAuthmacOS */;
+			targetProxy = 56A750A564A38EB634332F8F /* PBXContainerItemProxy */;
+		};
+		60F0AAB94F01ACBB3FD55C73 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17B49D7D8A2E4B6ACB4683F9 /* DemoAuth */;
+			targetProxy = B470E63FA9E76E1478C9A585 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		12D51973ABDC468F8DDF893A /* Debug */ = {
@@ -182,6 +298,50 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		37F3A06C1E60E321D6CF8F05 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.marekloose.DemoAuthmacOSTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.2;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DemoAuthmacOS.app/Contents/MacOS/DemoAuthmacOS";
+			};
+			name = Release;
+		};
+		5B0E423A8C8DB18EFFAEFD64 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.marekloose.DemoAuthTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DemoAuth.app/DemoAuth";
+			};
+			name = Debug;
 		};
 		768CDDAF8226451A1CAAB086 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -238,6 +398,28 @@
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
+		};
+		7B694948DD3CF0D5B8A8A811 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.marekloose.DemoAuthmacOSTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.2;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DemoAuthmacOS.app/Contents/MacOS/DemoAuthmacOS";
+			};
+			name = Debug;
 		};
 		7C0EB0CC59BF9E4B21F0C4EE /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -302,6 +484,28 @@
 			};
 			name = Debug;
 		};
+		A41A32AA05011A571E41105B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.marekloose.DemoAuthTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DemoAuth.app/DemoAuth";
+			};
+			name = Release;
+		};
 		A56DA98679953A63A7A851A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -364,6 +568,24 @@
 			buildConfigurations = (
 				A56DA98679953A63A7A851A2 /* Debug */,
 				F52EA2D6A6E91B0B91734AF0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8E44A7FCFDB3F5FE11C72779 /* Build configuration list for PBXNativeTarget "DemoAuthmacOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B694948DD3CF0D5B8A8A811 /* Debug */,
+				37F3A06C1E60E321D6CF8F05 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C87E9621FE22C5CE6F16F187 /* Build configuration list for PBXNativeTarget "DemoAuthTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5B0E423A8C8DB18EFFAEFD64 /* Debug */,
+				A41A32AA05011A571E41105B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

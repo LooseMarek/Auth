@@ -22,6 +22,21 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth
         DEVELOPMENT_TEAM: XXXXXXXXXX
 
+  DemoAuthTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: ["DemoAuthTests"]
+    dependencies:
+      - target: DemoAuth
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: NO
+        DEVELOPMENT_TEAM: ""
+
   DemoAuthmacOS:
     type: application
     platform: macOS
@@ -36,6 +51,21 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth-macos
         DEVELOPMENT_TEAM: XXXXXXXXXX
 
+  DemoAuthmacOSTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources: ["DemoAuthmacOSTests"]
+    dependencies:
+      - target: DemoAuthmacOS
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: NO
+        DEVELOPMENT_TEAM: ""
+
 
 
 
@@ -46,6 +76,7 @@ schemes:
         DemoAuth: all
     test:
       targets:
+        - DemoAuthTests
     run:
       config: Debug
     archive:
@@ -54,6 +85,9 @@ schemes:
     build:
       targets:
         DemoAuthmacOS: all
+    test:
+      targets:
+        - DemoAuthmacOSTests
     run:
       config: Debug
     archive:
