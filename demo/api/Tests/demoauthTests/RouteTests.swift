@@ -4,23 +4,20 @@ import VaporTesting
 import Testing
 import Vapor
 
-/// Tests verifying that removed scaffold routes are no longer present.
+/// Tests verifying route presence and that removed scaffold routes are no longer present.
 @Suite("Route Tests", .serialized)
 struct RouteTests {
 
-    // MARK: - Helpers
+    // MARK: - Hello route
 
-    private func withConfiguredApp(_ test: (Application) async throws -> Void) async throws {
-        let app = try await Application.make(.testing)
-        do {
-            try await configure(app)
-            app.databases.use(.sqlite(.memory), as: .sqlite, isDefault: true)
-            try await test(app)
-        } catch {
-            try? await app.asyncShutdown()
-            throw error
+    @Test("GET /hello returns 200 with 'Hello, world!'")
+    func testHelloRoute() async throws {
+        try await withConfiguredApp { app in
+            try await app.testing().test(.GET, "hello") { res async in
+                #expect(res.status == .ok)
+                #expect(res.body.string == "Hello, world!")
+            }
         }
-        try await app.asyncShutdown()
     }
 
     // MARK: - Todo scaffold removal
