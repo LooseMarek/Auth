@@ -20,7 +20,8 @@ targets:
       base:
         SWIFT_VERSION: 6.2
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth
-        DEVELOPMENT_TEAM: XXXXXXXXXX
+        DEVELOPMENT_TEAM: 9JVYUSJU3D
+        EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift"
 
   DemoAuthTests:
     type: bundle.unit-test
@@ -29,6 +30,68 @@ targets:
     sources: ["DemoAuthTests"]
     dependencies:
       - target: DemoAuth
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: NO
+        DEVELOPMENT_TEAM: ""
+
+  DemoAuthDefault:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: ["DemoAuth"]
+    info:
+      path: "DemoAuth/Info.plist"
+      properties:
+        UILaunchScreen: {}
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.demoauth.default
+        DEVELOPMENT_TEAM: 9JVYUSJU3D
+        EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthApp.swift DemoAuthCustomApp.swift"
+
+  DemoAuthDefaultTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: ["DemoAuthDefaultTests"]
+    dependencies:
+      - target: DemoAuthDefault
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: NO
+        DEVELOPMENT_TEAM: ""
+
+  DemoAuthCustom:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: ["DemoAuth"]
+    info:
+      path: "DemoAuth/Info.plist"
+      properties:
+        UILaunchScreen: {}
+    settings:
+      base:
+        SWIFT_VERSION: 6.2
+        PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.demoauth.custom
+        DEVELOPMENT_TEAM: 9JVYUSJU3D
+        EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthApp.swift DemoAuthDefaultApp.swift"
+
+  DemoAuthCustomTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: ["DemoAuthCustomTests"]
+    dependencies:
+      - target: DemoAuthCustom
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -49,7 +112,8 @@ targets:
       base:
         SWIFT_VERSION: 6.2
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth-macos
-        DEVELOPMENT_TEAM: XXXXXXXXXX
+        DEVELOPMENT_TEAM: 9JVYUSJU3D
+        EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift"
 
   DemoAuthmacOSTests:
     type: bundle.unit-test
@@ -77,6 +141,28 @@ schemes:
     test:
       targets:
         - DemoAuthTests
+    run:
+      config: Debug
+    archive:
+      config: Release
+  DemoAuthDefault:
+    build:
+      targets:
+        DemoAuthDefault: all
+    test:
+      targets:
+        - DemoAuthDefaultTests
+    run:
+      config: Debug
+    archive:
+      config: Release
+  DemoAuthCustom:
+    build:
+      targets:
+        DemoAuthCustom: all
+    test:
+      targets:
+        - DemoAuthCustomTests
     run:
       config: Debug
     archive:
