@@ -20,4 +20,5 @@ func routes(_ app: Application) throws {
 
     try app.register(collection: AuthController(configuration: authConfig))
     try app.register(collection: RefreshTokenController(configuration: authConfig))
+    try app.register(collection: MeController(configuration: authConfig))
 }
