@@ -1,6 +1,10 @@
 import AuthServer
 import Vapor
 
+struct ConfigurationError: Error {
+    let reason: String
+}
+
 func routes(_ app: Application) throws {
     app.get { req async in
         "It works!"
@@ -11,7 +15,7 @@ func routes(_ app: Application) throws {
     }
 
     guard let authConfig = app.storage[AuthServerConfiguration.StorageKey.self] else {
-        throw Abort(.internalServerError, reason: "AuthServerConfiguration not set in app.storage")
+        throw ConfigurationError(reason: "AuthServerConfiguration not set in app.storage")
     }
 
     try app.register(collection: AuthController(configuration: authConfig))
