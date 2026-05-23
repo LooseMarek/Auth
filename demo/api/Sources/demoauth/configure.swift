@@ -4,8 +4,16 @@ import AuthServer
 import Vapor
 
 /// Configures the Vapor application with SQLite persistence and AuthServer integration.
-public func configure(_ app: Application) async throws {
-    app.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
+///
+/// - Parameters:
+///   - app: The Vapor application to configure.
+///   - database: The database configuration factory. Defaults to a file-backed SQLite
+///     database (`db.sqlite`). Pass `.sqlite(.memory)` in tests for full isolation.
+public func configure(
+    _ app: Application,
+    database: DatabaseConfigurationFactory = .sqlite(.file("db.sqlite"))
+) async throws {
+    app.databases.use(database, as: .sqlite)
 
     let jwtSecret: String
     if let secret = Environment.get("JWT_SIGNING_SECRET") {
