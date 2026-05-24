@@ -126,9 +126,12 @@ final class ProfileViewModel {
         showDeleteConfirmation = false
     }
 
-    /// Triggers the guest-upgrade flow by presenting the auth sheet.
+    /// Triggers the guest-upgrade flow by presenting the auth sheet as a dismissible sheet.
+    ///
+    /// Uses `.sheet` style so the user can cancel the upgrade flow by dragging the
+    /// sheet down without losing their existing guest session.
     func upgradeAccount() {
-        authManager.presentAuthFlow()
+        authManager.presentAuthFlow(style: .sheet)
     }
 
     // MARK: - Private helpers

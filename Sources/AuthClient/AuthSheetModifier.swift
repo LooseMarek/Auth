@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A SwiftUI `ViewModifier` that attaches auth sheet presentation to any view.
+/// A SwiftUI `ViewModifier` that attaches auth flow presentation to any view.
 ///
 /// Attach it once on the host app's root view:
 /// ```swift
@@ -8,20 +8,35 @@ import SwiftUI
 ///     .authSheet(manager: authManager)
 /// ```
 ///
-/// The modifier observes `AuthManager.isPresentingAuthFlow`. When it becomes `true`,
-/// the `AuthSheetContainer` is presented as a system sheet. When the user dismisses
-/// the sheet (drag gesture on iOS, Cmd-W or close button on macOS), `dismissAuthFlow()`
-/// is called so `isPresentingAuthFlow` is reset to `false`.
+/// The modifier observes `AuthManager.isPresentingAuthFlow` and
+/// `AuthManager.authPresentationStyle`. When `isPresentingAuthFlow` becomes `true`:
+/// - `.fullScreen` style → iOS uses `.fullScreenCover` (non-dismissible); macOS uses
+///   `.sheet` with `.interactiveDismissDisabled(true)`.
+/// - `.sheet` style → iOS uses `.sheet` with `.large` detent and drag indicator;
+///   macOS uses the standard `.sheet` panel.
 ///
-/// ## Platform behaviour
-/// - **iOS:** `.presentationDetents([.large])` — medium was removed because the auth
-///   fields do not fit a medium-height sheet. Drag indicator is always visible.
-/// - **macOS:** SwiftUI renders `.sheet` as a floating panel. A manual `color.scrim`
-///   overlay is applied behind the panel using a `ZStack` on the host content.
-///   The scrim fades in when `isPresentingAuthFlow` is `true` and fades out on dismiss.
+/// When the user dismisses the sheet (only possible in `.sheet` style), or when
+/// authentication completes, `dismissAuthFlow()` is called to reset state.
+///
+/// ## macOS scrim
+/// SwiftUI does not render a scrim behind `.sheet` panels on macOS. A manual
+/// `color.scrim` overlay is applied behind the panel using a `ZStack` on the host
+/// content. The scrim fades in when `isPresentingAuthFlow` is `true` and fades out
+/// on dismiss.
 struct AuthSheetModifier: ViewModifier {
 
     @Bindable var authManager: AuthManager
+
+    private var isPresentingBinding: Binding<Bool> {
+        Binding(
+            get: { authManager.isPresentingAuthFlow },
+            set: { presenting in
+                if !presenting {
+                    authManager.dismissAuthFlow()
+                }
+            }
+        )
+    }
 
     func body(content: Content) -> some View {
 #if canImport(AppKit)
@@ -32,34 +47,24 @@ struct AuthSheetModifier: ViewModifier {
                     .ignoresSafeArea()
             }
         }
-        .sheet(
-            isPresented: Binding(
-                get: { authManager.isPresentingAuthFlow },
-                set: { presenting in
-                    if !presenting {
-                        authManager.dismissAuthFlow()
-                    }
-                }
-            )
-        ) {
+        .sheet(isPresented: isPresentingBinding) {
             AuthSheetContainer(authManager: authManager)
+                .interactiveDismissDisabled(authManager.authPresentationStyle == .fullScreen)
         }
 #else
-        content
-            .sheet(
-                isPresented: Binding(
-                    get: { authManager.isPresentingAuthFlow },
-                    set: { presenting in
-                        if !presenting {
-                            authManager.dismissAuthFlow()
-                        }
-                    }
-                )
-            ) {
-                AuthSheetContainer(authManager: authManager)
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
-            }
+        if authManager.authPresentationStyle == .fullScreen {
+            content
+                .fullScreenCover(isPresented: isPresentingBinding) {
+                    AuthSheetContainer(authManager: authManager)
+                }
+        } else {
+            content
+                .sheet(isPresented: isPresentingBinding) {
+                    AuthSheetContainer(authManager: authManager)
+                        .presentationDetents([.large])
+                        .presentationDragIndicator(.visible)
+                }
+        }
 #endif
     }
 }

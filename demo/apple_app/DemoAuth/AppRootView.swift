@@ -13,9 +13,6 @@ struct AppRootView: View {
     // MARK: - Constants
 
     /// Base URL for the demo Auth API server (local development).
-    ///
-    /// Wire this into a concrete `AuthNetworkService` implementation when adding real
-    /// network calls in a follow-up task.
     static let demoAPIBaseURL = "http://localhost:8080"
 
     // MARK: - State
@@ -30,7 +27,13 @@ struct AppRootView: View {
     ///   `AuthClientConfiguration()` (all Auth defaults) so that `DemoAuthDefault` and
     ///   plain `DemoAuth` targets can call `AppRootView()` with no arguments.
     init(configuration: AuthClientConfiguration = AuthClientConfiguration()) {
-        _authManager = State(initialValue: AuthManager(configuration: configuration))
+        _authManager = State(
+            initialValue: AuthManager(
+                configuration: configuration,
+                networkService: URLSessionAuthNetworkService(baseURL: Self.demoAPIBaseURL),
+                tokenStore: KeychainTokenStore()
+            )
+        )
     }
 
     // MARK: - Body
@@ -40,7 +43,7 @@ struct AppRootView: View {
             .authSheet(manager: authManager)
             .onAppear {
                 if case .unauthenticated = authManager.session {
-                    authManager.presentAuthFlow()
+                    authManager.presentAuthFlow(style: .fullScreen)
                 }
             }
     }
