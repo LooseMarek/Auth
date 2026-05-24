@@ -22,9 +22,15 @@ public final class AuthManager {
 
     /// Whether the auth sheet is currently being presented.
     ///
-    /// Set to `true` by calling ``presentAuthFlow()`` and back to `false` by
+    /// Set to `true` by calling ``presentAuthFlow(style:)`` and back to `false` by
     /// ``dismissAuthFlow()`` or when the user dismisses the sheet via gesture.
     public private(set) var isPresentingAuthFlow: Bool = false
+
+    /// The presentation style for the currently-active (or most-recently-dismissed) auth flow.
+    ///
+    /// Defaults to `.sheet`. Updated every time ``presentAuthFlow(style:)`` is called.
+    /// Resets to `.sheet` when ``dismissAuthFlow()`` is called.
+    public private(set) var authPresentationStyle: AuthPresentationStyle = .sheet
 
     /// The configuration supplied at initialisation time.
     public let configuration: AuthClientConfiguration
@@ -72,21 +78,30 @@ public final class AuthManager {
 
     // MARK: - Auth flow presentation
 
-    /// Triggers the auth sheet to be presented.
+    /// Triggers the auth flow to be presented with the given style.
     ///
-    /// Sets `isPresentingAuthFlow` to `true`, which the `.authSheet(manager:)`
-    /// modifier observes to show the sheet.
-    public func presentAuthFlow() {
+    /// - Parameter style: `.fullScreen` for a non-dismissible full-screen cover (used
+    ///   when gating app content behind authentication on launch); `.sheet` for a
+    ///   user-dismissible sheet (used for contextual flows such as guest upgrade).
+    ///   Defaults to `.sheet`.
+    ///
+    /// Sets `isPresentingAuthFlow` to `true` and records `authPresentationStyle`.
+    /// The `.authSheet(manager:)` modifier observes both to choose the correct
+    /// presentation API.
+    public func presentAuthFlow(style: AuthPresentationStyle = .sheet) {
+        authPresentationStyle = style
         isPresentingAuthFlow = true
     }
 
-    /// Dismisses the auth sheet.
+    /// Dismisses the auth flow.
     ///
-    /// Sets `isPresentingAuthFlow` to `false`. Called automatically when the
-    /// user dismisses the sheet via a drag gesture (iOS) or Cmd-W / close
-    /// button (macOS), or when authentication completes successfully.
+    /// Sets `isPresentingAuthFlow` to `false` and resets `authPresentationStyle` to
+    /// `.sheet`. Called automatically when the user dismisses the sheet via a drag
+    /// gesture (iOS) or Cmd-W / close button (macOS), or when authentication
+    /// completes successfully.
     public func dismissAuthFlow() {
         isPresentingAuthFlow = false
+        authPresentationStyle = .sheet
     }
 
     // MARK: - Guest session
