@@ -72,6 +72,22 @@ let package = Package(
 
 ## iOS Quick-Start
 
+> **Prerequisite — `UILaunchScreen` in `Info.plist`**
+>
+> Your host app's `Info.plist` must contain a `UILaunchScreen` key. Without it, iOS
+> renders the app in a legacy compatibility mode and adds black bars at the top and
+> bottom of the screen on all modern iPhone models — even with a bare SwiftUI view.
+>
+> Add the following to your `Info.plist`:
+>
+> ```xml
+> <key>UILaunchScreen</key>
+> <dict/>
+> ```
+>
+> An empty dictionary is sufficient. It signals to iOS that the app is designed for
+> the current device's full screen dimensions.
+
 ### 1. Configure `AuthManager`
 
 Create an `AuthManager` instance once — typically in your `App` entry point or at the

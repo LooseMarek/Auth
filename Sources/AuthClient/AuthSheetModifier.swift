@@ -27,14 +27,28 @@ struct AuthSheetModifier: ViewModifier {
 
     @Bindable var authManager: AuthManager
 
-    private var isPresentingBinding: Binding<Bool> {
+    // Both bindings are always in the view tree on iOS, so switching styles
+    // never changes the view structure. SwiftUI can reliably detect the
+    // false→true transition on whichever binding becomes active.
+    private var fullScreenBinding: Binding<Bool> {
+        Binding(
+            get: { authManager.isPresentingAuthFlow && authManager.authPresentationStyle == .fullScreen },
+            set: { presenting in if !presenting { authManager.dismissAuthFlow() } }
+        )
+    }
+
+    private var sheetBinding: Binding<Bool> {
+        Binding(
+            get: { authManager.isPresentingAuthFlow && authManager.authPresentationStyle == .sheet },
+            set: { presenting in if !presenting { authManager.dismissAuthFlow() } }
+        )
+    }
+
+    // macOS only: single binding for the sheet; style controls interactiveDismissDisabled.
+    private var macOSPresentingBinding: Binding<Bool> {
         Binding(
             get: { authManager.isPresentingAuthFlow },
-            set: { presenting in
-                if !presenting {
-                    authManager.dismissAuthFlow()
-                }
-            }
+            set: { presenting in if !presenting { authManager.dismissAuthFlow() } }
         )
     }
 
@@ -47,24 +61,20 @@ struct AuthSheetModifier: ViewModifier {
                     .ignoresSafeArea()
             }
         }
-        .sheet(isPresented: isPresentingBinding) {
+        .sheet(isPresented: macOSPresentingBinding) {
             AuthSheetContainer(authManager: authManager)
                 .interactiveDismissDisabled(authManager.authPresentationStyle == .fullScreen)
         }
 #else
-        if authManager.authPresentationStyle == .fullScreen {
-            content
-                .fullScreenCover(isPresented: isPresentingBinding) {
-                    AuthSheetContainer(authManager: authManager)
-                }
-        } else {
-            content
-                .sheet(isPresented: isPresentingBinding) {
-                    AuthSheetContainer(authManager: authManager)
-                        .presentationDetents([.large])
-                        .presentationDragIndicator(.visible)
-                }
-        }
+        content
+            .fullScreenCover(isPresented: fullScreenBinding) {
+                AuthSheetContainer(authManager: authManager)
+            }
+            .sheet(isPresented: sheetBinding) {
+                AuthSheetContainer(authManager: authManager)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
 #endif
     }
 }

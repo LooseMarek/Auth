@@ -109,7 +109,7 @@ public struct LoginView: View {
                     registerLink
                     Spacer().frame(height: 32)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 16)
                 // Apply custom base font when configured; child modifiers override as needed.
                 .font(theme.font)
                 // Disable all interaction while a login request or social sign-in is in flight.
@@ -120,7 +120,6 @@ public struct LoginView: View {
                     && !googleSignInHandler.isLoading
                 )
             }
-            .background(theme.backgroundColor)
 
             // Full-screen loading overlay shown while a social sign-in server call is in flight.
             // Under accessibilityReduceTransparency an opaque background is used instead of the
@@ -132,6 +131,10 @@ public struct LoginView: View {
                     .scaleEffect(1.5)
             }
         }
+        // Fill all space proposed by NavigationStack so no gaps appear below content.
+        // ignoresSafeArea() extends the background behind the Dynamic Island and home indicator.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(theme.backgroundColor.ignoresSafeArea())
     }
 
     // MARK: - Subviews

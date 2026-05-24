@@ -50,7 +50,9 @@ public struct AuthSheetContainer: View {
 #endif
         }
         .environment(\.authTheme, theme)
-#if canImport(AppKit)
+#if !canImport(AppKit)
+        .background(theme.backgroundColor.ignoresSafeArea())
+#else
         .frame(width: 440)
         .frame(minHeight: 540)
         .background(theme.backgroundColor)

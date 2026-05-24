@@ -41,14 +41,19 @@ struct AppRootView: View {
     var body: some View {
         content
             .authSheet(manager: authManager)
-            .onAppear {
-                if case .unauthenticated = authManager.session {
+            .task(id: isSessionUnauthenticated) {
+                if isSessionUnauthenticated {
                     authManager.presentAuthFlow(style: .fullScreen)
                 }
             }
     }
 
     // MARK: - Private
+
+    private var isSessionUnauthenticated: Bool {
+        if case .unauthenticated = authManager.session { return true }
+        return false
+    }
 
     @ViewBuilder
     private var content: some View {

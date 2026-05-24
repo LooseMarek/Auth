@@ -18,5 +18,9 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>GIDClientID</key>
+	<string>REPLACE_WITH_REAL_GOOGLE_CLIENT_ID</string>
+	<key>UILaunchScreen</key>
+	<dict/>
 </dict>
 </plist>
