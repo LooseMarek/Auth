@@ -1,0 +1,144 @@
+/* DemoAuthCustom — Localizable.strings (English)
+ *
+ * Custom English copy for the DemoAuthCustom target.
+ * Purposely rewritten with a warmer, friendlier tone to demonstrate
+ * that host apps can supply their own Localizable.strings and fully
+ * replace Auth's built-in copy.
+ *
+ * Key convention matches AuthClient: auth.{screen}.{element}
+ */
+
+// MARK: - LoginView
+
+/* Screen title */
+"auth.login.title" = "Hey, welcome!";
+
+/* Screen subtitle */
+"auth.login.subtitle" = "Jump back in — we've missed you.";
+
+/* Email text field placeholder */
+"auth.login.field.email.placeholder" = "your@email.com";
+
+/* Password text field placeholder */
+"auth.login.field.password.placeholder" = "Your password";
+
+/* Login submit button */
+"auth.login.button.submit" = "Sign in";
+
+/* Forgot password link */
+"auth.login.link.forgot_password" = "Can't remember your password?";
+
+/* Register navigation link */
+"auth.login.link.register" = "New here? Create an account";
+
+/* Guest access button */
+"auth.login.button.guest" = "Just browsing";
+
+/* Error: wrong email or password */
+"auth.login.error.invalid_credentials" = "Hmm, that email or password doesn't look right.";
+
+// MARK: - RegisterView
+
+/* Screen title (standard registration) */
+"auth.register.title" = "Let's get you set up";
+
+/* Screen subtitle (standard registration) */
+"auth.register.subtitle" = "Quick and free — no credit card required.";
+
+/* Screen title (guest upgrade flow) */
+"auth.register.upgrade.title" = "Keep your progress";
+
+/* Screen subtitle (guest upgrade flow) */
+"auth.register.upgrade.subtitle" = "Add your email and a password to lock in your data.";
+
+/* Email text field placeholder */
+"auth.register.field.email.placeholder" = "your@email.com";
+
+/* Password text field placeholder */
+"auth.register.field.password.placeholder" = "Choose a password (8+ chars)";
+
+/* Confirm password text field placeholder */
+"auth.register.field.confirm_password.placeholder" = "Confirm your password";
+
+/* Register submit button (standard) */
+"auth.register.button.submit" = "Create my account";
+
+/* Register submit button (guest upgrade) */
+"auth.register.upgrade.button.submit" = "Save my account";
+
+/* Login navigation link */
+"auth.register.link.login" = "Already got an account? Sign in";
+
+/* Error: password too short */
+"auth.register.error.password_too_short" = "Your password needs at least 8 characters.";
+
+/* Error: passwords do not match */
+"auth.register.error.password_mismatch" = "Those passwords don't match — give it another try.";
+
+/* Error: email already registered */
+"auth.register.error.email_taken" = "Looks like that email is already registered.";
+
+// MARK: - ForgotPasswordView
+
+/* Screen title */
+"auth.forgot.title" = "Forgot your password?";
+
+/* Screen subtitle */
+"auth.forgot.subtitle" = "No worries — pop in your email and we'll send you a reset link.";
+
+/* Email text field placeholder */
+"auth.forgot.field.email.placeholder" = "your@email.com";
+
+/* Send reset link button */
+"auth.forgot.button.submit" = "Send me a reset link";
+
+/* Back to login link / button */
+"auth.forgot.link.back" = "Back to sign in";
+
+/* Success state — card title */
+"auth.forgot.success.title" = "Check your inbox!";
+
+/* Success state — card body */
+"auth.forgot.success.body" = "We've sent a reset link to your email. It might take a moment to show up.";
+
+// MARK: - Shared buttons
+
+/* Sign in with Apple button label */
+"auth.button.apple" = "Continue with Apple";
+
+/* Sign in with Apple accessibility label */
+"auth.button.apple.accessibility" = "Continue with Apple";
+
+/* Sign in with Google button label */
+"auth.button.google" = "Continue with Google";
+
+/* Sign in with Google accessibility label */
+"auth.button.google.accessibility" = "Continue with Google";
+
+// MARK: - Shared UI
+
+/* "Or" divider between primary and social auth options */
+"auth.separator.or" = "or";
+
+/* Accessibility label for the show-password toggle (currently hidden) */
+"auth.field.password.show" = "Show password";
+
+/* Accessibility label for the hide-password toggle (currently visible) */
+"auth.field.password.hide" = "Hide password";
+
+// MARK: - Shared errors
+
+/* Error: required field is empty */
+"auth.error.required" = "This field can't be empty.";
+
+/* Error: invalid email format */
+"auth.error.email_format" = "That doesn't look like a valid email address.";
+
+/* Error: no internet connection */
+"auth.error.network" = "No connection found. Check your internet and try again.";
+
+/* Error: generic server error */
+"auth.error.server" = "Something went wrong on our end. Please try again.";
+
+/* Error: social sign-in token is invalid */
+"auth.social.error.token_invalid" = "Sign-in didn't work. Please try again.";

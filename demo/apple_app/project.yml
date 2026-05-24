@@ -82,7 +82,12 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "17.0"
-    sources: ["DemoAuth"]
+    sources:
+      - path: "DemoAuth"
+        excludes:
+          - "Resources"
+      - path: "DemoAuth/Resources"
+        type: resource
     info:
       path: "DemoAuth/Info.plist"
       properties:
