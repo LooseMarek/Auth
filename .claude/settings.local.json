@@ -44,7 +44,8 @@
       "Bash(bundle exec *)",
       "Bash(gh milestone *)",
       "Bash(xargs ls -la)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Bash(xcrun simctl *)"
     ],
     "deny": [
       "Bash(git push --force*)",
