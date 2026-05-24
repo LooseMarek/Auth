@@ -193,10 +193,15 @@ public struct LoginView: View {
     private var forgotPasswordLink: some View {
         HStack {
             Spacer()
-            Button(String(localized: "auth.login.link.forgot_password", bundle: bundle)) {}
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(theme.primaryColor)
-                .buttonStyle(.plain)
+            NavigationLink(destination: ForgotPasswordView(
+                authManager: authManager,
+                networkService: viewModel.networkService
+            )) {
+                Text(String(localized: "auth.login.link.forgot_password", bundle: bundle))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(theme.primaryColor)
+            }
+            .buttonStyle(.plain)
         }
         .padding(.top, 4)
     }
@@ -328,7 +333,10 @@ public struct LoginView: View {
     private var registerLink: some View {
         HStack {
             Spacer()
-            Button {} label: {
+            NavigationLink(destination: RegisterView(
+                authManager: authManager,
+                networkService: viewModel.networkService
+            )) {
                 // The full localised string is "Don't have an account? Register".
                 // We split it on "Register" at runtime so the "Register" word can be
                 // styled with the primary colour while keeping the full phrase localizable.
