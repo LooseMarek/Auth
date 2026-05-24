@@ -182,6 +182,34 @@ Correct placement in `Package.swift`:
 .testTarget(name: "AuthClientSnapshotTests", dependencies: [..., .product(name: "SnapshotTesting", ...)], ...)
 ```
 
+### Demo API — running in Xcode vs terminal
+
+The demo API lives in `demo/api/` and is a pure Swift Package (no `.xcodeproj`). It
+references the Auth package via a local path dependency (`../../`).
+
+**Canonical development workflow — use `swift run` in the terminal:**
+```
+cd demo/api
+swift run
+```
+The server starts on http://localhost:8080. This always works because it resolves the
+local path dependency directly from `Package.swift`.
+
+**Opening in Xcode:**
+Open `demo/api/` as a Swift Package via File → Open (select the folder, **not** a
+`.xcodeproj`). Xcode resolves the local Auth package automatically.
+
+**If Xcode shows "Missing package product 'AuthService'":**
+This means Xcode has a stale index or cached workspace that referenced the old product
+name `AuthService` (renamed to `AuthServer` in an earlier task). Fix:
+1. Close the project in Xcode.
+2. Delete the stale build artifacts:
+   ```
+   rm -rf demo/api/.build demo/api/.swiftpm
+   ```
+3. Re-open `demo/api/` in Xcode — it will resolve from scratch using the correct
+   `Package.swift` (which already uses `AuthServer`).
+
 ---
 
 ## Environment & Secrets
