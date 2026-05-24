@@ -7,14 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06F2EB9649B329A3E07F8F5A /* MeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54EB5002B0E09C728DFE83 /* MeResponse.swift */; };
 		07D1CB41C8A85B4E28BB7B8C /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
 		0AD2E266E57E0E0CF4F811EB /* DemoAuthCustomApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CFE905BD2970672E6FFB45 /* DemoAuthCustomApp.swift */; };
 		142A3E75A23261C615A07B2B /* DemoAuthmacOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6724C386B29B26E603A1D2 /* DemoAuthmacOSTests.swift */; };
 		17DE08B7CFD986FACE644A19 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F15B6914E951F1776B29BBA /* AppRootView.swift */; };
 		1D2FD7CC24F5E33B86746A8C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
+		23778A1E7FBF78B3411DBD05 /* MeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54EB5002B0E09C728DFE83 /* MeResponse.swift */; };
+		3555BB1E6D25A036E7B52C9A /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ADA9D71EAE2601DA21FAF9 /* ProfileView.swift */; };
 		4C45338889A4F84CD810677E /* DemoAuthCustomApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CFE905BD2970672E6FFB45 /* DemoAuthCustomApp.swift */; };
 		5B195A749E2694D63442A7E9 /* AuthManagerSetupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97DFC211F800C1142C37FAB /* AuthManagerSetupTests.swift */; };
+		5C71CDA5C1DADF6444338FE3 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */; };
+		5E8DFD1256A1D896DF7EF78E /* MeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54EB5002B0E09C728DFE83 /* MeResponse.swift */; };
+		5EE77DEF4A2CC4B9AD699798 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */; };
 		658C4278CE3A04027CA759B9 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F15B6914E951F1776B29BBA /* AppRootView.swift */; };
+		67E2A82B6F033891075993C8 /* ProfileViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A42A24511A5CE01F5E4BD7E /* ProfileViewModelTests.swift */; };
 		76284F560AE32B1FD89AE6C9 /* DemoAuthDefaultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8824A1CB67156CFA27C26790 /* DemoAuthDefaultTests.swift */; };
 		79578B5294614F4DE5E039F4 /* AuthClient in Frameworks */ = {isa = PBXBuildFile; productRef = 9BEC23A087779FCA5B823B53 /* AuthClient */; };
 		797FC8029B385D063F9AD164 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
@@ -25,17 +32,23 @@
 		8B440098800F38E71293EB91 /* DemoAuthDefaultApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA7D287FD52AD54574C835E4 /* DemoAuthDefaultApp.swift */; };
 		934A2EA16C253E97D580F8AD /* DemoAuthDefaultApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA7D287FD52AD54574C835E4 /* DemoAuthDefaultApp.swift */; };
 		95ACB81206A06119304C37B2 /* AuthClient in Frameworks */ = {isa = PBXBuildFile; productRef = F2A924587146FF01D7D09226 /* AuthClient */; };
+		9E6D5DEFDF7AF7DCBF9BB768 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ADA9D71EAE2601DA21FAF9 /* ProfileView.swift */; };
+		A6288FC870BB1B0F083846CD /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ADA9D71EAE2601DA21FAF9 /* ProfileView.swift */; };
 		ADBAE9559B32299A297BBEE8 /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
 		B275228DCF2F65256164B8B4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
 		BA43E24BE1A7655F584C0FED /* AuthClient in Frameworks */ = {isa = PBXBuildFile; productRef = 36DC85E354C3F89938FE4968 /* AuthClient */; };
 		BA8472BEADFE5EA2DCC0EA77 /* DemoAuthDefaultApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA7D287FD52AD54574C835E4 /* DemoAuthDefaultApp.swift */; };
 		BDF8903AB85D45EAB690A161 /* DemoAuthCustomApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CFE905BD2970672E6FFB45 /* DemoAuthCustomApp.swift */; };
+		BE1F36D3C3F180A0B35C37C6 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */; };
 		D5FACC89FBAB1B6B54BF8082 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD45418B3B0372D510503D7 /* ContentView.swift */; };
 		D9AE2DAB10F31BB76D5A23EE /* AuthClient in Frameworks */ = {isa = PBXBuildFile; productRef = 66091D300E5F8CECCC81D738 /* AuthClient */; };
+		DDD6551E7155AD9BEC4401ED /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */; };
+		E90E5A8EEB9BC7FC255BF022 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ADA9D71EAE2601DA21FAF9 /* ProfileView.swift */; };
 		ECE1FD9CDD8509DF28951C12 /* DemoAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D7D261B0133D236965ACC0 /* DemoAuthTests.swift */; };
 		F28C76D5646BB379984B0322 /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
 		F3EC4A73C6C8FD3EA4214FDB /* DemoAuthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */; };
 		F49BAF4C87499EE32BD20E57 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F15B6914E951F1776B29BBA /* AppRootView.swift */; };
+		FFD2D5F1BA4642742C837FC5 /* MeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54EB5002B0E09C728DFE83 /* MeResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,7 +90,9 @@
 		424BE21DBC266A017203EC29 /* DemoAuthCustom.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DemoAuthCustom.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48188D175C9675D3B6614690 /* DemoAuthCustomTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DemoAuthCustomTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		48CFE905BD2970672E6FFB45 /* DemoAuthCustomApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthCustomApp.swift; sourceTree = "<group>"; };
+		4A42A24511A5CE01F5E4BD7E /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
 		4AFF48014E6C0BBB4CE62A4F /* Auth */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Auth; path = ../..; sourceTree = SOURCE_ROOT; };
+		57ADA9D71EAE2601DA21FAF9 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		77037612B5E38ACDA8360DB6 /* DemoAuthmacOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAuthmacOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		80ECFF3AE47A6DA7E6F07E1B /* DemoAuth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DemoAuth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8824A1CB67156CFA27C26790 /* DemoAuthDefaultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthDefaultTests.swift; sourceTree = "<group>"; };
@@ -85,9 +100,11 @@
 		9ACBFCE6F98860C8A96D2932 /* DemoAuthmacOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DemoAuthmacOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B041BEAD33B8B765DCC6852C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B3997B605F737674862DCCD6 /* DemoAuthDefault.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DemoAuthDefault.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		C97DFC211F800C1142C37FAB /* AuthManagerSetupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManagerSetupTests.swift; sourceTree = "<group>"; };
 		CA7D287FD52AD54574C835E4 /* DemoAuthDefaultApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthDefaultApp.swift; sourceTree = "<group>"; };
 		D3C76D4B50F108752FB975C0 /* DemoAuthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthApp.swift; sourceTree = "<group>"; };
+		DC54EB5002B0E09C728DFE83 /* MeResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeResponse.swift; sourceTree = "<group>"; };
 		E200BD79CDAB9D156470DE55 /* DemoAuthTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DemoAuthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB6724C386B29B26E603A1D2 /* DemoAuthmacOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthmacOSTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -133,6 +150,7 @@
 			children = (
 				C97DFC211F800C1142C37FAB /* AuthManagerSetupTests.swift */,
 				8824A1CB67156CFA27C26790 /* DemoAuthDefaultTests.swift */,
+				4A42A24511A5CE01F5E4BD7E /* ProfileViewModelTests.swift */,
 			);
 			path = DemoAuthDefaultTests;
 			sourceTree = "<group>";
@@ -146,6 +164,9 @@
 				48CFE905BD2970672E6FFB45 /* DemoAuthCustomApp.swift */,
 				CA7D287FD52AD54574C835E4 /* DemoAuthDefaultApp.swift */,
 				B041BEAD33B8B765DCC6852C /* Info.plist */,
+				DC54EB5002B0E09C728DFE83 /* MeResponse.swift */,
+				57ADA9D71EAE2601DA21FAF9 /* ProfileView.swift */,
+				B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */,
 			);
 			path = DemoAuth;
 			sourceTree = "<group>";
@@ -448,6 +469,7 @@
 			files = (
 				5B195A749E2694D63442A7E9 /* AuthManagerSetupTests.swift in Sources */,
 				76284F560AE32B1FD89AE6C9 /* DemoAuthDefaultTests.swift in Sources */,
+				67E2A82B6F033891075993C8 /* ProfileViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -460,6 +482,9 @@
 				ADBAE9559B32299A297BBEE8 /* DemoAuthApp.swift in Sources */,
 				BDF8903AB85D45EAB690A161 /* DemoAuthCustomApp.swift in Sources */,
 				8B440098800F38E71293EB91 /* DemoAuthDefaultApp.swift in Sources */,
+				5E8DFD1256A1D896DF7EF78E /* MeResponse.swift in Sources */,
+				3555BB1E6D25A036E7B52C9A /* ProfileView.swift in Sources */,
+				5EE77DEF4A2CC4B9AD699798 /* ProfileViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -472,6 +497,9 @@
 				F28C76D5646BB379984B0322 /* DemoAuthApp.swift in Sources */,
 				4C45338889A4F84CD810677E /* DemoAuthCustomApp.swift in Sources */,
 				BA8472BEADFE5EA2DCC0EA77 /* DemoAuthDefaultApp.swift in Sources */,
+				06F2EB9649B329A3E07F8F5A /* MeResponse.swift in Sources */,
+				9E6D5DEFDF7AF7DCBF9BB768 /* ProfileView.swift in Sources */,
+				DDD6551E7155AD9BEC4401ED /* ProfileViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,6 +512,9 @@
 				F3EC4A73C6C8FD3EA4214FDB /* DemoAuthApp.swift in Sources */,
 				7F3D8842923CF7F8F1217901 /* DemoAuthCustomApp.swift in Sources */,
 				81F877C8D6957113B35693F6 /* DemoAuthDefaultApp.swift in Sources */,
+				23778A1E7FBF78B3411DBD05 /* MeResponse.swift in Sources */,
+				A6288FC870BB1B0F083846CD /* ProfileView.swift in Sources */,
+				5C71CDA5C1DADF6444338FE3 /* ProfileViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -504,6 +535,9 @@
 				07D1CB41C8A85B4E28BB7B8C /* DemoAuthApp.swift in Sources */,
 				0AD2E266E57E0E0CF4F811EB /* DemoAuthCustomApp.swift in Sources */,
 				934A2EA16C253E97D580F8AD /* DemoAuthDefaultApp.swift in Sources */,
+				FFD2D5F1BA4642742C837FC5 /* MeResponse.swift in Sources */,
+				E90E5A8EEB9BC7FC255BF022 /* ProfileView.swift in Sources */,
+				BE1F36D3C3F180A0B35C37C6 /* ProfileViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

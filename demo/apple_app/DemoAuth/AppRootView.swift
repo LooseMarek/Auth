@@ -43,8 +43,10 @@ struct AppRootView: View {
             // The auth sheet covers the screen; show an empty background behind it.
             Color.clear
         case .guest, .authenticated:
-            // Profile page placeholder — replaced by the real profile view in task #76.
-            Text("Profile")
+            ProfileView(
+                authManager: authManager,
+                apiBaseURL: Self.demoAPIBaseURL
+            )
         }
     }
 }
