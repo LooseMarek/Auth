@@ -20,7 +20,18 @@ struct AppRootView: View {
 
     // MARK: - State
 
-    @State private var authManager = AuthManager(configuration: AuthClientConfiguration())
+    @State private var authManager: AuthManager
+
+    // MARK: - Init
+
+    /// Creates the root view.
+    ///
+    /// - Parameter configuration: The `AuthClientConfiguration` to use. Defaults to
+    ///   `AuthClientConfiguration()` (all Auth defaults) so that `DemoAuthDefault` and
+    ///   plain `DemoAuth` targets can call `AppRootView()` with no arguments.
+    init(configuration: AuthClientConfiguration = AuthClientConfiguration()) {
+        _authManager = State(initialValue: AuthManager(configuration: configuration))
+    }
 
     // MARK: - Body
 

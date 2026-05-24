@@ -1,0 +1,142 @@
+/* DemoAuthCustom — Localizable.strings (Polish)
+ *
+ * Polish translations for the DemoAuthCustom target.
+ * Demonstrates full EN+PL localisation support for the Auth SPM package.
+ *
+ * Key convention matches AuthClient: auth.{screen}.{element}
+ */
+
+// MARK: - LoginView
+
+/* Screen title */
+"auth.login.title" = "Witaj z powrotem!";
+
+/* Screen subtitle */
+"auth.login.subtitle" = "Zaloguj się i kontynuuj od miejsca, w którym skończyłeś.";
+
+/* Email text field placeholder */
+"auth.login.field.email.placeholder" = "twoj@email.com";
+
+/* Password text field placeholder */
+"auth.login.field.password.placeholder" = "Twoje hasło";
+
+/* Login submit button */
+"auth.login.button.submit" = "Zaloguj się";
+
+/* Forgot password link */
+"auth.login.link.forgot_password" = "Nie pamiętasz hasła?";
+
+/* Register navigation link */
+"auth.login.link.register" = "Nie masz konta? Zarejestruj się";
+
+/* Guest access button */
+"auth.login.button.guest" = "Kontynuuj jako gość";
+
+/* Error: wrong email or password */
+"auth.login.error.invalid_credentials" = "Nieprawidłowy adres e-mail lub hasło.";
+
+// MARK: - RegisterView
+
+/* Screen title (standard registration) */
+"auth.register.title" = "Utwórz konto";
+
+/* Screen subtitle (standard registration) */
+"auth.register.subtitle" = "Zajmuje około 20 sekund. Karta płatnicza nie jest wymagana.";
+
+/* Screen title (guest upgrade flow) */
+"auth.register.upgrade.title" = "Zapisz swoje postępy";
+
+/* Screen subtitle (guest upgrade flow) */
+"auth.register.upgrade.subtitle" = "Dodaj e-mail i hasło, aby nie utracić swoich danych.";
+
+/* Email text field placeholder */
+"auth.register.field.email.placeholder" = "twoj@email.com";
+
+/* Password text field placeholder */
+"auth.register.field.password.placeholder" = "Minimum 8 znaków";
+
+/* Confirm password text field placeholder */
+"auth.register.field.confirm_password.placeholder" = "Powtórz hasło";
+
+/* Register submit button (standard) */
+"auth.register.button.submit" = "Utwórz konto";
+
+/* Register submit button (guest upgrade) */
+"auth.register.upgrade.button.submit" = "Zapisz konto";
+
+/* Login navigation link */
+"auth.register.link.login" = "Masz już konto? Zaloguj się";
+
+/* Error: password too short */
+"auth.register.error.password_too_short" = "Hasło musi zawierać co najmniej 8 znaków.";
+
+/* Error: passwords do not match */
+"auth.register.error.password_mismatch" = "Hasła nie są zgodne.";
+
+/* Error: email already registered */
+"auth.register.error.email_taken" = "Konto z tym adresem e-mail już istnieje.";
+
+// MARK: - ForgotPasswordView
+
+/* Screen title */
+"auth.forgot.title" = "Resetuj hasło";
+
+/* Screen subtitle */
+"auth.forgot.subtitle" = "Podaj swój e-mail, a wyślemy Ci link do zresetowania hasła.";
+
+/* Email text field placeholder */
+"auth.forgot.field.email.placeholder" = "twoj@email.com";
+
+/* Send reset link button */
+"auth.forgot.button.submit" = "Wyślij link resetujący";
+
+/* Back to login link / button */
+"auth.forgot.link.back" = "Wróć do logowania";
+
+/* Success state — card title */
+"auth.forgot.success.title" = "Sprawdź swoją skrzynkę!";
+
+/* Success state — card body */
+"auth.forgot.success.body" = "Wysłaliśmy link do resetowania hasła na Twój adres e-mail. Może to potrwać kilka minut.";
+
+// MARK: - Shared buttons
+
+/* Sign in with Apple button label */
+"auth.button.apple" = "Zaloguj się przez Apple";
+
+/* Sign in with Apple accessibility label */
+"auth.button.apple.accessibility" = "Zaloguj się przez Apple";
+
+/* Sign in with Google button label */
+"auth.button.google" = "Zaloguj się przez Google";
+
+/* Sign in with Google accessibility label */
+"auth.button.google.accessibility" = "Zaloguj się przez Google";
+
+// MARK: - Shared UI
+
+/* "Or" divider between primary and social auth options */
+"auth.separator.or" = "lub";
+
+/* Accessibility label for the show-password toggle (currently hidden) */
+"auth.field.password.show" = "Pokaż hasło";
+
+/* Accessibility label for the hide-password toggle (currently visible) */
+"auth.field.password.hide" = "Ukryj hasło";
+
+// MARK: - Shared errors
+
+/* Error: required field is empty */
+"auth.error.required" = "To pole jest wymagane.";
+
+/* Error: invalid email format */
+"auth.error.email_format" = "Podaj prawidłowy adres e-mail.";
+
+/* Error: no internet connection */
+"auth.error.network" = "Brak połączenia z internetem. Spróbuj ponownie.";
+
+/* Error: generic server error */
+"auth.error.server" = "Coś poszło nie tak. Spróbuj ponownie.";
+
+/* Error: social sign-in token is invalid */
+"auth.social.error.token_invalid" = "Logowanie nie powiodło się. Spróbuj ponownie.";
