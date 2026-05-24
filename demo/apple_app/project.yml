@@ -5,6 +5,9 @@ options:
     iOS: "17.0"
     macOS: "14.0"
 
+packages:
+  Auth:
+    path: ../..
 
 targets:
   DemoAuth:
@@ -16,6 +19,9 @@ targets:
       path: "DemoAuth/Info.plist"
       properties:
         UILaunchScreen: {}
+    dependencies:
+      - package: Auth
+        product: AuthClient
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -47,6 +53,9 @@ targets:
       path: "DemoAuth/Info.plist"
       properties:
         UILaunchScreen: {}
+    dependencies:
+      - package: Auth
+        product: AuthClient
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -78,6 +87,9 @@ targets:
       path: "DemoAuth/Info.plist"
       properties:
         UILaunchScreen: {}
+    dependencies:
+      - package: Auth
+        product: AuthClient
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -108,6 +120,9 @@ targets:
     info:
       path: "DemoAuth/Info.plist"
       properties: {}
+    dependencies:
+      - package: Auth
+        product: AuthClient
     settings:
       base:
         SWIFT_VERSION: 6.2

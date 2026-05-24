@@ -169,6 +169,19 @@ Key convention: `auth.{screen}.{element}` (e.g. `auth.login.title`, `auth.regist
 Write unit tests only: assert schema names, model initialisation, field values, and relationship IDs. Do not write migration or CRUD integration tests inside this package — those belong in the host app's test suite.
 
 
+### SnapshotTesting must not be a production AuthClient dependency
+
+`SnapshotTesting` (from swift-snapshot-testing) must only appear as a dependency of **test targets** (`AuthClientSnapshotTests`), never of the production `AuthClient` target. If added to the production target, host apps that link `AuthClient` will fail to link because `SnapshotTesting` references Swift Testing framework symbols (`Testing.Trait`, `Testing.SourceLocation`, etc.) that are unavailable in app bundles.
+
+Correct placement in `Package.swift`:
+```swift
+// WRONG — causes linker failures in host apps:
+.target(name: "AuthClient", dependencies: [..., .product(name: "SnapshotTesting", ...)], ...)
+
+// CORRECT — only in the snapshot test target:
+.testTarget(name: "AuthClientSnapshotTests", dependencies: [..., .product(name: "SnapshotTesting", ...)], ...)
+```
+
 ---
 
 ## Environment & Secrets
