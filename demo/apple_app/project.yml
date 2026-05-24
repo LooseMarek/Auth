@@ -19,6 +19,7 @@ targets:
       path: "DemoAuth/Info.plist"
       properties:
         UILaunchScreen: {}
+        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient
@@ -53,6 +54,7 @@ targets:
       path: "DemoAuth/Info.plist"
       properties:
         UILaunchScreen: {}
+        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient
@@ -92,6 +94,7 @@ targets:
       path: "DemoAuth/Info.plist"
       properties:
         UILaunchScreen: {}
+        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient
@@ -124,7 +127,8 @@ targets:
     sources: ["DemoAuth"]
     info:
       path: "DemoAuth/Info.plist"
-      properties: {}
+      properties:
+        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient

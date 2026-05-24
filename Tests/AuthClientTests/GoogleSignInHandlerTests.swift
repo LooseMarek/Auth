@@ -92,6 +92,44 @@ final class GoogleSignInHandlerTests: XCTestCase {
         XCTAssertEqual(networkService.signInWithGoogleCallCount, 0)
     }
 
+    // MARK: - testMissingGIDClientIDTreatedAsCancellation
+
+    func testMissingGIDClientIDTreatedAsCancellation() async {
+        // Given: a token provider that simulates a missing GIDClientID by throwing
+        // GoogleSignInCancellationError — the same error the production
+        // GIDSignInTokenProvider throws when GIDSignIn.sharedInstance.configuration is nil.
+        let tokenProvider = MockGoogleIDTokenProvider(result: .failure(GoogleSignInCancellationError()))
+        let networkService = MockGoogleAuthNetworkService(
+            signInWithGoogleResult: .failure(AuthNetworkError.serverError)
+        )
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: InMemoryTokenStore()
+        )
+        let viewModel = LoginViewModel(networkService: networkService)
+        let handler = GoogleSignInHandler(
+            authManager: authManager,
+            viewModel: viewModel,
+            tokenProvider: tokenProvider
+        )
+
+        // When: sign-in is attempted (simulating missing GIDClientID)
+        await handler.handleSignIn()
+
+        // Then: no error is surfaced — this must be a silent no-op
+        XCTAssertNil(viewModel.errorMessage, "Missing GIDClientID must not show an error to the user")
+
+        // And: session remains .unauthenticated
+        guard case .unauthenticated = authManager.session else {
+            XCTFail("Expected .unauthenticated, got \(authManager.session)")
+            return
+        }
+
+        // And: the network service was never called
+        XCTAssertEqual(networkService.signInWithGoogleCallCount, 0)
+    }
+
     // MARK: - testNetworkErrorSetsErrorOnViewModel
 
     func testNetworkErrorSetsErrorOnViewModel() async {

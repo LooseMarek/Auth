@@ -132,6 +132,13 @@ struct GIDSignInTokenProvider: GoogleIDTokenProvider {
     func fetchIDToken() async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
             Task { @MainActor in
+                // Guard against missing GIDClientID in Info.plist. When configuration is
+                // nil, GIDSignIn crashes immediately rather than returning an error.
+                // Treat this as a cancellation so the UI degrades gracefully instead.
+                guard GIDSignIn.sharedInstance.configuration != nil else {
+                    continuation.resume(throwing: GoogleSignInCancellationError())
+                    return
+                }
 #if canImport(UIKit)
                 guard
                     let scene = UIApplication.shared.connectedScenes
