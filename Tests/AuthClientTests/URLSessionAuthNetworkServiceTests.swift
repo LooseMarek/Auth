@@ -135,7 +135,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
     func testLoginSendsPostToAuthLogin() async throws {
         // Given: server returns a valid AuthResponse
         let responseData = makeAuthResponseJSON()
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), responseData)
         }
@@ -150,7 +150,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testLoginEncodesEmailAndPasswordInBody() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), makeAuthResponseJSON())
         }
@@ -246,7 +246,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testForgotPasswordSendsPostToAuthForgotPassword() async throws {
         // Given: server returns 200 with no body (success)
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), nil)
         }
@@ -261,7 +261,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testForgotPasswordEncodesEmailInBody() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), nil)
         }
@@ -278,7 +278,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testLogoutSendsPostToAuthLogout() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), nil)
         }
@@ -293,7 +293,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testLogoutEncodesRefreshTokenInBody() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), nil)
         }
@@ -310,7 +310,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testDeleteAccountSendsDeleteToAuthAccount() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), nil)
         }
@@ -325,7 +325,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testDeleteAccountSetsBearerTokenHeader() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), nil)
         }
@@ -377,7 +377,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testRegisterSendsPostToAuthRegister() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), makeAuthResponseJSON())
         }
@@ -394,7 +394,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
 
     func testLoginAsGuestSendsPostToAuthGuest() async throws {
         // Given
-        MockURLProtocolForNetworkService.requestHandler = { [self] request in
+        MockURLProtocolForNetworkService.requestHandler = { request in
             URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
             return (makeHTTPResponse(url: request.url!, status: 200), makeAuthResponseJSON())
         }

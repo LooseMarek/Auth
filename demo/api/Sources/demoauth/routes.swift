@@ -21,4 +21,8 @@ func routes(_ app: Application) throws {
     try app.register(collection: AuthController(configuration: authConfig))
     try app.register(collection: RefreshTokenController(configuration: authConfig))
     try app.register(collection: MeController(configuration: authConfig))
+    // AccountDeletionController must be registered so that DELETE /auth/account is handled.
+    // Without it, Vapor returns 404 and the client shows "Something went wrong." even
+    // when the server receives the request (Vapor logs all requests, including 404s).
+    try app.register(collection: AccountDeletionController(configuration: authConfig))
 }
