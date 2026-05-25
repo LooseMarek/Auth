@@ -1,0 +1,56 @@
+name: Preview Snapshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform(s) to record'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - ios
+          - macos
+          - both
+
+jobs:
+  record:
+    name: Preview Snapshots (${{ inputs.platform }})
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Delete stale x86_64 snapshots
+        run: find . -not -path './.build/*' -type f -name '*-x86_64.png' -path '*/__Snapshots__/*' -delete
+
+      - name: Record iOS snapshots
+        if: inputs.platform == 'ios' || inputs.platform == 'both'
+        continue-on-error: true
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
+          SNAPSHOT_TESTING_RECORD: "all"
+        run: bundle exec fastlane ios record_snapshots
+
+      - name: Record macOS snapshots
+        if: inputs.platform == 'macos' || inputs.platform == 'both'
+        continue-on-error: true
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
+          SNAPSHOT_TESTING_RECORD: "all"
+        run: bundle exec fastlane mac record_snapshots
+
+      - name: Upload recorded snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorded-snapshots-${{ inputs.platform }}-${{ github.run_id }}
+          path: Tests/**/__Snapshots__/**
+          if-no-files-found: warn
+          retention-days: 30

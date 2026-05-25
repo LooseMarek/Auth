@@ -1,0 +1,153 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Tests/**'
+      - 'Package.swift'
+      - 'demo/apple_app/**'
+      - 'demo/api/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Tests/**'
+      - 'Package.swift'
+      - 'demo/apple_app/**'
+      - 'demo/api/**'
+  workflow_dispatch:
+
+env:
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+  FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+  FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: self-hosted
+    outputs:
+      spm: ${{ steps.filter.outputs.spm }}
+      demo_app: ${{ steps.filter.outputs.demo_app }}
+      demo_api: ${{ steps.filter.outputs.demo_api }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Filter paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            spm:
+              - 'Sources/**'
+              - 'Tests/**'
+              - 'Package.swift'
+            demo_app:
+              - 'Sources/**'
+              - 'Package.swift'
+              - 'demo/apple_app/**'
+            demo_api:
+              - 'Sources/**'
+              - 'Package.swift'
+              - 'demo/api/**'
+
+  spm-ios:
+    name: SPM iOS
+    needs: changes
+    if: needs.changes.outputs.spm == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests via Fastlane
+        run: bundle exec fastlane ios test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures-spm-ios-${{ github.run_id }}
+          path: fastlane/test_output/
+          retention-days: 14
+
+  spm-macos:
+    name: SPM macOS
+    needs: changes
+    if: needs.changes.outputs.spm == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests via Fastlane
+        run: bundle exec fastlane mac test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures-spm-macos-${{ github.run_id }}
+          path: fastlane/test_output/
+          retention-days: 14
+
+  demo-ios:
+    name: Demo iOS
+    needs: changes
+    if: needs.changes.outputs.demo_app == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests via Fastlane
+        run: bundle exec fastlane ios demo_ios_test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures-demo-ios-${{ github.run_id }}
+          path: fastlane/test_output/
+          retention-days: 14
+
+  demo-macos:
+    name: Demo macOS
+    needs: changes
+    if: needs.changes.outputs.demo_app == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests via Fastlane
+        run: bundle exec fastlane mac demo_mac_test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failures-demo-macos-${{ github.run_id }}
+          path: fastlane/test_output/
+          retention-days: 14
+
+  demo-api:
+    name: Demo API
+    needs: changes
+    if: needs.changes.outputs.demo_api == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests via Fastlane
+        run: bundle exec fastlane mac demo_api_test
