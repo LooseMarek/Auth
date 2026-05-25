@@ -2,7 +2,7 @@ import Foundation
 import AuthShared
 
 /// Errors that can be thrown by ``AuthNetworkService`` operations.
-public enum AuthNetworkError: Error, Sendable {
+public enum AuthNetworkError: Error, LocalizedError, Sendable {
     /// The supplied credentials (email/password or identity token) were rejected by the server.
     case invalidCredentials
     /// Registration failed because the email address is already associated with an account.
@@ -11,6 +11,24 @@ public enum AuthNetworkError: Error, Sendable {
     case networkUnavailable
     /// The server returned an unexpected error response.
     case serverError
+
+    /// A human-readable description suitable for display in the UI.
+    ///
+    /// Conforms to `LocalizedError` so that `error.localizedDescription` returns a
+    /// user-facing string instead of the raw domain/code string produced by the
+    /// default `Error` implementation (e.g. "AuthClient.AuthNetworkError error 3").
+    public var errorDescription: String? {
+        switch self {
+        case .invalidCredentials:
+            return String(localized: "auth.login.error.invalid_credentials", bundle: .module)
+        case .emailTaken:
+            return String(localized: "auth.register.error.email_taken", bundle: .module)
+        case .networkUnavailable:
+            return String(localized: "auth.error.network", bundle: .module)
+        case .serverError:
+            return String(localized: "auth.error.server", bundle: .module)
+        }
+    }
 }
 
 /// Defines the network contract between `AuthManager` and the host app's backend.

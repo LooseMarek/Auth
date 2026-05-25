@@ -211,6 +211,47 @@ final class ProfileViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.showDeleteConfirmation, "Confirmation alert should be shown after confirmDeleteAccount()")
     }
 
+    // MARK: - testRetryDeleteAccount_issuesDeleteNotFetchMe
+
+    func testRetryDeleteAccount_issuesDeleteNotFetchMe() async throws {
+        // Given: a ProfileViewModel backed by a network service that counts deleteAccount calls
+        let trackingNetworkService = TrackingAuthNetworkService()
+        let tokenStore = InMemoryTokenStore()
+        let metadata = TokenMetadata(
+            accessToken: "test-access-token",
+            refreshToken: "test-refresh-token",
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        try tokenStore.save(metadata)
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: trackingNetworkService,
+            tokenStore: tokenStore
+        )
+
+        let viewModel = ProfileViewModel(
+            authManager: authManager,
+            apiBaseURL: "http://localhost:8080",
+            urlSession: makeMockSession()
+        )
+
+        // When: deleteAccount is called
+        await viewModel.deleteAccount()
+
+        // Then: deleteAccount was called on the network service, not login/refresh
+        XCTAssertEqual(trackingNetworkService.deleteAccountCallCount, 1, "deleteAccount should be called once")
+        XCTAssertEqual(trackingNetworkService.loginCallCount, 0, "login must not be called")
+        XCTAssertEqual(trackingNetworkService.refreshTokenCallCount, 0, "refreshToken (proxy for GET /me) must not be called")
+
+        // When: retryDeleteAccount is called
+        await viewModel.retryDeleteAccount()
+
+        // Then: deleteAccount was called again — retry re-issues DELETE, not any other endpoint
+        XCTAssertEqual(trackingNetworkService.deleteAccountCallCount, 2, "retry must re-issue DELETE")
+        XCTAssertEqual(trackingNetworkService.loginCallCount, 0, "retry must not call login")
+        XCTAssertEqual(trackingNetworkService.refreshTokenCallCount, 0, "retry must not call refreshToken")
+    }
+
     // MARK: - testGuestUpgradeButtonVisibleWhenIsGuestTrue
 
     func testGuestUpgradeButtonVisibleWhenIsGuestTrue() {
@@ -228,4 +269,35 @@ final class ProfileViewModelTests: XCTestCase {
         // Then: the Upgrade Account button should be visible (isGuest == true)
         XCTAssertTrue(viewModel.isGuest, "isGuest should be true so the Upgrade Account button is visible")
     }
+}
+
+// MARK: - TrackingAuthNetworkService
+
+/// An `AuthNetworkService` that counts calls to each endpoint, used to assert
+/// that retry re-issues DELETE /account and not any other endpoint.
+final class TrackingAuthNetworkService: AuthNetworkService, @unchecked Sendable {
+    var loginCallCount = 0
+    var refreshTokenCallCount = 0
+    var deleteAccountCallCount = 0
+
+    func login(email: String, password: String) async throws -> AuthResponse {
+        loginCallCount += 1
+        throw AuthNetworkError.serverError
+    }
+    func register(email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func forgotPassword(email: String) async throws {}
+    func refreshToken(refreshToken: String) async throws -> AuthResponse {
+        refreshTokenCallCount += 1
+        throw AuthNetworkError.serverError
+    }
+    func logout(refreshToken: String) async throws {}
+    func deleteAccount(accessToken: String) async throws {
+        deleteAccountCallCount += 1
+    }
+    func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func signInWithGoogle(identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func loginAsGuest() async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
 }
