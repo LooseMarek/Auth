@@ -227,6 +227,32 @@ name `AuthService` (renamed to `AuthServer` in an earlier task). Fix:
 3. Re-open `demo/api/` in Xcode — it will resolve from scratch using the correct
    `Package.swift` (which already uses `AuthServer`).
 
+### Demo API — all AuthServer controllers must be registered in routes.swift
+
+Every `RouteCollection` added to `AuthServer` must also be registered in
+`demo/api/Sources/demoauth/routes.swift`. Vapor logs **all** incoming requests,
+including ones that match no route — so the server log showing `DELETE /auth/account`
+does **not** confirm the route is registered. A missing registration returns HTTP 404,
+which `URLSessionAuthNetworkService.mapStatusCode` maps to `.serverError`, and the user
+sees "Something went wrong." even though the DELETE request reached the server.
+
+**Checklist for routes.swift:**
+```swift
+try app.register(collection: AuthController(configuration: authConfig))
+try app.register(collection: RefreshTokenController(configuration: authConfig))
+try app.register(collection: MeController(configuration: authConfig))
+try app.register(collection: AccountDeletionController(configuration: authConfig))
+// Add new controllers here when they are added to AuthServer.
+```
+
+**IPv6/IPv4 "Connection refused" log noise.** The OS networking stack logs
+`nw_socket_handle_socket_event ... Socket SO_ERROR [61: Connection refused]` when
+URLSession's Happy Eyeballs (RFC 6555) attempts `::1:8080` (IPv6) first, fails because
+Vapor only binds IPv4 (`0.0.0.0`), and then automatically retries on `127.0.0.1:8080`.
+This log line is **harmless** — the request succeeds on the IPv4 fallback. It is NOT
+the cause of the user-visible error. Do not add special IPv6 handling; the fallback
+is automatic and correct.
+
 ---
 
 ## Environment & Secrets
