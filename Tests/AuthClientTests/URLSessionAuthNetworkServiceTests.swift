@@ -340,6 +340,39 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
         )
     }
 
+    /// Regression test: if the demo API does not register AccountDeletionController,
+    /// Vapor returns HTTP 404 for DELETE /auth/account. Verify that a 404 response
+    /// maps to `.serverError` — which surfaces to the user as "Something went wrong."
+    /// rather than silently succeeding.
+    ///
+    /// Fix: register `AccountDeletionController` in `demo/api/Sources/demoauth/routes.swift`.
+    func testDeleteAccountThrowsServerErrorOn404() async throws {
+        // Given: server returns 404 (route not registered — the regression scenario)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 404), nil)
+        }
+
+        // When / Then: 404 must map to .serverError, not succeed silently
+        do {
+            try await sut.deleteAccount(accessToken: "token")
+            XCTFail("Expected .serverError when server returns 404 (unregistered route)")
+        } catch AuthNetworkError.serverError {
+            // Expected — confirms 404 is NOT treated as success.
+            // The fix is to register AccountDeletionController so the server returns 204.
+        }
+    }
+
+    func testDeleteAccountSucceedsOn204NoContent() async throws {
+        // Given: server returns 204 No Content (the correct response from AccountDeletionController)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 204), nil)
+        }
+
+        // When / Then: 204 is a 2xx → no error thrown
+        try await sut.deleteAccount(accessToken: "token")
+        // Reaching here without throwing confirms 204 is accepted as success.
+    }
+
     // MARK: - register
 
     func testRegisterSendsPostToAuthRegister() async throws {
