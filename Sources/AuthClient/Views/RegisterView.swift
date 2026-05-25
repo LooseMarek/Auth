@@ -19,6 +19,7 @@ public struct RegisterView: View {
     private let authManager: AuthManager
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.authTheme) private var theme
+    @Environment(\.dismiss) private var dismiss
 
     private var bundle: Bundle { authManager.configuration.localizationBundle ?? .module }
 
@@ -59,6 +60,11 @@ public struct RegisterView: View {
                 \.authTheme,
                 AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
             )
+            .onAppear {
+                // Wire the dismiss action into the ViewModel so navigateToLogin() pops
+                // this view off the NavigationStack and returns the user to LoginView.
+                viewModel.onNavigateToLogin = { dismiss() }
+            }
     }
 
     @ViewBuilder
@@ -213,7 +219,9 @@ public struct RegisterView: View {
     private var loginLink: some View {
         HStack {
             Spacer()
-            Button {} label: {
+            Button {
+                viewModel.navigateToLogin()
+            } label: {
                 // The full localised string is "Already have an account? Log in".
                 // We split it on "Log in" at runtime so the "Log in" word can be
                 // styled with the primary colour while keeping the full phrase localizable.
