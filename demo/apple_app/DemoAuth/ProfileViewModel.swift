@@ -18,6 +18,14 @@ final class ProfileViewModel {
     private let apiBaseURL: String
     private let urlSession: URLSession
 
+    // MARK: - Internal delegates
+
+    /// Dedicated view model for the delete-account flow.
+    ///
+    /// Manages its own error state and provides a `retry()` method that
+    /// always re-issues `DELETE /account` — never `GET /me`.
+    let deleteAccountViewModel = DeleteAccountViewModel()
+
     // MARK: - User fields
 
     /// The authenticated user's unique identifier.
@@ -49,6 +57,9 @@ final class ProfileViewModel {
     var isLoading: Bool = false
 
     /// Set to a human-readable description when the `GET /me` call fails.
+    ///
+    /// This field is only set by `fetchMe()`. Account-deletion errors are surfaced
+    /// via ``deleteAccountViewModel/errorMessage`` instead.
     var errorMessage: String?
 
     /// Controls the delete-account confirmation alert.
@@ -113,17 +124,21 @@ final class ProfileViewModel {
         showDeleteConfirmation = true
     }
 
-    /// Permanently deletes the account by delegating to `AuthManager.deleteAccount()`.
+    /// Permanently deletes the account by delegating to ``DeleteAccountViewModel``.
     ///
     /// On success, the session resets to `.unauthenticated`.
-    /// On failure, `errorMessage` is set.
+    /// On failure, ``deleteAccountViewModel/errorMessage`` is set.
     func deleteAccount() async {
-        do {
-            try await authManager.deleteAccount()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        await deleteAccountViewModel.deleteAccount(authManager: authManager)
         showDeleteConfirmation = false
+    }
+
+    /// Retries the last failed delete-account request.
+    ///
+    /// Delegates to ``DeleteAccountViewModel/retry(authManager:)`` which always
+    /// re-issues `DELETE /account` — never `GET /me`.
+    func retryDeleteAccount() async {
+        await deleteAccountViewModel.retry(authManager: authManager)
     }
 
     /// Triggers the guest-upgrade flow by presenting the auth sheet as a dismissible sheet.

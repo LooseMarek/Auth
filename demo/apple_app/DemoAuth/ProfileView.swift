@@ -54,7 +54,7 @@ struct ProfileView: View {
     @ViewBuilder
     private var profileContent: some View {
         List {
-            // MARK: Error banner
+            // MARK: Fetch-me error banner
             if let errorMessage = viewModel.errorMessage {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
@@ -62,6 +62,20 @@ struct ProfileView: View {
                             .foregroundStyle(.red)
                         Button("Retry") {
                             Task { await viewModel.fetchMe() }
+                        }
+                    }
+                }
+            }
+
+            // MARK: Delete-account error banner
+            // Shown separately so "Retry" re-issues DELETE /account, not GET /me.
+            if let deleteErrorMessage = viewModel.deleteAccountViewModel.errorMessage {
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(deleteErrorMessage)
+                            .foregroundStyle(.red)
+                        Button("Retry") {
+                            Task { await viewModel.retryDeleteAccount() }
                         }
                     }
                 }
