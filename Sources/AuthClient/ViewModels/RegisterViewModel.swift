@@ -20,10 +20,17 @@ final class RegisterViewModel {
 
     private let networkService: any AuthNetworkService
     private let localizationBundle: Bundle?
+    /// Navigation callback injected by the hosting view.
+    ///
+    /// In production, `RegisterView` sets this to a closure that calls
+    /// `@Environment(\.dismiss)` so the view pops off the navigation stack.
+    /// In tests, a spy closure is injected directly to verify the callback fires.
+    var onNavigateToLogin: (() -> Void)?
 
     init(
         networkService: any AuthNetworkService,
         localizationBundle: Bundle? = nil,
+        onNavigateToLogin: (() -> Void)? = nil,
         initialEmail: String = "",
         initialPassword: String = "",
         initialConfirmPassword: String = "",
@@ -32,11 +39,20 @@ final class RegisterViewModel {
     ) {
         self.networkService = networkService
         self.localizationBundle = localizationBundle
+        self.onNavigateToLogin = onNavigateToLogin
         self.email = initialEmail
         self.password = initialPassword
         self.confirmPassword = initialConfirmPassword
         self.confirmPasswordError = initialConfirmPasswordError
         self.isLoading = initialIsLoading
+    }
+
+    /// Navigates back to the Login view by invoking the `onNavigateToLogin` callback.
+    ///
+    /// The callback is provided by the hosting `RegisterView` and calls
+    /// `@Environment(\.dismiss)` to pop the view off the navigation stack.
+    func navigateToLogin() {
+        onNavigateToLogin?()
     }
 
     private func localizedString(_ key: String) -> String {
