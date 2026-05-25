@@ -182,6 +182,23 @@ Correct placement in `Package.swift`:
 .testTarget(name: "AuthClientSnapshotTests", dependencies: [..., .product(name: "SnapshotTesting", ...)], ...)
 ```
 
+### AuthNetworkError — LocalizedError conformance required
+
+Swift's default `Error` implementation produces opaque strings like
+`"The operation couldn't be completed. (AuthClient.AuthNetworkError error 3.)"` when
+`error.localizedDescription` is called. This raw domain/code string must never be shown
+to users.
+
+**Rule:** `AuthNetworkError` conforms to `LocalizedError` and provides `errorDescription`
+for every case. All UI error messages must go through `error.localizedDescription` (or
+a dedicated localised string lookup) — never through `String(describing: error)` or raw
+`catch { errorMessage = "\(error)" }`.
+
+When adding new `AuthNetworkError` cases, always add a corresponding `errorDescription`
+entry. The existing pattern is in `Sources/AuthClient/Network/AuthNetworkService.swift`.
+
+---
+
 ### Demo API — running in Xcode vs terminal
 
 The demo API lives in `demo/api/` and is a pure Swift Package (no `.xcodeproj`). It
