@@ -6,6 +6,23 @@ import AuthShared
 @MainActor
 final class RegisterViewModelTests: XCTestCase {
 
+    // MARK: - testLogInButtonTapped_navigatesToLogin
+
+    func testLogInButtonTapped_navigatesToLogin() {
+        var navigateToLoginCalled = false
+        let mock = MockRegisterNetworkService(result: .success(makeAuthResponse()))
+        let viewModel = RegisterViewModel(
+            networkService: mock,
+            onNavigateToLogin: { navigateToLoginCalled = true }
+        )
+
+        viewModel.navigateToLogin()
+
+        XCTAssertTrue(navigateToLoginCalled, "onNavigateToLogin callback should be invoked when navigateToLogin() is called")
+    }
+
+    // MARK: - Existing tests
+
     func testPasswordMismatchSetsError() async {
         let mock = MockRegisterNetworkService(result: .success(makeAuthResponse()))
         let viewModel = RegisterViewModel(networkService: mock)
