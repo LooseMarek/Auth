@@ -199,6 +199,43 @@ entry. The existing pattern is in `Sources/AuthClient/Network/AuthNetworkService
 
 ---
 
+### Fluent migration: making a column nullable
+
+Fluent's cross-database `updateField` API only supports changing a column's *data type* — it cannot add or remove NOT NULL constraints generically. To make a column nullable:
+
+```swift
+// In prepare: remove NOT NULL by updating the column type without .required
+try await database.schema(User.schema)
+    .updateField("email", .string)
+    .update()
+```
+
+Reverting such a migration (restoring NOT NULL) is not possible via `updateField` because `DatabaseSchema.FieldUpdate` only has a `.dataType` case. The standard practice is to leave `revert()` as a no-op with a comment explaining that reverting requires a fresh database. Never attempt `updateField(.definition(...))` — that case does not exist.
+
+### Guest session persistence and GuestTokenStore
+
+`AuthManager` supports silently resuming a guest session after logout via the `GuestTokenStore` protocol, which `KeychainTokenStore` conforms to. The guest refresh token is stored under a *separate* Keychain account key (`"auth.guest-refresh-token"`) so it is never overwritten by the main token store operations.
+
+`InMemoryTokenStore` does **not** conform to `GuestTokenStore` — unit tests that don't need guest persistence continue to use it unchanged. Tests that must assert on guest-token save/load/delete use `MockTokenStore` (which conforms to `GuestTokenStore`).
+
+The `AuthManager` checks for `GuestTokenStore` conformance at runtime via `as? (any GuestTokenStore)`, so the protocol is opt-in and does not break existing `TokenStore` implementations.
+
+### Demo API — resetting the SQLite database during development
+
+The demo API stores its SQLite database at `demo/api/db.sqlite`. During development,
+when schema migrations change or you want a clean slate, simply delete the file and
+restart the server — Fluent will recreate the schema from scratch:
+
+```
+rm demo/api/db.sqlite
+cd demo/api && swift run
+```
+
+There is no need to run migration scripts or handle migration failures. The database
+is ephemeral in a development context; all migrations are applied fresh on each clean start.
+
+---
+
 ### Demo API — running in Xcode vs terminal
 
 The demo API lives in `demo/api/` and is a pure Swift Package (no `.xcodeproj`). It
