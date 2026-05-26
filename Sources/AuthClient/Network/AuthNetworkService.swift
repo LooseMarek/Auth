@@ -90,7 +90,7 @@ public protocol AuthNetworkService: Sendable {
     ///   - guestUUID: The UUID of the existing guest session.
     ///   - identityToken: The JWT identity token returned by `ASAuthorizationAppleIDCredential`.
     ///   - displayName: The user's display name (only provided by Apple on first sign-in).
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse
 
     /// Authenticates with a Google identity token via POST /auth/google.
     ///
@@ -103,7 +103,7 @@ public protocol AuthNetworkService: Sendable {
     /// - Parameters:
     ///   - guestUUID: The UUID of the existing guest session.
     ///   - identityToken: The JWT identity token returned by the Google Sign-In SDK.
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse
 
     /// Creates an anonymous guest session via POST /auth/guest.
     ///
@@ -116,5 +116,5 @@ public protocol AuthNetworkService: Sendable {
     ///   - guestUUID: The UUID of the existing guest session to upgrade.
     ///   - email: The email address for the new account.
     ///   - password: The password for the new account.
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse
 }

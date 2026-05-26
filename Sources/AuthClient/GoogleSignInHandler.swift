@@ -102,10 +102,13 @@ public final class GoogleSignInHandler {
         do {
             let response: AuthResponse
             if case .guest(let guestUUID) = authManager.session {
-                response = try await authManager.networkService.upgradeGuestWithGoogle(
-                    guestUUID: guestUUID,
-                    identityToken: identityToken
-                )
+                response = try await authManager.withFreshToken { accessToken in
+                    try await authManager.networkService.upgradeGuestWithGoogle(
+                        guestUUID: guestUUID,
+                        accessToken: accessToken,
+                        identityToken: identityToken
+                    )
+                }
             } else {
                 response = try await authManager.networkService.signInWithGoogle(
                     identityToken: identityToken

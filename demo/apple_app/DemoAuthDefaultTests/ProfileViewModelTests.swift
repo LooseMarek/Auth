@@ -75,11 +75,11 @@ struct MockAuthNetworkService: AuthNetworkService {
     func logout(refreshToken: String) async throws {}
     func deleteAccount(accessToken: String) async throws {}
     func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func signInWithGoogle(identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func loginAsGuest() async throws -> AuthResponse { throw AuthNetworkError.serverError }
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
 }
 
 // MARK: - ProfileViewModelTests
@@ -295,9 +295,9 @@ final class TrackingAuthNetworkService: AuthNetworkService, @unchecked Sendable 
         deleteAccountCallCount += 1
     }
     func signInWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func signInWithGoogle(identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func loginAsGuest() async throws -> AuthResponse { throw AuthNetworkError.serverError }
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
 }

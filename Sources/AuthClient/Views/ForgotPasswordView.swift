@@ -359,7 +359,7 @@ private struct PreviewForgotPasswordNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -367,7 +367,7 @@ private struct PreviewForgotPasswordNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -375,7 +375,7 @@ private struct PreviewForgotPasswordNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
