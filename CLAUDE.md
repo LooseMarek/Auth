@@ -311,6 +311,17 @@ with value `["Default"]` for Sign in with Apple to work with a provisioned build
 entitlement is referenced from each iOS target in `project.yml` via
 `CODE_SIGN_ENTITLEMENTS`. The macOS target does not need this entitlement.
 
+### Apple Sign In — email is nil on repeat sign-ins
+
+Apple only provides the user's email in the identity token on the **first** sign-in for a given app. All subsequent sign-ins omit it. Code that stores or requires the email from an Apple credential must handle `nil` gracefully.
+
+The pattern used across `AppleAuthController` and `UpgradeController`: if `appleToken.email` is nil, derive a stable synthetic address from the token's `sub` (subject) claim:
+```swift
+let email = appleToken.email ?? "\(appleToken.subject.value)@privaterelay.appleid.com"
+```
+
+This ensures the same Apple ID always maps to the same User record (looked up by email) regardless of which sign-in is the "first".
+
 ---
 
 ## Environment & Secrets

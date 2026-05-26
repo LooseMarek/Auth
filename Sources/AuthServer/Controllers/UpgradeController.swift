@@ -92,9 +92,28 @@ public struct UpgradeController: RouteCollection, Sendable {
             user.email = email
             user.passwordHash = hash
 
-        case .apple, .google:
+        case .apple:
+            // Apple only provides email on the first sign-in. When absent, decode the
+            // identity token and derive a stable synthetic address from the subject claim
+            // (mirrors AppleAuthController.appleSignIn).
+            let appleEmail: String
+            if let provided = body.email {
+                appleEmail = provided
+            } else {
+                guard let jwks = configuration.appleJWKS,
+                      let tokenString = body.identityToken else {
+                    throw Abort(.badRequest, reason: "Apple identity token is required when email is not provided")
+                }
+                let appleKeys = JWTKeyCollection()
+                try await appleKeys.add(jwks: jwks)
+                let appleToken = try await appleKeys.verify(tokenString, as: AppleIdentityToken.self)
+                appleEmail = appleToken.email ?? "\(appleToken.subject.value)@privaterelay.appleid.com"
+            }
+            user.email = appleEmail
+
+        case .google:
             guard let email = body.email else {
-                throw Abort(.badRequest, reason: "Email is required for social upgrade")
+                throw Abort(.badRequest, reason: "Email is required for Google upgrade")
             }
             user.email = email
             // Social users do not authenticate with a password via AuthServer.
