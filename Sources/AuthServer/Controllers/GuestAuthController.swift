@@ -13,10 +13,12 @@ import AuthShared
 /// - `POST /auth/guest` — creates a new anonymous user tied to a device identifier
 ///   and returns `AuthResponse`
 ///
-/// Guest users have an empty `email` and `passwordHash`. The stable identifier for
-/// the session is the user's UUID returned in `AuthResponse.user.id`. The host app
-/// should persist this UUID alongside the guest JWT in Keychain so the session
-/// survives app launches.
+/// Guest users are stored with a synthetic email `guest+{UUID}@auth.internal` and an
+/// empty `passwordHash`. The synthetic email satisfies the NOT NULL + UNIQUE constraints
+/// without colliding across multiple guest sign-ins. The stable identifier for the
+/// session is the user's UUID returned in `AuthResponse.user.id`. The host app should
+/// persist this UUID alongside the guest JWT in Keychain so the session survives app
+/// launches. The `AuthResponse.user.email` is always `nil` for guests.
 ///
 /// To attach credentials to a guest session later, use `UpgradeController`
 /// (`POST /auth/upgrade`).
@@ -51,8 +53,14 @@ public struct GuestAuthController: RouteCollection, Sendable {
         // Decode the request body — deviceID is recorded but not used for de-duplication.
         _ = try req.content.decode(GuestAuthRequest.self)
 
-        // Create a guest user with no email or password credentials.
-        let user = User(email: "", passwordHash: "")
+        // Pre-assign the UUID so the synthetic guest email can embed it before the first save.
+        // This guarantees uniqueness without altering the schema (email stays NOT NULL UNIQUE).
+        let guestID = UUID()
+        let user = User(
+            id: guestID,
+            email: User.guestEmail(for: guestID),
+            passwordHash: ""
+        )
         try await user.save(on: req.db)
 
         return try await makeAuthResponse(for: user, on: req)
@@ -76,9 +84,10 @@ public struct GuestAuthController: RouteCollection, Sendable {
         )
         try await refreshToken.save(on: req.db)
 
+        // Expose nil email in the DTO — the synthetic storage email is an implementation detail.
         let userDTO = UserDTO(
             id: userID.uuidString,
-            email: user.email,
+            email: user.isGuest ? nil : user.email,
             displayName: nil
         )
 

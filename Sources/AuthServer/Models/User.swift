@@ -3,9 +3,10 @@ import Foundation
 
 /// Fluent model representing an authenticated user account in the `users` table.
 ///
-/// A `User` is created by any registration or social sign-in flow. Guest users are
-/// also stored as `User` records with an empty `email` and `passwordHash` until they
-/// are upgraded via `UpgradeController`.
+/// Guest users are stored as `User` records with a synthetic email
+/// `guest+{UUID}@auth.internal` and an empty `passwordHash`. The synthetic
+/// email satisfies the NOT NULL and UNIQUE constraints while clearly identifying
+/// the row as a guest. When upgraded, the real email and password hash replace them.
 public final class User: Model, @unchecked Sendable {
 
     public static let schema = "users"
@@ -14,11 +15,16 @@ public final class User: Model, @unchecked Sendable {
     @ID(key: .id)
     public var id: UUID?
 
-    /// The user's email address. Empty string for guest users before upgrade.
+    /// The user's email address.
+    ///
+    /// Guest users have a synthetic email `guest+{UUID}@auth.internal`. This satisfies
+    /// the NOT NULL and UNIQUE constraints on the `users` table while distinguishing
+    /// guests from real accounts. After upgrade via `UpgradeController`, this field
+    /// holds the user's real email address.
     @Field(key: "email")
     public var email: String
 
-    /// The BCrypt hash of the user's password. Empty string for social-only accounts.
+    /// The BCrypt hash of the user's password. Empty string for social-only or guest accounts.
     @Field(key: "password_hash")
     public var passwordHash: String
 
@@ -37,8 +43,8 @@ public final class User: Model, @unchecked Sendable {
     ///
     /// - Parameters:
     ///   - id: Optional UUID. Pass `nil` to let the database generate one.
-    ///   - email: The user's email address. Pass an empty string for guest users.
-    ///   - passwordHash: The BCrypt-hashed password. Pass an empty string for social-only or guest users.
+    ///   - email: The user's email. For guests, use `User.guestEmail(for:)`.
+    ///   - passwordHash: The BCrypt-hashed password. Empty string for social-only or guest users.
     public init(
         id: UUID? = nil,
         email: String,
@@ -48,4 +54,19 @@ public final class User: Model, @unchecked Sendable {
         self.email = email
         self.passwordHash = passwordHash
     }
+
+    // MARK: - Guest helpers
+
+    /// The domain suffix used for synthetic guest emails.
+    static let guestEmailDomain = "@auth.internal"
+
+    /// Returns the synthetic guest email for the given UUID.
+    ///
+    /// Format: `guest+{uuid-lowercase}@auth.internal`
+    public static func guestEmail(for id: UUID) -> String {
+        "guest+\(id.uuidString.lowercased())\(guestEmailDomain)"
+    }
+
+    /// Whether this user record is still an unupgraded guest.
+    public var isGuest: Bool { email.hasSuffix(Self.guestEmailDomain) }
 }
