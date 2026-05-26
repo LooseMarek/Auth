@@ -50,7 +50,7 @@ public struct AuthController: RouteCollection, Sendable {
 
         // Hash password and persist user
         let hash = try await req.password.async.hash(body.password)
-        let user = User(email: body.email, passwordHash: hash)
+        let user = User(email: body.email, passwordHash: hash, authProvider: "email")
         try await user.save(on: req.db)
 
         return try await makeAuthResponse(for: user, on: req)

@@ -84,7 +84,7 @@ public struct GoogleAuthController: RouteCollection, Sendable {
             .first() {
             return existing
         }
-        let user = User(email: email, passwordHash: "")
+        let user = User(email: email, passwordHash: "", authProvider: "google")
         try await user.save(on: req.db)
         return user
     }
