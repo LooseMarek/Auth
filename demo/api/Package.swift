@@ -17,6 +17,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 🔐 Auth SPM package (local).
         .package(path: "../../"),
+        // 🔑 JWTKit for JWKS decoding at startup.
+        .package(url: "https://github.com/vapor/jwt-kit", from: "5.5.0"),
     ],
     targets: [
         .executableTarget(
@@ -28,6 +30,7 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "AuthServer", package: "Auth"),
+                .product(name: "JWTKit", package: "jwt-kit"),
             ],
             swiftSettings: swiftSettings
         ),
