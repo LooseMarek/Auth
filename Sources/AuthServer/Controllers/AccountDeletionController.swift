@@ -22,7 +22,7 @@ public struct AccountDeletionController: RouteCollection, Sendable {
     }
 
     /// Registers the `DELETE /auth/account` route under the JWT-protected route group.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         let protected = auth.grouped(JWTMiddleware(configuration: configuration))
         protected.delete("account", use: deleteAccount)

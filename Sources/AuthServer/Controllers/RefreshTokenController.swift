@@ -24,7 +24,7 @@ public struct RefreshTokenController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/refresh` route.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("refresh", use: refresh)
     }

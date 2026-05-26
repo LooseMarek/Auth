@@ -29,7 +29,7 @@ public struct AppleAuthController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/apple` route.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("apple", use: appleSignIn)
     }

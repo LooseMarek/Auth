@@ -29,7 +29,7 @@ public struct GoogleAuthController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/google` route.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("google", use: googleSignIn)
     }

@@ -21,7 +21,7 @@ public struct LogoutController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/logout` route under the JWT-protected route group.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         let protected = auth.grouped(JWTMiddleware(configuration: configuration))
         protected.post("logout", use: logout)
