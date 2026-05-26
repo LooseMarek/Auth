@@ -22,7 +22,7 @@ struct MeController: RouteCollection, Sendable {
     }
 
     /// Registers the `GET /me` route behind `JWTMiddleware`.
-    func boot(routes: RoutesBuilder) throws {
+    func boot(routes: any RoutesBuilder) throws {
         let protected = routes.grouped(JWTMiddleware(configuration: configuration))
         protected.get("me", use: me)
     }

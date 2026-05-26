@@ -34,7 +34,7 @@ public struct GuestAuthController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/guest` route.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("guest", use: guestSignIn)
     }

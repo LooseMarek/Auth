@@ -24,7 +24,7 @@ public struct AuthController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/register` and `POST /auth/login` routes.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("register", use: register)
         auth.post("login", use: login)

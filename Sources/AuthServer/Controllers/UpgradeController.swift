@@ -32,7 +32,7 @@ public struct UpgradeController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/upgrade` route under the JWT-protected route group.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         let protected = auth.grouped(JWTMiddleware(configuration: configuration))
         protected.post("upgrade", use: upgrade)

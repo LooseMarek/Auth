@@ -22,7 +22,7 @@ public struct ResetPasswordController: RouteCollection, Sendable {
     }
 
     /// Registers the `POST /auth/reset-password` route.
-    public func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
         auth.post("reset-password", use: resetPassword)
     }
