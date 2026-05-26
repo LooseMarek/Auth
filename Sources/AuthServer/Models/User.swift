@@ -36,6 +36,13 @@ public final class User: Model, @unchecked Sendable {
     @Timestamp(key: "updated_at", on: .update)
     public var updatedAt: Date?
 
+    /// The identity provider used to create this account.
+    ///
+    /// One of `"email"`, `"apple"`, `"google"`, or `"guest"`. Nil for rows that
+    /// pre-date the `AddAuthProviderToUser` migration (treat as `"email"`).
+    @OptionalField(key: "auth_provider")
+    public var authProvider: String?
+
     /// Required by Fluent for model hydration.
     public init() {}
 
@@ -45,14 +52,17 @@ public final class User: Model, @unchecked Sendable {
     ///   - id: Optional UUID. Pass `nil` to let the database generate one.
     ///   - email: The user's email. For guests, use `User.guestEmail(for:)`.
     ///   - passwordHash: The BCrypt-hashed password. Empty string for social-only or guest users.
+    ///   - authProvider: The identity provider (`"email"`, `"apple"`, `"google"`, `"guest"`).
     public init(
         id: UUID? = nil,
         email: String,
-        passwordHash: String
+        passwordHash: String,
+        authProvider: String? = nil
     ) {
         self.id = id
         self.email = email
         self.passwordHash = passwordHash
+        self.authProvider = authProvider
     }
 
     // MARK: - Guest helpers

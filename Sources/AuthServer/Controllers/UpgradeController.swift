@@ -91,6 +91,7 @@ public struct UpgradeController: RouteCollection, Sendable {
             let hash = try await req.password.async.hash(password)
             user.email = email
             user.passwordHash = hash
+            user.authProvider = "email"
 
         case .apple:
             // Apple only provides email on the first sign-in. When absent, decode the
@@ -110,12 +111,14 @@ public struct UpgradeController: RouteCollection, Sendable {
                 appleEmail = appleToken.email ?? "\(appleToken.subject.value)@privaterelay.appleid.com"
             }
             user.email = appleEmail
+            user.authProvider = "apple"
 
         case .google:
             guard let email = body.email else {
                 throw Abort(.badRequest, reason: "Email is required for Google upgrade")
             }
             user.email = email
+            user.authProvider = "google"
             // Social users do not authenticate with a password via AuthServer.
             // Leave passwordHash as empty string — BCrypt comparison will always fail,
             // which is the correct behaviour for social-only accounts.

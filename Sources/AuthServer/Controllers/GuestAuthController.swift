@@ -59,7 +59,8 @@ public struct GuestAuthController: RouteCollection, Sendable {
         let user = User(
             id: guestID,
             email: User.guestEmail(for: guestID),
-            passwordHash: ""
+            passwordHash: "",
+            authProvider: "guest"
         )
         try await user.save(on: req.db)
 
