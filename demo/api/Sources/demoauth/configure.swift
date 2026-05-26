@@ -1,5 +1,6 @@
 import Fluent
 import FluentSQLiteDriver
+import JWTKit
 import AuthServer
 import Vapor
 
@@ -13,6 +14,7 @@ public func configure(
     _ app: Application,
     database: DatabaseConfigurationFactory = .sqlite(.file("db.sqlite"))
 ) async throws {
+    app.http.server.configuration.hostname = "0.0.0.0"
     app.databases.use(database, as: .sqlite)
 
     let jwtSecret: String
@@ -22,7 +24,12 @@ public func configure(
         app.logger.warning("JWT_SIGNING_SECRET is not set — using insecure default. Set this environment variable before deploying.")
         jwtSecret = "demo-secret-change-in-production"
     }
-    let authConfig = AuthServerConfiguration(jwtSigningSecret: jwtSecret)
+    let appleJWKSData = try await URLSession.shared.data(
+        from: URL(string: "https://appleid.apple.com/auth/keys")!
+    ).0
+    let appleJWKS = try JSONDecoder().decode(JWKS.self, from: appleJWKSData)
+
+    let authConfig = AuthServerConfiguration(jwtSigningSecret: jwtSecret, appleJWKS: appleJWKS)
     app.storage[AuthServerConfiguration.StorageKey.self] = authConfig
 
     app.migrations.add(CreateUser())
