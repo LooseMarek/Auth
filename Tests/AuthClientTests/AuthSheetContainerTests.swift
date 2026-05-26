@@ -78,8 +78,8 @@ final class AuthSheetContainerTests: XCTestCase {
             XCTFail("Expected .unauthenticated when NoOpAuthNetworkService is used, got \(manager.session)")
             return
         }
-        // And: an error message is displayed to the user
-        XCTAssertNotNil(viewModel.errorMessage,
-            "NoOpAuthNetworkService should produce an error message — login always throws serverError")
+        // And: a toast error message is displayed to the user (serverError is non-validation → toast)
+        XCTAssertNotNil(viewModel.toastErrorMessage,
+            "NoOpAuthNetworkService should produce a toast error message — login always throws serverError")
     }
 }

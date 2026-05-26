@@ -91,22 +91,35 @@ Localisation key: `auth.login.subtitle`.
 | Hover (macOS) | Login button shifts to `color.primary.hover` |
 | Pressed | Login button shifts to `color.primary.pressed` + scale 0.97 |
 | Loading | Login button shows spinner (tinted `color.label.on-primary`); all fields and other buttons disabled; keyboard dismissed |
-| Error — field | Affected field uses `color.error` border + inline error row below |
-| Error — server | Inline error appears below the Login button |
+| Error — field | Affected field uses `color.error` border + inline error row below (validation errors only) |
+| Error — toast | Dismissible toast banner at the bottom of the screen (`color.error` background); for network/server/provider errors |
 | Social loading | Full-screen `LoadingOverlay` over the sheet while Apple/Google call is in flight |
 
 ---
 
 ## Error States
 
-| Scenario | Key | Placement |
-|----------|-----|-----------|
-| Empty email or password | `auth.error.required` | Below the empty field |
-| Invalid email format | `auth.error.email_format` | Below email field |
-| Invalid credentials | `auth.login.error.invalid_credentials` | Below password field |
-| Network unavailable | `auth.error.network` | Below Login button |
-| Server error | `auth.error.server` | Below Login button |
-| Social token invalid | `auth.social.error.token_invalid` | Below Login button |
+**Strategy — validation vs. non-validation:**
+
+- **Validation errors** (field-level): displayed *inline* directly below the relevant input field.
+  These are errors the user can fix by correcting a field value (wrong credentials, bad format, etc.).
+- **Non-validation errors** (network / server / provider): displayed as a *dismissible toast*
+  pinned to the bottom of the screen. These are errors the user cannot fix by editing a field
+  (no internet connection, server down, third-party sign-in failure, etc.).
+
+Tapping the toast banner dismisses it and leaves the Login view in a clean state ready for retry.
+
+| Scenario | Key | Placement | Error type |
+|----------|-----|-----------|------------|
+| Empty email or password | `auth.error.required` | Below the empty field | Validation — inline |
+| Invalid email format | `auth.error.email_format` | Below email field | Validation — inline |
+| Invalid credentials | `auth.login.error.invalid_credentials` | Below password field | Validation — inline |
+| Network unavailable | `auth.error.network` | Toast at bottom of screen | Non-validation — toast |
+| Server error | `auth.error.server` | Toast at bottom of screen | Non-validation — toast |
+| Social token invalid | `auth.social.error.token_invalid` | Toast at bottom of screen | Non-validation — toast |
+| Guest sign-in error | `auth.error.network` / `auth.error.server` | Toast at bottom of screen | Non-validation — toast |
+| Google sign-in error | `auth.error.network` / `auth.error.server` | Toast at bottom of screen | Non-validation — toast |
+| Apple sign-in error | `auth.error.network` / `auth.error.server` | Toast at bottom of screen | Non-validation — toast |
 
 ---
 

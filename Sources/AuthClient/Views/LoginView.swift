@@ -46,7 +46,10 @@ public struct LoginView: View {
     ///   - networkService: The network layer used for login and social auth requests.
     ///   - prefilledEmail: Optional email to pre-populate the email field (e.g. for Xcode Previews).
     ///   - prefilledPassword: Optional password to pre-populate the password field.
-    ///   - initialErrorMessage: Optional error message to display immediately on appear.
+    ///   - initialErrorMessage: Optional inline error message to display immediately on appear
+    ///     (shown below the password field — use for validation errors such as invalid credentials).
+    ///   - initialToastErrorMessage: Optional toast error message to display immediately on appear
+    ///     (shown at the bottom of the screen — use for network/server/provider errors).
     ///   - initialIsLoading: When `true`, the login button shows a loading indicator on appear.
     public init(
         authManager: AuthManager,
@@ -54,6 +57,7 @@ public struct LoginView: View {
         prefilledEmail: String = "",
         prefilledPassword: String = "",
         initialErrorMessage: String? = nil,
+        initialToastErrorMessage: String? = nil,
         initialIsLoading: Bool = false
     ) {
         self.authManager = authManager
@@ -63,6 +67,7 @@ public struct LoginView: View {
             initialEmail: prefilledEmail,
             initialPassword: prefilledPassword,
             initialErrorMessage: initialErrorMessage,
+            initialToastErrorMessage: initialToastErrorMessage,
             initialIsLoading: initialIsLoading
         )
         self._viewModel = State(wrappedValue: vm)
@@ -101,7 +106,7 @@ public struct LoginView: View {
                     appleSignInButton
                     Spacer().frame(height: 8)
                     googleSignInButton
-                    if authManager.configuration.allowGuestAccess {
+                    if authManager.configuration.allowGuestAccess && !authManager.session.isGuest {
                         Spacer().frame(height: 8)
                         guestButton
                     }
@@ -129,6 +134,12 @@ public struct LoginView: View {
                     .ignoresSafeArea()
                 ProgressView()
                     .scaleEffect(1.5)
+            }
+
+            // Toast overlay for non-validation errors (network, server, provider).
+            // Pinned to the bottom of the screen; tapping it dismisses the error.
+            if viewModel.toastErrorMessage != nil {
+                toastOverlay
             }
         }
         // Fill all space proposed by NavigationStack so no gaps appear below content.
@@ -178,7 +189,7 @@ public struct LoginView: View {
 
     @ViewBuilder
     private var errorRow: some View {
-        if let message = viewModel.errorMessage {
+        if let message = viewModel.inlineErrorMessage {
             HStack(spacing: 6) {
                 Image(systemName: "exclamationmark.circle.fill")
                     .font(.system(size: 13))
@@ -191,6 +202,47 @@ public struct LoginView: View {
             .padding(.top, 4)
             .accessibilityAddTraits(.updatesFrequently)
         }
+    }
+
+    /// Toast banner shown at the bottom of the screen for non-validation errors.
+    ///
+    /// Displays a dismissible banner for network, server, and provider errors.
+    /// Tapping the banner calls `viewModel.dismissToast()`.
+    private var toastOverlay: some View {
+        VStack {
+            Spacer()
+            if let message = viewModel.toastErrorMessage {
+                Button {
+                    viewModel.dismissToast()
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.white)
+                            .accessibilityHidden(true)
+                        Text(message)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.leading)
+                        Spacer()
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.8))
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .background(theme.errorColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(message)
+                .accessibilityHint(String(localized: "auth.toast.dismiss.hint", bundle: bundle))
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
+            }
+        }
+        .accessibilityAddTraits(.updatesFrequently)
     }
 
     private var forgotPasswordLink: some View {
@@ -448,7 +500,7 @@ private struct PreviewNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -456,7 +508,7 @@ private struct PreviewNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -464,7 +516,7 @@ private struct PreviewNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }

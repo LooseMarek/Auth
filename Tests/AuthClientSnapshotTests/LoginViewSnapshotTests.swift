@@ -363,6 +363,58 @@ final class LoginViewSnapshotTests: XCTestCase {
 #endif
     }
 
+    // MARK: - Toast error state
+
+    /// Verifies the toast error banner appears at the bottom of the screen for non-validation errors
+    /// (e.g. network/server/provider errors from guest, Google, or Apple sign-in).
+    func testToastErrorVisible() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService(),
+            initialToastErrorMessage: "No internet connection. Please try again."
+        ))
+    }
+
+    func testToastErrorVisible_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService(),
+            initialToastErrorMessage: "No internet connection. Please try again."
+        ), colorScheme: .dark)
+    }
+
+    // MARK: - Guest button hidden during guest session
+
+    /// Verifies that the 'Continue as Guest' button is hidden when the current session
+    /// is already .guest, even when allowGuestAccess is true.
+    /// A guest tapping "Log in" to upgrade their account should not see a guest button —
+    /// they are already a guest and can simply close the sheet.
+    func testGuestButtonHidden_guestSession() {
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(allowGuestAccess: true),
+            networkService: NoOpNetworkService(),
+            tokenStore: InMemoryTokenStore()
+        )
+        manager.setGuestSession(uuid: UUID())
+        snapshot(LoginView(
+            authManager: manager,
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testGuestButtonHidden_guestSession_dark() {
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(allowGuestAccess: true),
+            networkService: NoOpNetworkService(),
+            tokenStore: InMemoryTokenStore()
+        )
+        manager.setGuestSession(uuid: UUID())
+        snapshot(LoginView(
+            authManager: manager,
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(
@@ -469,7 +521,7 @@ private struct NoOpNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -477,7 +529,7 @@ private struct NoOpNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -485,7 +537,7 @@ private struct NoOpNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
