@@ -10,11 +10,13 @@ struct ProfileView: View {
 
     // MARK: - State
 
+    private let authManager: AuthManager
     @State private var viewModel: ProfileViewModel
 
     // MARK: - Init
 
     init(authManager: AuthManager, apiBaseURL: String) {
+        self.authManager = authManager
         _viewModel = State(
             initialValue: ProfileViewModel(
                 authManager: authManager,
@@ -35,7 +37,7 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Profile")
-            .task {
+            .task(id: authManager.session.isGuest) {
                 await viewModel.fetchMe()
             }
             .alert("Delete Account", isPresented: $viewModel.showDeleteConfirmation) {

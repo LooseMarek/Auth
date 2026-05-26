@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import AuthShared
 
 @Observable
 @MainActor
@@ -76,7 +77,21 @@ final class RegisterViewModel {
         defer { isLoading = false }
 
         do {
-            let response = try await networkService.register(email: email, password: password)
+            let response: AuthResponse
+            if case .guest(let guestUUID) = authManager.session {
+                // Guest upgrading via the register form — preserve the existing UUID
+                // by calling the upgrade endpoint instead of creating a new account.
+                response = try await authManager.withFreshToken { accessToken in
+                    try await networkService.upgradeGuestWithEmail(
+                        guestUUID: guestUUID,
+                        accessToken: accessToken,
+                        email: email,
+                        password: password
+                    )
+                }
+            } else {
+                response = try await networkService.register(email: email, password: password)
+            }
             authManager.signIn(response: response)
         } catch AuthNetworkError.emailTaken {
             emailError = localizedString("auth.register.error.email_taken")
