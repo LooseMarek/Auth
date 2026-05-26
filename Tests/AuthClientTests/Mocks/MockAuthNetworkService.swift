@@ -93,7 +93,7 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
         return try signInWithAppleResult.get()
     }
 
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         upgradeGuestWithAppleCallCount += 1
         lastUpgradeGuestUUID = guestUUID
         lastUpgradeGuestWithAppleToken = identityToken
@@ -106,7 +106,7 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
         return try signInWithGoogleResult.get()
     }
 
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         upgradeGuestWithGoogleCallCount += 1
         lastUpgradeGuestWithGoogleToken = identityToken
         return try upgradeGuestWithGoogleResult.get()
@@ -117,7 +117,7 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
         return try loginAsGuestResult.get()
     }
 
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         upgradeGuestWithEmailCallCount += 1
         lastUpgradeGuestWithEmailUUID = guestUUID
         lastUpgradeGuestWithEmailEmail = email

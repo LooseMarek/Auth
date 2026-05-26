@@ -70,8 +70,9 @@ final class AppleSignInHandlerTests: XCTestCase {
             return
         }
 
-        // And: no error message is shown
-        XCTAssertNil(viewModel.errorMessage, "Cancellation must not set an error message")
+        // And: no error message is shown (neither inline nor toast)
+        XCTAssertNil(viewModel.errorMessage, "Cancellation must not set an inline error message")
+        XCTAssertNil(viewModel.toastErrorMessage, "Cancellation must not set a toast error message")
 
         // And: the network service was never called
         XCTAssertEqual(networkService.signInWithAppleCallCount, 0)
@@ -98,8 +99,8 @@ final class AppleSignInHandlerTests: XCTestCase {
         // When: the credential is received but the server call fails
         await handler.handleCredential(mockCredential)
 
-        // Then: an inline error message is set on the ViewModel
-        XCTAssertNotNil(viewModel.errorMessage, "A network error must set an error message on the ViewModel")
+        // Then: a toast error message is set on the ViewModel (network errors are non-validation → toast)
+        XCTAssertNotNil(viewModel.toastErrorMessage, "A network error must set a toast error message on the ViewModel")
 
         // And: AuthManager session is still .unauthenticated
         guard case .unauthenticated = authManager.session else {
@@ -137,7 +138,7 @@ final class MockAppleAuthNetworkService: AuthNetworkService, @unchecked Sendable
         return try signInWithAppleResult.get()
     }
 
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         upgradeGuestWithAppleCallCount += 1
         lastUpgradeGuestToken = identityToken
         return try signInWithAppleResult.get()
@@ -171,7 +172,7 @@ final class MockAppleAuthNetworkService: AuthNetworkService, @unchecked Sendable
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -179,7 +180,7 @@ final class MockAppleAuthNetworkService: AuthNetworkService, @unchecked Sendable
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }

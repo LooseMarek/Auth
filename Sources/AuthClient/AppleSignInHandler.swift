@@ -85,11 +85,14 @@ public final class AppleSignInHandler: NSObject {
         do {
             let response: AuthResponse
             if case .guest(let guestUUID) = authManager.session {
-                response = try await authManager.networkService.upgradeGuestWithApple(
-                    guestUUID: guestUUID,
-                    identityToken: identityToken,
-                    displayName: displayName
-                )
+                response = try await authManager.withFreshToken { accessToken in
+                    try await authManager.networkService.upgradeGuestWithApple(
+                        guestUUID: guestUUID,
+                        accessToken: accessToken,
+                        identityToken: identityToken,
+                        displayName: displayName
+                    )
+                }
             } else {
                 response = try await authManager.networkService.signInWithApple(
                     identityToken: identityToken,

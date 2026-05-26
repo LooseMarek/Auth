@@ -25,4 +25,8 @@ func routes(_ app: Application) throws {
     // Without it, Vapor returns 404 and the client shows "Something went wrong." even
     // when the server receives the request (Vapor logs all requests, including 404s).
     try app.register(collection: AccountDeletionController(configuration: authConfig))
+    // GuestAuthController must be registered so that POST /auth/guest is handled.
+    // Without it, Vapor returns 404 and "Continue as Guest" shows "Something went wrong."
+    try app.register(collection: GuestAuthController(configuration: authConfig))
+    try app.register(collection: UpgradeController(configuration: authConfig))
 }

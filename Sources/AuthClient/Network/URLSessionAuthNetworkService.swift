@@ -82,7 +82,7 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
         return try await post(path: "/auth/apple", body: body)
     }
 
-    public func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    public func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         let body = UpgradeGuestRequest(
             guestUUID: guestUUID.uuidString,
             provider: .apple,
@@ -90,7 +90,7 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
             password: nil,
             identityToken: identityToken
         )
-        return try await post(path: "/auth/upgrade", body: body)
+        return try await postWithBearer(path: "/auth/upgrade", bearerToken: accessToken, body: body)
     }
 
     public func signInWithGoogle(identityToken: String) async throws -> AuthResponse {
@@ -98,7 +98,7 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
         return try await post(path: "/auth/google", body: body)
     }
 
-    public func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    public func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         let body = UpgradeGuestRequest(
             guestUUID: guestUUID.uuidString,
             provider: .google,
@@ -106,7 +106,7 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
             password: nil,
             identityToken: identityToken
         )
-        return try await post(path: "/auth/upgrade", body: body)
+        return try await postWithBearer(path: "/auth/upgrade", bearerToken: accessToken, body: body)
     }
 
     public func loginAsGuest() async throws -> AuthResponse {
@@ -116,7 +116,7 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
         return try await post(path: "/auth/guest", body: body)
     }
 
-    public func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+    public func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         let body = UpgradeGuestRequest(
             guestUUID: guestUUID.uuidString,
             provider: .email,
@@ -124,7 +124,7 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
             password: password,
             identityToken: nil
         )
-        return try await post(path: "/auth/upgrade", body: body)
+        return try await postWithBearer(path: "/auth/upgrade", bearerToken: accessToken, body: body)
     }
 
     // MARK: - Private helpers
@@ -132,6 +132,13 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
     /// Sends a POST request with a JSON-encoded body and decodes the `AuthResponse`.
     private func post<Body: Encodable>(path: String, body: Body) async throws -> AuthResponse {
         let request = try makeRequest(path: path, method: "POST", body: body)
+        return try await perform(request)
+    }
+
+    /// Sends a POST request with a JSON-encoded body and Bearer token, decodes the `AuthResponse`.
+    private func postWithBearer<Body: Encodable>(path: String, bearerToken: String, body: Body) async throws -> AuthResponse {
+        var request = try makeRequest(path: path, method: "POST", body: body)
+        request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
         return try await perform(request)
     }
 
