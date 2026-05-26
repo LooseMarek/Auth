@@ -282,6 +282,12 @@ try app.register(collection: AccountDeletionController(configuration: authConfig
 // Add new controllers here when they are added to AuthServer.
 ```
 
+**Vapor default hostname is `127.0.0.1`, not `0.0.0.0`.** Without explicit configuration, `swift run` starts the server on loopback only — a real iPhone on the same LAN gets `ECONNREFUSED`. The fix is already applied in `configure.swift`:
+```swift
+app.http.server.configuration.hostname = "0.0.0.0"
+```
+This makes the server reachable at the Mac's LAN IP (e.g. `192.168.68.58:8080`) from a real device.
+
 **IPv6/IPv4 "Connection refused" log noise.** The OS networking stack logs
 `nw_socket_handle_socket_event ... Socket SO_ERROR [61: Connection refused]` when
 URLSession's Happy Eyeballs (RFC 6555) attempts `::1:8080` (IPv6) first, fails because
@@ -289,6 +295,21 @@ Vapor only binds IPv4 (`0.0.0.0`), and then automatically retries on `127.0.0.1:
 This log line is **harmless** — the request succeeds on the IPv4 fallback. It is NOT
 the cause of the user-visible error. Do not add special IPv6 handling; the fallback
 is automatic and correct.
+
+### AppleSignInHandler — presentationContextProvider required on real devices
+
+`ASAuthorizationController.presentationContextProvider` must be set before calling
+`performRequests()`. Without it, the system cannot locate the window to present the
+Apple sign-in sheet on a real device, producing `AKAuthenticationError -7026`.
+
+`AppleSignInHandler` conforms to `ASAuthorizationControllerPresentationContextProviding`
+(iOS/UIKit only, guarded with `#if canImport(UIKit)`) and sets itself as the
+`presentationContextProvider` in `performSignIn()`.
+
+The demo app's `DemoAuth.entitlements` must include `com.apple.developer.applesignin`
+with value `["Default"]` for Sign in with Apple to work with a provisioned build. This
+entitlement is referenced from each iOS target in `project.yml` via
+`CODE_SIGN_ENTITLEMENTS`. The macOS target does not need this entitlement.
 
 ---
 

@@ -11,6 +11,77 @@ import AuthShared
 @MainActor
 final class AppleSignInHandlerTests: XCTestCase {
 
+    // MARK: - testHandleCredential_validAppleIDCredential_succeeds
+
+    func testHandleCredential_validAppleIDCredential_succeeds() async {
+        // Given: a mocked valid Apple credential with a JWT identity token
+        let identityToken = "valid-apple-jwt-identity-token"
+        let mockCredential = MockAppleIDCredential(identityTokenString: identityToken, fullName: nil)
+
+        let mockResponse = AuthResponse(
+            accessToken: "access-token",
+            refreshToken: "refresh-token",
+            expiresAt: .distantFuture,
+            user: UserDTO(id: "apple-user-1", email: "apple@example.com", displayName: "Apple User")
+        )
+        let networkService = MockAppleAuthNetworkService(signInWithAppleResult: .success(mockResponse))
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: InMemoryTokenStore()
+        )
+        let viewModel = LoginViewModel(networkService: networkService)
+        let handler = AppleSignInHandler(authManager: authManager, viewModel: viewModel)
+
+        // When: the valid Apple credential is handled
+        await handler.handleCredential(mockCredential)
+
+        // Then: the identity token was forwarded to the server
+        XCTAssertEqual(networkService.signInWithAppleCallCount, 1)
+        XCTAssertEqual(networkService.lastSignInWithAppleToken, identityToken)
+
+        // And: AuthManager transitions to .authenticated
+        guard case .authenticated(let user) = authManager.session else {
+            XCTFail("Expected .authenticated after valid credential, got \(authManager.session)")
+            return
+        }
+        XCTAssertEqual(user.id, "apple-user-1")
+        XCTAssertEqual(user.email, "apple@example.com")
+
+        // And: no error messages are shown
+        XCTAssertNil(viewModel.toastErrorMessage, "Successful sign-in must not set a toast error")
+        XCTAssertNil(viewModel.inlineErrorMessage, "Successful sign-in must not set an inline error")
+    }
+
+    // MARK: - testHandleError_authorizationError_showsToast
+
+    func testHandleError_authorizationError_showsToast() async {
+        // Given: an unauthenticated setup with a network service that would fail
+        let networkService = MockAppleAuthNetworkService(signInWithAppleResult: .failure(AuthNetworkError.serverError))
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: InMemoryTokenStore()
+        )
+        let viewModel = LoginViewModel(networkService: networkService)
+        _ = AppleSignInHandler(authManager: authManager, viewModel: viewModel)
+
+        // When: an ASAuthorization error (non-cancellation) is delivered.
+        // The delegate method calls viewModel.setAppleSignInError(.serverError) for all
+        // non-cancellation errors. We invoke that directly to test the routing behaviour.
+        viewModel.setAppleSignInError(.serverError)
+
+        // Then: the error routes to the toast slot (non-validation errors always use toast)
+        XCTAssertNotNil(viewModel.toastErrorMessage, "Authorization errors must route to the toast slot")
+        XCTAssertNil(viewModel.inlineErrorMessage, "Authorization errors must not appear in the inline slot")
+
+        // And: auth state is still .unauthenticated (no credential was processed)
+        guard case .unauthenticated = authManager.session else {
+            XCTFail("Expected .unauthenticated after authorization error, got \(authManager.session)")
+            return
+        }
+    }
+
     // MARK: - testSuccessfulTokenForwardsToServer
 
     func testSuccessfulTokenForwardsToServer() async {
