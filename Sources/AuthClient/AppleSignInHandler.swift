@@ -1,6 +1,9 @@
 import AuthenticationServices
 import AuthShared
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Handles the result of a Sign in with Apple authorisation flow.
 ///
@@ -49,14 +52,22 @@ public final class AppleSignInHandler: NSObject {
 
     /// Initiates the Sign in with Apple system sheet.
     ///
-    /// Creates and retains an `ASAuthorizationController`, sets itself as the delegate,
-    /// then calls `performRequests()`. Results are delivered via `ASAuthorizationControllerDelegate`.
+    /// Creates and retains an `ASAuthorizationController`, sets itself as the delegate and
+    /// (on iOS) as the `presentationContextProvider`, then calls `performRequests()`.
+    /// Setting `presentationContextProvider` is required on real devices — without it the
+    /// system cannot locate the window to present the Apple sign-in sheet and the request
+    /// fails with `AKAuthenticationError -7026`.
+    ///
+    /// Results are delivered via `ASAuthorizationControllerDelegate`.
     public func performSignIn() {
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
         let controller = ASAuthorizationController(authorizationRequests: [request])
         controller.delegate = self
+#if canImport(UIKit)
+        controller.presentationContextProvider = self
+#endif
         currentController = controller
         controller.performRequests()
     }
@@ -136,17 +147,50 @@ extension AppleSignInHandler: ASAuthorizationControllerDelegate {
         didCompleteWithError error: Error
     ) {
         Task { @MainActor [self] in
-            defer { currentController = nil }
             let nsError = error as NSError
-            if nsError.domain == ASAuthorizationError.errorDomain,
-               nsError.code == ASAuthorizationError.canceled.rawValue {
+            guard nsError.domain == ASAuthorizationError.errorDomain else {
+                defer { currentController = nil }
+                viewModel.setAppleSignInError(.serverError)
+                return
+            }
+            switch ASAuthorizationError.Code(rawValue: nsError.code) {
+            case .canceled:
+                defer { currentController = nil }
                 await handleCancellation()
-            } else {
+            case .unknown:
+                // Code=1000 is a transient system error (LaunchServices/AKAuth initialisation
+                // on first use). The framework retries automatically and delivers
+                // didCompleteWithAuthorization immediately after — suppress the error.
+                break
+            default:
+                defer { currentController = nil }
                 viewModel.setAppleSignInError(.serverError)
             }
         }
     }
 }
+
+// MARK: - ASAuthorizationControllerPresentationContextProviding (iOS only)
+
+#if canImport(UIKit)
+extension AppleSignInHandler: ASAuthorizationControllerPresentationContextProviding {
+
+    /// Returns the window in which the Sign in with Apple sheet should be presented.
+    ///
+    /// Searches for the foreground-active `UIWindowScene`'s key window. Falls back to a
+    /// new `UIWindow()` if no key window is found (e.g. during unit tests or edge-case
+    /// app states) so `performRequests()` always has a valid anchor rather than crashing.
+    nonisolated public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        let scenes = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+        let keyWindow = scenes
+            .first(where: { $0.activationState == .foregroundActive })?
+            .windows
+            .first(where: { $0.isKeyWindow })
+        return keyWindow ?? UIWindow()
+    }
+}
+#endif
 
 // MARK: - ASAuthorizationAppleIDCredential conformance
 

@@ -29,6 +29,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth
         DEVELOPMENT_TEAM: 9JVYUSJU3D
         EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift"
+        CODE_SIGN_ENTITLEMENTS: "DemoAuth/DemoAuth.entitlements"
 
   DemoAuthTests:
     type: bundle.unit-test
@@ -64,6 +65,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.demoauth.default
         DEVELOPMENT_TEAM: 9JVYUSJU3D
         EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthApp.swift DemoAuthCustomApp.swift"
+        CODE_SIGN_ENTITLEMENTS: "DemoAuth/DemoAuth.entitlements"
 
   DemoAuthDefaultTests:
     type: bundle.unit-test
@@ -104,6 +106,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.demoauth.custom
         DEVELOPMENT_TEAM: 9JVYUSJU3D
         EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthApp.swift DemoAuthDefaultApp.swift"
+        CODE_SIGN_ENTITLEMENTS: "DemoAuth/DemoAuth.entitlements"
 
   DemoAuthCustomTests:
     type: bundle.unit-test

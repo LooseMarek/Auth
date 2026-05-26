@@ -104,8 +104,9 @@
 		8824A1CB67156CFA27C26790 /* DemoAuthDefaultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthDefaultTests.swift; sourceTree = "<group>"; };
 		8BD45418B3B0372D510503D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9ACBFCE6F98860C8A96D2932 /* DemoAuthmacOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DemoAuthmacOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D57A6832FC6432100A4ABD2 /* DemoAuthDefault.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoAuthDefault.entitlements; sourceTree = "<group>"; };
 		B041BEAD33B8B765DCC6852C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		B3997B605F737674862DCCD6 /* DemoAuthDefault.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DemoAuthDefault.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B3997B605F737674862DCCD6 /* DemoAuthDefault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAuthDefault.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		C97DFC211F800C1142C37FAB /* AuthManagerSetupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManagerSetupTests.swift; sourceTree = "<group>"; };
 		CA7D287FD52AD54574C835E4 /* DemoAuthDefaultApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthDefaultApp.swift; sourceTree = "<group>"; };
@@ -197,6 +198,7 @@
 		7A7213783383812B0ABFD6E4 = {
 			isa = PBXGroup;
 			children = (
+				9D57A6832FC6432100A4ABD2 /* DemoAuthDefault.entitlements */,
 				38E920562EA71F3EC128C8CD /* DemoAuth */,
 				EBD72507DAC7ADDA39947105 /* DemoAuthCustomTests */,
 				292F308AAE1B6EDBD87D5782 /* DemoAuthDefaultTests */,
@@ -640,7 +642,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthDefaultApp.swift,
+					DemoAuthCustomApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -660,7 +665,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthDefaultApp.swift,
+					DemoAuthCustomApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -702,7 +710,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthApp.swift DemoAuthDefaultApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthApp.swift,
+					DemoAuthDefaultApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -929,7 +940,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthApp.swift DemoAuthDefaultApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthApp.swift,
+					DemoAuthDefaultApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -971,7 +985,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthDefaultApp.swift,
+					DemoAuthCustomApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1010,9 +1027,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DemoAuthDefault.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthApp.swift DemoAuthCustomApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthApp.swift,
+					DemoAuthCustomApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1054,7 +1075,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthDefaultApp.swift,
+					DemoAuthCustomApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1071,9 +1095,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DemoAuthDefault.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 9JVYUSJU3D;
-				EXCLUDED_SOURCE_FILE_NAMES = "DemoAuthApp.swift DemoAuthCustomApp.swift";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					DemoAuthApp.swift,
+					DemoAuthCustomApp.swift,
+				);
 				INFOPLIST_FILE = DemoAuth/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
