@@ -141,3 +141,8 @@
 
 /* Error: social sign-in token is invalid */
 "auth.social.error.token_invalid" = "Sign-in failed. Please try again.";
+
+// MARK: - Toast
+
+/* Accessibility hint for the dismissible toast error banner */
+"auth.toast.dismiss.hint" = "Tap to dismiss";
