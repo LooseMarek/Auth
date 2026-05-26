@@ -29,4 +29,6 @@ func routes(_ app: Application) throws {
     // Without it, Vapor returns 404 and "Continue as Guest" shows "Something went wrong."
     try app.register(collection: GuestAuthController(configuration: authConfig))
     try app.register(collection: UpgradeController(configuration: authConfig))
+    // AppleAuthController must be registered so that POST /auth/apple is handled.
+    try app.register(collection: AppleAuthController(configuration: authConfig))
 }
