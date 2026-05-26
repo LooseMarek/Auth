@@ -49,11 +49,13 @@ public struct ForgotPasswordController: RouteCollection, Sendable {
         let body = try req.content.decode(ForgotPasswordRequest.self)
 
         // Look up user — do NOT reveal existence via the response.
+        // Guest users have synthetic @auth.internal emails that no one will submit here.
         if let user = try await User.query(on: req.db)
             .filter(\.$email == body.email)
             .first(),
            let userID = user.id
         {
+            let userEmail = user.email
             // Invalidate any existing reset tokens for this user.
             try await PasswordResetToken.query(on: req.db)
                 .filter(\.$user.$id == userID)
@@ -68,7 +70,7 @@ public struct ForgotPasswordController: RouteCollection, Sendable {
             // Deliver the reset email via the injected transport.
             let subject = "Reset your password"
             let body = "Use the following token to reset your password (valid for 1 hour): \(rawToken)"
-            try await emailTransport(user.email, subject, body)
+            try await emailTransport(userEmail, subject, body)
         }
 
         // Always 200 — prevents user enumeration.

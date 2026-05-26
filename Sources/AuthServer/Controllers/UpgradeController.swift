@@ -75,8 +75,8 @@ public struct UpgradeController: RouteCollection, Sendable {
             throw Abort(.unauthorized, reason: "User not found")
         }
 
-        // Reject if the user has already upgraded (email is non-empty).
-        guard user.email.isEmpty else {
+        // Reject if the user has already upgraded (email is no longer the synthetic guest email).
+        guard user.isGuest else {
             throw Abort(.conflict, reason: "Account has already been upgraded")
         }
 
@@ -128,7 +128,7 @@ public struct UpgradeController: RouteCollection, Sendable {
 
         let userDTO = UserDTO(
             id: userID.uuidString,
-            email: user.email,
+            email: user.isGuest ? nil : user.email,
             displayName: nil
         )
 

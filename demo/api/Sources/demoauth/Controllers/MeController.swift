@@ -72,12 +72,12 @@ struct MeController: RouteCollection, Sendable {
         }
 
         // Derive provider and guest status from the user model.
-        let isGuest = user.email.isEmpty
+        let isGuest = user.isGuest
         let authProvider = isGuest ? "guest" : "email"
 
         return MeResponse(
             id: userID,
-            email: user.email,
+            email: isGuest ? "" : user.email,
             authProvider: authProvider,
             createdAt: user.createdAt ?? Date(),
             isGuest: isGuest,
