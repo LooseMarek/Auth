@@ -7,7 +7,12 @@ import AuthShared
 ///
 /// Each instance is scoped to a unique `service` identifier so multiple
 /// apps or test runs can coexist without collisions.
-public struct KeychainTokenStore: TokenStore {
+///
+/// Conforms to ``GuestTokenStore`` to support silent guest session resumption:
+/// on guest logout the refresh token is persisted under a separate Keychain key
+/// (`"auth.guest-refresh-token"`) so ``AuthManager/loginAsGuest()`` can restore the
+/// session via token refresh instead of creating a new guest account.
+public struct KeychainTokenStore: TokenStore, GuestTokenStore {
 
     // MARK: - Properties
 
@@ -16,6 +21,12 @@ public struct KeychainTokenStore: TokenStore {
 
     /// The fixed account key under which the encoded token blob is stored.
     private static let account = "auth.token-metadata"
+
+    /// The separate account key used to persist the guest session's refresh token.
+    ///
+    /// Keeping this distinct from ``account`` ensures that a guest logout (which writes
+    /// to this key) and a regular save (which writes to ``account``) never overwrite each other.
+    private static let guestRefreshTokenAccount = "auth.guest-refresh-token"
 
     // MARK: - Init
 
@@ -87,6 +98,44 @@ public struct KeychainTokenStore: TokenStore {
         }
     }
 
+    // MARK: - GuestTokenStore
+
+    /// Saves `token` to the guest-refresh-token Keychain slot.
+    ///
+    /// If an item already exists it is updated; otherwise a new item is added.
+    public func saveGuestRefreshToken(_ token: String) {
+        guard let data = token.data(using: .utf8) else { return }
+        let query = guestRefreshTokenQuery()
+
+        // Try update first; if not found, add.
+        let updateStatus = SecItemUpdate(query as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+        if updateStatus == errSecItemNotFound {
+            var addAttributes = query
+            addAttributes[kSecValueData as String] = data
+            addAttributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+            SecItemAdd(addAttributes as CFDictionary, nil)
+        }
+    }
+
+    /// Returns the saved guest refresh token, or `nil` when none exists.
+    public func loadGuestRefreshToken() -> String? {
+        var query = guestRefreshTokenQuery()
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess, let data = result as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// Removes the saved guest refresh token.
+    ///
+    /// A no-op if the item does not exist.
+    public func deleteGuestRefreshToken() {
+        SecItemDelete(guestRefreshTokenQuery() as CFDictionary)
+    }
+
     // MARK: - Private Helpers
 
     /// Returns the base query dictionary shared by all Keychain operations.
@@ -99,6 +148,19 @@ public struct KeychainTokenStore: TokenStore {
 #if os(macOS)
         // On macOS the legacy file-based keychain requires user interaction; the
         // data-protection keychain (10.15+) works in headless/CI contexts.
+        query[kSecUseDataProtectionKeychain as String] = true
+#endif
+        return query
+    }
+
+    /// Returns the query dictionary for the guest refresh token Keychain slot.
+    private func guestRefreshTokenQuery() -> [String: Any] {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: Self.guestRefreshTokenAccount,
+        ]
+#if os(macOS)
         query[kSecUseDataProtectionKeychain as String] = true
 #endif
         return query

@@ -106,14 +106,43 @@ public final class AuthManager {
 
     // MARK: - Guest session
 
-    /// Creates an anonymous guest session via POST /auth/guest.
+    /// Creates or resumes an anonymous guest session.
+    ///
+    /// **Resume flow:** If a previously-saved guest refresh token exists in the token store
+    /// (persisted during a prior guest logout), this method attempts a silent token refresh
+    /// via `POST /auth/token/refresh` to restore the old guest session. On success the
+    /// session resumes without creating a new guest account, preserving any app data linked
+    /// to the original guest UUID.
+    ///
+    /// **New-guest flow:** If no saved guest token exists, or the refresh call fails (token
+    /// expired or revoked), a new guest account is created via `POST /auth/guest`. The stale
+    /// saved token (if any) is cleared before falling back.
     ///
     /// On success, tokens are persisted to the token store and `session` transitions
     /// to `.guest(uuid)` where `uuid` is the stable guest identifier returned by the server.
     ///
-    /// - Throws: Any ``AuthNetworkError`` returned by the server.
+    /// - Throws: Any ``AuthNetworkError`` returned by the server when creating a new guest account.
     public func loginAsGuest() async throws {
+        // Attempt to resume an existing guest session via the saved refresh token.
+        if let guestStore = tokenStore as? (any GuestTokenStore),
+           let savedRefreshToken = guestStore.loadGuestRefreshToken() {
+            do {
+                let response = try await networkService.refreshToken(refreshToken: savedRefreshToken)
+                restoreGuestSession(from: response)
+                return
+            } catch {
+                // Refresh failed — clear the stale token and fall through to create a new guest.
+                guestStore.deleteGuestRefreshToken()
+            }
+        }
+
+        // No saved token or refresh failed: create a new guest account.
         let response = try await networkService.loginAsGuest()
+        restoreGuestSession(from: response)
+    }
+
+    /// Applies an `AuthResponse` from either a refresh or a fresh guest sign-in as a guest session.
+    private func restoreGuestSession(from response: AuthResponse) {
         let uuid = UUID(uuidString: response.user.id) ?? UUID()
         let metadata = TokenMetadata(
             accessToken: response.accessToken,
@@ -189,18 +218,31 @@ public final class AuthManager {
     /// Signs the user out locally and, if a refresh token is present, invalidates it
     /// on the server.
     ///
+    /// **Guest sessions:** Before clearing the main token store, the current refresh token
+    /// is saved to the guest slot (via ``GuestTokenStore``) so the session can be silently
+    /// resumed on the next "Continue as Guest" tap. Authenticated (non-guest) logout does
+    /// NOT touch the guest slot.
+    ///
     /// Local Keychain clearance and state reset always succeed, even if the server call
     /// fails (network unavailable, server error). This satisfies the UX contract:
     /// logout must always succeed locally.
     public func logout() async {
-        // Load the refresh token before clearing the store
+        // Load the refresh token before clearing the store.
         let refreshToken = (try? tokenStore.load())?.refreshToken
 
-        // Always clear local state first
+        // If the current session is guest, persist the refresh token to the guest slot
+        // so it can be used to resume the session on the next loginAsGuest() call.
+        if session.isGuest,
+           let guestStore = tokenStore as? (any GuestTokenStore),
+           let refreshToken {
+            guestStore.saveGuestRefreshToken(refreshToken)
+        }
+
+        // Always clear local state first.
         try? tokenStore.delete()
         session = .unauthenticated
 
-        // Best-effort server invalidation — only when a refresh token exists
+        // Best-effort server invalidation — only when a refresh token exists.
         if let refreshToken {
             try? await networkService.logout(refreshToken: refreshToken)
         }
@@ -211,7 +253,8 @@ public final class AuthManager {
     /// Permanently deletes the authenticated account.
     ///
     /// Calls `DELETE /auth/account` with the current access token. On success, the
-    /// local Keychain is cleared and the session resets to `.unauthenticated`.
+    /// local Keychain is cleared, any saved guest refresh token is also removed, and
+    /// the session resets to `.unauthenticated`.
     ///
     /// Unlike `logout()`, errors from the server are **not** swallowed — the caller
     /// is responsible for presenting an error to the user.
@@ -221,6 +264,8 @@ public final class AuthManager {
         let accessToken = try await withFreshToken { token in token }
         try await networkService.deleteAccount(accessToken: accessToken)
         try? tokenStore.delete()
+        // Also clear the guest token slot so the deleted account cannot be resumed.
+        (tokenStore as? (any GuestTokenStore))?.deleteGuestRefreshToken()
         session = .unauthenticated
     }
 }
@@ -258,7 +303,7 @@ struct NoOpAuthNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -266,7 +311,7 @@ struct NoOpAuthNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -274,7 +319,7 @@ struct NoOpAuthNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 }
