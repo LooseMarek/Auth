@@ -13,7 +13,14 @@ struct AppRootView: View {
     // MARK: - Constants
 
     /// Base URL for the demo Auth API server (local development).
+    ///
+    /// Simulators run on the same host as the Mac, so `localhost` works.
+    /// Real devices are on the LAN and must reach the Mac by its IP address.
+    #if targetEnvironment(simulator)
     static let demoAPIBaseURL = "http://localhost:8080"
+    #else
+    static let demoAPIBaseURL = "http://192.168.68.58:8080"
+    #endif
 
     // MARK: - State
 
