@@ -63,6 +63,38 @@ final class RegisterViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.confirmPasswordError)
     }
 
+    func testGuestSession_register_callsUpgradeNotRegister() async {
+        let guestUUID = UUID()
+        let response = makeAuthResponse()
+        let mock = MockRegisterNetworkService(upgradeResult: .success(response))
+        let viewModel = RegisterViewModel(networkService: mock)
+        let tokenStore = InMemoryTokenStore()
+        try? tokenStore.save(TokenMetadata(
+            accessToken: "guest-access-token",
+            refreshToken: "guest-refresh-token",
+            expiresAt: .distantFuture
+        ))
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: mock,
+            tokenStore: tokenStore
+        )
+        authManager.setGuestSession(uuid: guestUUID)
+
+        viewModel.email = "new@example.com"
+        viewModel.password = "secret123"
+        viewModel.confirmPassword = "secret123"
+        await viewModel.register(authManager: authManager)
+
+        XCTAssertFalse(mock.registerCalled, "register() must NOT be called when upgrading a guest")
+        XCTAssertTrue(mock.upgradeGuestCalled, "upgradeGuestWithEmail() must be called for guest sessions")
+        XCTAssertEqual(mock.upgradeGuestUUID, guestUUID, "upgrade must use the existing guest UUID")
+        guard case .authenticated = authManager.session else {
+            XCTFail("Expected .authenticated after guest upgrade, got \(authManager.session)")
+            return
+        }
+    }
+
     func testDuplicateEmailSetsError() async {
         let mock = MockRegisterNetworkService(result: .failure(AuthNetworkError.emailTaken))
         let viewModel = RegisterViewModel(networkService: mock)
@@ -97,10 +129,17 @@ private func makeAuthResponse() -> AuthResponse {
 
 private final class MockRegisterNetworkService: AuthNetworkService, @unchecked Sendable {
     let result: Result<AuthResponse, Error>
+    let upgradeResult: Result<AuthResponse, Error>
     private(set) var registerCalled = false
+    private(set) var upgradeGuestCalled = false
+    private(set) var upgradeGuestUUID: UUID?
 
-    init(result: Result<AuthResponse, Error>) {
+    init(
+        result: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError),
+        upgradeResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
+    ) {
         self.result = result
+        self.upgradeResult = upgradeResult
     }
 
     func login(email: String, password: String) async throws -> AuthResponse {
@@ -135,7 +174,7 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithApple(guestUUID: UUID, identityToken: String, displayName: String?) async throws -> AuthResponse {
+    func upgradeGuestWithApple(guestUUID: UUID, accessToken: String, identityToken: String, displayName: String?) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -143,7 +182,7 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithGoogle(guestUUID: UUID, identityToken: String) async throws -> AuthResponse {
+    func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
 
@@ -151,7 +190,12 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
         throw AuthNetworkError.serverError
     }
 
-    func upgradeGuestWithEmail(guestUUID: UUID, email: String, password: String) async throws -> AuthResponse {
-        throw AuthNetworkError.serverError
+    func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
+        upgradeGuestCalled = true
+        upgradeGuestUUID = guestUUID
+        switch upgradeResult {
+        case .success(let response): return response
+        case .failure(let error): throw error
+        }
     }
 }
