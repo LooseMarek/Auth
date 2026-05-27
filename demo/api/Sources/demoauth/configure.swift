@@ -29,7 +29,16 @@ public func configure(
     ).0
     let appleJWKS = try JSONDecoder().decode(JWKS.self, from: appleJWKSData)
 
-    let authConfig = AuthServerConfiguration(jwtSigningSecret: jwtSecret, appleJWKS: appleJWKS)
+    let googleJWKSData = try await URLSession.shared.data(
+        from: URL(string: "https://www.googleapis.com/oauth2/v3/certs")!
+    ).0
+    let googleJWKS = try JSONDecoder().decode(JWKS.self, from: googleJWKSData)
+
+    let authConfig = AuthServerConfiguration(
+        jwtSigningSecret: jwtSecret,
+        appleJWKS: appleJWKS,
+        googleJWKS: googleJWKS
+    )
     app.storage[AuthServerConfiguration.StorageKey.self] = authConfig
 
     app.migrations.add(CreateUser())
