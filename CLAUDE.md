@@ -288,6 +288,16 @@ app.http.server.configuration.hostname = "0.0.0.0"
 ```
 This makes the server reachable at the Mac's LAN IP (e.g. `192.168.68.58:8080`) from a real device.
 
+**Google Sign-In XPC log noise.** When the Google Sign-In sheet is presented on a real device, iOS daemons print the following lines into the Xcode console:
+
+```
+(501) Invalidation handler invoked, clearing connection
+(501) personaAttributesForPersonaType for type:0 failed with error … com.apple.mobile.usermanagerd.xpc was invalidated
+Received port for identifier response: <(null)> with error: RBSServiceErrorDomain Code=1 "Client not entitled"
+```
+
+These are **harmless system noise** emitted by iOS internals (`usermanagerd`, RunningBoard) whenever any app presents an `ASWebAuthenticationSession`. Third-party apps are not entitled to the underlying XPC services, so the OS immediately drops the connections and logs it. The sign-in flow completes successfully regardless. Do not attempt to fix or suppress these messages — they come from iOS daemons, not from app code.
+
 **IPv6/IPv4 "Connection refused" log noise.** The OS networking stack logs
 `nw_socket_handle_socket_event ... Socket SO_ERROR [61: Connection refused]` when
 URLSession's Happy Eyeballs (RFC 6555) attempts `::1:8080` (IPv6) first, fails because
@@ -310,6 +320,40 @@ The demo app's `DemoAuth.entitlements` must include `com.apple.developer.applesi
 with value `["Default"]` for Sign in with Apple to work with a provisioned build. This
 entitlement is referenced from each iOS target in `project.yml` via
 `CODE_SIGN_ENTITLEMENTS`. The macOS target does not need this entitlement.
+
+### Google Sign-In — URL scheme and Info.plist setup
+
+The Google Sign-In SDK validates that a reversed-client-ID URL scheme is registered in
+the app's `Info.plist` **at the point the sign-in flow is triggered**. If it is missing,
+the SDK throws:
+
+```
+NSInvalidArgumentException: Your app is missing support for the following URL schemes: <client-id>
+```
+
+**Required configuration for every iOS target:**
+
+1. `GIDClientID` in `Info.plist` / `project.yml` — set to the client ID from `GoogleService-Info.plist`.
+2. `CFBundleURLTypes` in `Info.plist` / `project.yml` — must contain an entry whose
+   `CFBundleURLSchemes` array includes the **reversed** client ID
+   (e.g. `com.googleusercontent.apps.{client-id}`).
+
+Both `Info.plist` and `project.yml` (for XcodeGen) must be updated together. The demo
+app uses the placeholders `REPLACE_WITH_REAL_GOOGLE_CLIENT_ID` and
+`REPLACE_WITH_REVERSED_GOOGLE_CLIENT_ID` — replace them with real values from your
+`GoogleService-Info.plist` before running on a real device.
+
+**macOS** does **not** need `CFBundleURLTypes` — on macOS, Google Sign-In uses a
+loopback URL redirect rather than a custom URL scheme.
+
+**Graceful degradation when placeholder is still in place:**
+`GIDSignInTokenProvider.fetchIDToken()` guards against `nil` configuration
+(`GIDSignIn.sharedInstance.configuration == nil`) and throws `GoogleSignInCancellationError`,
+which `GoogleSignInHandler` treats as a silent no-op. This prevents a crash when the
+SDK configuration is missing — but the URL-scheme entry **must still be present** in
+`Info.plist` to prevent the `NSInvalidArgumentException` before that guard can fire.
+
+---
 
 ### Apple Sign In — email is nil on repeat sign-ins
 

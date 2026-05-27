@@ -338,6 +338,154 @@ Run `bundle install` first to install Fastlane via Bundler.
 
 ---
 
+## Demo App
+
+The `demo/` folder contains a full end-to-end example:
+
+| Path | What it is |
+|------|-----------|
+| `demo/apple_app/` | iOS + macOS SwiftUI app (XcodeGen project, three iOS targets + one macOS target) |
+| `demo/api/` | Vapor 4 backend wired to `AuthServer` with SQLite |
+
+### Running the demo API
+
+```sh
+cd demo/api
+swift run          # starts on http://0.0.0.0:8080
+```
+
+Delete `demo/api/db.sqlite` for a clean slate (Fluent recreates the schema on next start).
+
+When testing on a real device, use your Mac's LAN IP (e.g. `http://192.168.x.x:8080`) instead of `localhost`.
+
+### Opening the demo app in Xcode
+
+Open `demo/apple_app/` as a Swift Package via **File → Open** (select the folder, not an `.xcodeproj`). The local Auth package dependency is resolved automatically.
+
+To regenerate the `.xcodeproj` after editing `project.yml`:
+
+```sh
+cd demo/apple_app
+xcodegen generate
+```
+
+---
+
+### Configuring Sign in with Google
+
+Sign in with Google requires two values from a Google OAuth 2.0 client:
+the **client ID** and its **reversed form** (used as a URL scheme for the
+OAuth redirect).
+
+> **Are these values secret?** No. `CLIENT_ID` and `REVERSED_CLIENT_ID` are
+> public identifiers — they end up in the app binary and in OAuth redirect
+> URLs. Committing them to a private repo (or even a public one) is perfectly
+> safe. Google does not treat them as credentials.
+
+#### Step 1 — Create a Google OAuth client
+
+1. Go to [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials).
+2. Create a project (or select an existing one).
+3. Click **Create Credentials → OAuth client ID**.
+4. Choose **iOS** as the application type.
+5. Enter your bundle identifier (e.g. `com.marekloose.DemoAuth`).
+6. Click **Create** and then **Download plist** to get `GoogleService-Info.plist`.
+
+#### Step 2 — Find your client ID values
+
+Open the downloaded `GoogleService-Info.plist` and locate:
+
+```xml
+<key>CLIENT_ID</key>
+<string>1234567890-xxxxxxxxxxxx.apps.googleusercontent.com</string>
+
+<key>REVERSED_CLIENT_ID</key>
+<string>com.googleusercontent.apps.1234567890-xxxxxxxxxxxx</string>
+```
+
+#### Step 3 — Fill in `GoogleCredentials.xcconfig`
+
+`demo/apple_app/GoogleCredentials.xcconfig` is committed with placeholder
+values. Open it and replace the two placeholders with your real credentials:
+
+```
+GOOGLE_CLIENT_ID = 1234567890-xxxxxxxxxxxx.apps.googleusercontent.com
+REVERSED_GOOGLE_CLIENT_ID = com.googleusercontent.apps.1234567890-xxxxxxxxxxxx
+```
+
+Then tell git to stop tracking local changes to this file so your real
+credentials never appear in diffs or get accidentally committed:
+
+```sh
+git update-index --skip-worktree demo/apple_app/GoogleCredentials.xcconfig
+```
+
+That's it — rebuild. `Info.plist` already references `$(GOOGLE_CLIENT_ID)`
+and `$(REVERSED_GOOGLE_CLIENT_ID)`, so Xcode injects the values at build
+time. Running `xcodegen generate` is not required after editing the xcconfig.
+
+> To undo `skip-worktree` (e.g. to commit a change to a placeholder or
+> comment): `git update-index --no-skip-worktree demo/apple_app/GoogleCredentials.xcconfig`
+
+#### Step 4 — Start the demo API
+
+No additional configuration is needed for Google Sign-In on the server side.
+The demo API fetches Google's public JWKS automatically at startup (from
+`https://www.googleapis.com/oauth2/v3/certs`) and uses it to verify the
+identity token signature. Just start the server as normal:
+
+```sh
+cd demo/api
+swift run
+```
+
+---
+
+### Sign in with Google in your own app
+
+`CLIENT_ID` and `REVERSED_CLIENT_ID` are safe to commit. The recommended
+patterns for host apps:
+
+**Simple (most apps):** Put the values directly in your `Info.plist` or
+in an `.xcconfig` that is checked in. No extra setup needed.
+
+```xml
+<key>GIDClientID</key>
+<string>1234567890-xxxxxxxxxxxx.apps.googleusercontent.com</string>
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>com.googleusercontent.apps.1234567890-xxxxxxxxxxxx</string>
+        </array>
+    </dict>
+</array>
+```
+
+**Multiple environments (dev / staging / prod):** Keep one `.xcconfig` per
+environment (each with its own OAuth client), select the right config via
+your build scheme, and commit all of them. None are secret.
+
+---
+
+### Configuring Sign in with Apple
+
+Sign in with Apple is pre-configured for real-device builds via
+`DemoAuth/DemoAuth.entitlements` (which includes the
+`com.apple.developer.applesignin` entitlement). No extra credential files
+are needed — the system handles the OAuth flow using your Apple Developer
+Team ID and the app's bundle identifier.
+
+Requirements:
+- The **Sign in with Apple** capability must be enabled for your App ID in
+  [Apple Developer → Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/identifiers/list).
+- Your device must be registered under your development team.
+- Build with a provisioned scheme (not the Simulator) for the Apple sign-in
+  sheet to appear.
+
+---
+
 ## Development
 
 Refer to `CLAUDE.md` for agent workflow, coding conventions, and architecture decisions.
