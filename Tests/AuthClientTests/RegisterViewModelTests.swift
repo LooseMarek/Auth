@@ -112,6 +112,61 @@ final class RegisterViewModelTests: XCTestCase {
             return
         }
     }
+
+    // MARK: - Password minimum length validation
+
+    func testPasswordTooShort_showsValidationError() async {
+        let mock = MockRegisterNetworkService(result: .success(makeAuthResponse()))
+        let viewModel = RegisterViewModel(networkService: mock)
+        let authManager = AuthManager(configuration: AuthClientConfiguration())
+
+        viewModel.email = "test@example.com"
+        viewModel.password = "abc"        // 3 characters — below minimum
+        viewModel.confirmPassword = "abc"
+        await viewModel.register(authManager: authManager)
+
+        XCTAssertNotNil(viewModel.passwordError, "passwordError should be set when password is shorter than 8 characters")
+        XCTAssertEqual(viewModel.passwordError, "Password must be at least 8 characters.")
+        XCTAssertFalse(mock.registerCalled, "No network call should be made when password is too short")
+        guard case .unauthenticated = authManager.session else {
+            XCTFail("Expected .unauthenticated, got \(authManager.session)")
+            return
+        }
+    }
+
+    func testPasswordExactlyMinLength_noValidationError() async {
+        let mock = MockRegisterNetworkService(result: .success(makeAuthResponse()))
+        let viewModel = RegisterViewModel(networkService: mock)
+        let authManager = AuthManager(configuration: AuthClientConfiguration())
+
+        viewModel.email = "test@example.com"
+        viewModel.password = "abcdefgh"   // exactly 8 characters
+        viewModel.confirmPassword = "abcdefgh"
+        await viewModel.register(authManager: authManager)
+
+        XCTAssertNil(viewModel.passwordError, "passwordError must be nil when password is exactly 8 characters")
+        XCTAssertTrue(mock.registerCalled, "Network call should proceed when password meets the minimum length")
+    }
+
+    func testPasswordValidationClears_whenLengthMet() async {
+        // First: trigger the too-short error
+        let mock = MockRegisterNetworkService(result: .success(makeAuthResponse()))
+        let viewModel = RegisterViewModel(networkService: mock)
+        let authManager = AuthManager(configuration: AuthClientConfiguration())
+
+        viewModel.email = "test@example.com"
+        viewModel.password = "short"       // 5 characters
+        viewModel.confirmPassword = "short"
+        await viewModel.register(authManager: authManager)
+        XCTAssertNotNil(viewModel.passwordError, "Precondition: passwordError must be set for too-short password")
+
+        // Then: correct the password to meet the requirement
+        viewModel.password = "longenough"  // 10 characters
+        viewModel.confirmPassword = "longenough"
+        await viewModel.register(authManager: authManager)
+
+        XCTAssertNil(viewModel.passwordError, "passwordError must clear when the password is corrected to 8+ characters")
+    }
 }
 
 // MARK: - Helpers
