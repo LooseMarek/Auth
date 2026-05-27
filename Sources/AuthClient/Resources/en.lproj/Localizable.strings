@@ -51,10 +51,10 @@
 "auth.register.upgrade.subtitle" = "Add an email and password so you don't lose your data.";
 
 /* Email text field placeholder */
-"auth.register.field.email.placeholder" = "you@email.com";
+"auth.register.field.email.placeholder" = "Email";
 
 /* Password text field placeholder */
-"auth.register.field.password.placeholder" = "At least 8 characters";
+"auth.register.field.password.placeholder" = "Password";
 
 /* Confirm password text field placeholder */
 "auth.register.field.confirm_password.placeholder" = "Re-enter password";
