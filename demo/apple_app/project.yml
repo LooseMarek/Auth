@@ -15,14 +15,12 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources: ["DemoAuth"]
-    info:
-      path: "DemoAuth/Info.plist"
-      properties:
-        UILaunchScreen: {}
-        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient
+    configFiles:
+      Debug: GoogleCredentials.xcconfig
+      Release: GoogleCredentials.xcconfig
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -30,6 +28,7 @@ targets:
         DEVELOPMENT_TEAM: 9JVYUSJU3D
         EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift"
         CODE_SIGN_ENTITLEMENTS: "DemoAuth/DemoAuth.entitlements"
+        INFOPLIST_FILE: "DemoAuth/Info.plist"
 
   DemoAuthTests:
     type: bundle.unit-test
@@ -51,14 +50,12 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources: ["DemoAuth"]
-    info:
-      path: "DemoAuth/Info.plist"
-      properties:
-        UILaunchScreen: {}
-        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient
+    configFiles:
+      Debug: GoogleCredentials.xcconfig
+      Release: GoogleCredentials.xcconfig
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -66,6 +63,7 @@ targets:
         DEVELOPMENT_TEAM: 9JVYUSJU3D
         EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthApp.swift DemoAuthCustomApp.swift"
         CODE_SIGN_ENTITLEMENTS: "DemoAuth/DemoAuth.entitlements"
+        INFOPLIST_FILE: "DemoAuth/Info.plist"
 
   DemoAuthDefaultTests:
     type: bundle.unit-test
@@ -92,14 +90,12 @@ targets:
           - "Resources"
       - path: "DemoAuth/Resources"
         type: resource
-    info:
-      path: "DemoAuth/Info.plist"
-      properties:
-        UILaunchScreen: {}
-        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient
+    configFiles:
+      Debug: GoogleCredentials.xcconfig
+      Release: GoogleCredentials.xcconfig
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -107,6 +103,7 @@ targets:
         DEVELOPMENT_TEAM: 9JVYUSJU3D
         EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthApp.swift DemoAuthDefaultApp.swift"
         CODE_SIGN_ENTITLEMENTS: "DemoAuth/DemoAuth.entitlements"
+        INFOPLIST_FILE: "DemoAuth/Info.plist"
 
   DemoAuthCustomTests:
     type: bundle.unit-test
@@ -128,19 +125,19 @@ targets:
     platform: macOS
     deploymentTarget: "14.0"
     sources: ["DemoAuth"]
-    info:
-      path: "DemoAuth/Info.plist"
-      properties:
-        GIDClientID: REPLACE_WITH_REAL_GOOGLE_CLIENT_ID
     dependencies:
       - package: Auth
         product: AuthClient
+    configFiles:
+      Debug: GoogleCredentials.xcconfig
+      Release: GoogleCredentials.xcconfig
     settings:
       base:
         SWIFT_VERSION: 6.2
         PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth-macos
         DEVELOPMENT_TEAM: 9JVYUSJU3D
         EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift"
+        INFOPLIST_FILE: "DemoAuth/Info.plist"
 
   DemoAuthmacOSTests:
     type: bundle.unit-test
