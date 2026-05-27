@@ -60,9 +60,9 @@ not on guest-upgrade where a different subtitle applies (see § 5).
 |-----------|----------------|------------------|-------|
 | Screen title | `type.title.lg`, `color.label.primary` | `auth.register.title` | |
 | Subtitle | `type.callout`, `color.label.secondary` | `auth.register.subtitle` | |
-| Email field | Text Field | `auth.register.field.email.placeholder` | `textContentType(.emailAddress)`, `submitLabel(.next)` |
-| Password field | Text Field (secure) | `auth.register.field.password.placeholder` | `textContentType(.newPassword)`, `submitLabel(.next)` |
-| Confirm password field | Text Field (secure) | `auth.register.field.confirm_password.placeholder` | `textContentType(.newPassword)`, `submitLabel(.go)` |
+| Email field | Text Field | `auth.register.field.email.placeholder` — "Email" | `textContentType(.emailAddress)`, `submitLabel(.next)` |
+| Password field | Text Field (secure) | `auth.register.field.password.placeholder` — "Password" | `textContentType(.newPassword)`, `submitLabel(.next)` |
+| Confirm password field | Text Field (secure) | `auth.register.field.confirm_password.placeholder` — "Re-enter password" | `textContentType(.newPassword)`, `submitLabel(.go)` |
 | Show/hide toggle (both pwds) | SF Symbol `eye` / `eye.slash`, 18pt | `auth.field.password.show` / `.hide` | Per LoginView spec |
 | Inline error | Error Row component | See Error States | |
 | Register button | Primary Button | `auth.register.button.submit` | Full width, 52pt |
@@ -120,8 +120,8 @@ All other components and behaviour are identical.
 | `auth.register.subtitle` | Takes about 20 seconds. No payment needed. |
 | `auth.register.upgrade.title` | Save your progress |
 | `auth.register.upgrade.subtitle` | Add an email and password so you don't lose your data. |
-| `auth.register.field.email.placeholder` | you@email.com |
-| `auth.register.field.password.placeholder` | At least 8 characters |
+| `auth.register.field.email.placeholder` | Email |
+| `auth.register.field.password.placeholder` | Password |
 | `auth.register.field.confirm_password.placeholder` | Re-enter password |
 | `auth.register.button.submit` | Create account |
 | `auth.register.upgrade.button.submit` | Save account |
