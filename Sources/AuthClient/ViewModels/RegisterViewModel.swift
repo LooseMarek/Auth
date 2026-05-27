@@ -67,6 +67,12 @@ final class RegisterViewModel {
         confirmPasswordError = nil
         errorMessage = nil
 
+        // Client-side validation: password must meet the minimum length.
+        guard PasswordValidator.isValidLength(password) else {
+            passwordError = localizedString("auth.register.error.password_too_short")
+            return
+        }
+
         // Client-side validation: passwords must match.
         guard password == confirmPassword else {
             confirmPasswordError = localizedString("auth.register.error.password_mismatch")
