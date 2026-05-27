@@ -78,6 +78,26 @@ final class LocalisationTests: XCTestCase {
         }
     }
 
+    // MARK: - Register view placeholder values
+
+    /// Verifies the email placeholder on RegisterView is "Email" (issue #97).
+    func testRegisterEmailPlaceholder_isEmail() {
+        let value = String(localized: "auth.register.field.email.placeholder", bundle: bundle)
+        XCTAssertEqual(value, "Email", "Register email placeholder should be 'Email'")
+    }
+
+    /// Verifies the password placeholder on RegisterView is "Password" (issue #97).
+    func testRegisterPasswordPlaceholder_isPassword() {
+        let value = String(localized: "auth.register.field.password.placeholder", bundle: bundle)
+        XCTAssertEqual(value, "Password", "Register password placeholder should be 'Password'")
+    }
+
+    /// Verifies the confirm-password placeholder on RegisterView is "Re-enter password" (issue #97).
+    func testRegisterConfirmPasswordPlaceholder_isReEnterPassword() {
+        let value = String(localized: "auth.register.field.confirm_password.placeholder", bundle: bundle)
+        XCTAssertEqual(value, "Re-enter password", "Register confirm-password placeholder should be 'Re-enter password'")
+    }
+
     /// Spot-checks that a representative set of keys follows the auth.{screen}.{element} pattern.
     func testKeyConventionIsCorrect() {
         let conventionPattern = #"^auth\.[a-z_]+(\.[a-z_]+)+$"#
