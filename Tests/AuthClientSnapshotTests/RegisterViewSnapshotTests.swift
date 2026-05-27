@@ -14,6 +14,24 @@ private let snapshotArch = "x86_64"
 @MainActor
 final class RegisterViewSnapshotTests: XCTestCase {
 
+    // MARK: - Placeholder correctness (issue #97)
+
+    /// Verifies the Register view renders with the correct placeholder text in all three
+    /// input fields: "Email", "Password", and "Re-enter password".
+    func testEmptyState_correctPlaceholders() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService()
+        ))
+    }
+
+    func testEmptyState_correctPlaceholders_dark() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Light mode
 
     func testDefaultState() {
