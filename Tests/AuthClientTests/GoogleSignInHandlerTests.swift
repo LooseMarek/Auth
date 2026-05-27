@@ -8,12 +8,103 @@ import AuthShared
 ///  - A successful credential forwards the identity token to the server and updates state.
 ///  - A cancellation leaves `AuthManager` state unchanged and no error is shown.
 ///  - A network error from POST /auth/google surfaces as an error message on the ViewModel.
+///  - A missing GIDClientID / URL scheme degrades gracefully without crashing.
 ///
 /// `GIDSignIn` cannot be invoked in tests (requires a real UIViewController / NSWindow),
 /// so `GoogleSignInHandler` depends on a `GoogleIDTokenProvider` protocol that the
 /// tests inject with a mock implementation.
 @MainActor
 final class GoogleSignInHandlerTests: XCTestCase {
+
+    // MARK: - testHandleCredential_validGoogleCredential_succeeds
+
+    /// Verifies a mocked valid Google credential produces an authenticated state.
+    ///
+    /// This is the primary happy-path test: a real token comes back from the provider,
+    /// the network service accepts it, and `AuthManager` transitions to `.authenticated`.
+    func testHandleCredential_validGoogleCredential_succeeds() async {
+        // Given: a mock token provider that returns a valid identity token
+        let identityToken = "valid-google-identity-token"
+        let tokenProvider = MockGoogleIDTokenProvider(result: .success(identityToken))
+
+        let mockResponse = AuthResponse(
+            accessToken: "access-token",
+            refreshToken: "refresh-token",
+            expiresAt: .distantFuture,
+            user: UserDTO(id: "user-1", email: "google@example.com", displayName: "Google User")
+        )
+        let networkService = MockGoogleAuthNetworkService(signInWithGoogleResult: .success(mockResponse))
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: InMemoryTokenStore()
+        )
+        let viewModel = LoginViewModel(networkService: networkService)
+        let handler = GoogleSignInHandler(
+            authManager: authManager,
+            viewModel: viewModel,
+            tokenProvider: tokenProvider
+        )
+
+        // When: sign-in completes with a valid credential
+        await handler.handleSignIn()
+
+        // Then: POST /auth/google was called exactly once with the identity token
+        XCTAssertEqual(networkService.signInWithGoogleCallCount, 1)
+        XCTAssertEqual(networkService.lastSignInWithGoogleToken, identityToken)
+
+        // And: AuthManager state is .authenticated
+        guard case .authenticated(let user) = authManager.session else {
+            XCTFail("Expected .authenticated, got \(authManager.session)")
+            return
+        }
+        XCTAssertEqual(user.id, "user-1")
+    }
+
+    // MARK: - testMissingClientID_doesNotCrash
+
+    /// Verifies the service handles a nil/missing GIDClientID gracefully without crashing.
+    ///
+    /// When the Google SDK's URL scheme is missing or the GIDClientID is a placeholder,
+    /// `GIDSignInTokenProvider.fetchIDToken()` guards against `nil` configuration and
+    /// throws `GoogleSignInCancellationError`. This test verifies that path results in a
+    /// silent no-op rather than an uncaught exception or user-visible error.
+    func testMissingClientID_doesNotCrash() async {
+        // Given: a token provider that simulates a missing GIDClientID / URL scheme by
+        // throwing GoogleSignInCancellationError — the same path the production
+        // GIDSignInTokenProvider takes when GIDSignIn.sharedInstance.configuration is nil.
+        let tokenProvider = MockGoogleIDTokenProvider(result: .failure(GoogleSignInCancellationError()))
+        let networkService = MockGoogleAuthNetworkService(
+            signInWithGoogleResult: .failure(AuthNetworkError.serverError)
+        )
+        let authManager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: InMemoryTokenStore()
+        )
+        let viewModel = LoginViewModel(networkService: networkService)
+        let handler = GoogleSignInHandler(
+            authManager: authManager,
+            viewModel: viewModel,
+            tokenProvider: tokenProvider
+        )
+
+        // When: sign-in is attempted with a missing/invalid client ID
+        await handler.handleSignIn()
+
+        // Then: no error is surfaced to the user — this must be a silent no-op
+        XCTAssertNil(viewModel.errorMessage, "Missing GIDClientID must not show a validation error to the user")
+        XCTAssertNil(viewModel.toastErrorMessage, "Missing GIDClientID must not show a toast error to the user")
+
+        // And: session remains .unauthenticated
+        guard case .unauthenticated = authManager.session else {
+            XCTFail("Expected .unauthenticated, got \(authManager.session)")
+            return
+        }
+
+        // And: the network service was never called
+        XCTAssertEqual(networkService.signInWithGoogleCallCount, 0)
+    }
 
     // MARK: - testSuccessfulTokenForwardsToServer
 
