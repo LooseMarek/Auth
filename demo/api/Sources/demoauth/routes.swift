@@ -31,4 +31,7 @@ func routes(_ app: Application) throws {
     try app.register(collection: UpgradeController(configuration: authConfig))
     // AppleAuthController must be registered so that POST /auth/apple is handled.
     try app.register(collection: AppleAuthController(configuration: authConfig))
+    // GoogleAuthController must be registered so that POST /auth/google is handled.
+    // Without it, Vapor returns 404 and Sign in with Google shows "Something went wrong."
+    try app.register(collection: GoogleAuthController(configuration: authConfig))
 }
