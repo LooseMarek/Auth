@@ -104,6 +104,64 @@ public final class AuthManager {
         authPresentationStyle = .sheet
     }
 
+    // MARK: - Session restoration
+
+    /// Attempts to restore a previously authenticated session on app launch.
+    ///
+    /// Call this method once when the app starts — for example in the root view's
+    /// `.task` modifier or during `App.init` — to silently resume a logged-in
+    /// session without requiring the user to log in again.
+    ///
+    /// **Restoration flow:**
+    /// 1. **Email / social session:** If a `TokenMetadata` is found in the main token
+    ///    store, a silent `refreshToken` call is made. On success, `session` transitions
+    ///    to `.authenticated(user)`. On failure, the stale token is cleared.
+    /// 2. **Guest session:** If no main token is found but the token store conforms to
+    ///    ``GuestTokenStore`` and a guest refresh token is saved, a silent refresh is
+    ///    attempted. On success, `session` transitions to `.guest(uuid)`. On failure,
+    ///    the stale guest token is cleared.
+    /// 3. If neither restoration succeeds, `session` remains `.unauthenticated`.
+    ///
+    /// This approach always refreshes — even for non-expired tokens — to ensure the
+    /// `UserDTO` / guest UUID is available and the server acknowledges the session is
+    /// still active.
+    public func restoreSession() async {
+        // ── 1. Try to restore an email / social session from the main token store. ──
+        if let storedMetadata = try? tokenStore.load() {
+            do {
+                let response = try await networkService.refreshToken(refreshToken: storedMetadata.refreshToken)
+                let newMetadata = TokenMetadata(
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken,
+                    expiresAt: response.expiresAt
+                )
+                try? tokenStore.save(newMetadata)
+                session = .authenticated(response.user)
+                return
+            } catch {
+                // Refresh failed — clear the stale token and fall through.
+                try? tokenStore.delete()
+            }
+        }
+
+        // ── 2. Try to restore a guest session from the guest refresh token slot. ──
+        guard let guestStore = tokenStore as? (any GuestTokenStore),
+              let savedGuestRefreshToken = guestStore.loadGuestRefreshToken() else {
+            // No guest token either — fresh install or post-logout.
+            session = .unauthenticated
+            return
+        }
+
+        do {
+            let response = try await networkService.refreshToken(refreshToken: savedGuestRefreshToken)
+            restoreGuestSession(from: response)
+        } catch {
+            // Guest refresh failed — clear the stale guest token.
+            guestStore.deleteGuestRefreshToken()
+            session = .unauthenticated
+        }
+    }
+
     // MARK: - Guest session
 
     /// Creates or resumes an anonymous guest session.

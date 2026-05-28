@@ -48,8 +48,16 @@ struct AppRootView: View {
     var body: some View {
         content
             .authSheet(manager: authManager)
-            .task(id: isSessionUnauthenticated) {
+            .task {
+                // Attempt to restore a persisted session (email or guest) before
+                // falling back to showing the auth flow.
+                await authManager.restoreSession()
                 if isSessionUnauthenticated {
+                    authManager.presentAuthFlow(style: .fullScreen)
+                }
+            }
+            .onChange(of: isSessionUnauthenticated) { _, nowUnauthenticated in
+                if nowUnauthenticated {
                     authManager.presentAuthFlow(style: .fullScreen)
                 }
             }
