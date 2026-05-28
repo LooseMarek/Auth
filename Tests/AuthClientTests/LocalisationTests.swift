@@ -98,6 +98,20 @@ final class LocalisationTests: XCTestCase {
         XCTAssertEqual(value, "Re-enter password", "Register confirm-password placeholder should be 'Re-enter password'")
     }
 
+    // MARK: - auth.error.server key
+
+    /// Verifies `auth.error.server` resolves to a non-empty, human-readable string (not the bare key).
+    func testAuthErrorServerKey_resolvesNonEmpty() {
+        let value = String(localized: "auth.error.server", bundle: bundle)
+        XCTAssertFalse(value.isEmpty, "auth.error.server should resolve to a non-empty string")
+        XCTAssertNotEqual(
+            value, "auth.error.server",
+            "auth.error.server should not resolve to the bare key — add it to Localizable.strings"
+        )
+    }
+
+    // MARK: - Key convention
+
     /// Spot-checks that a representative set of keys follows the auth.{screen}.{element} pattern.
     func testKeyConventionIsCorrect() {
         let conventionPattern = #"^auth\.[a-z_]+(\.[a-z_]+)+$"#

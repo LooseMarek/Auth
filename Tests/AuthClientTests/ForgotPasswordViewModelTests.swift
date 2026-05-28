@@ -6,6 +6,39 @@ import AuthShared
 @MainActor
 final class ForgotPasswordViewModelTests: XCTestCase {
 
+    // MARK: - Back navigation
+
+    func testBackToSignInTapped_navigatesToLogin() {
+        var navigatedBack = false
+        let mock = MockForgotPasswordNetworkService(result: .success(()))
+        let viewModel = ForgotPasswordViewModel(
+            networkService: mock,
+            onBackToSignIn: { navigatedBack = true }
+        )
+
+        viewModel.backToSignIn()
+
+        XCTAssertTrue(navigatedBack, "backToSignIn() should invoke the onBackToSignIn callback")
+    }
+
+    // MARK: - Error clearing on email input
+
+    func testEmailFieldChanged_clearsError() {
+        let mock = MockForgotPasswordNetworkService(result: .success(()))
+        let viewModel = ForgotPasswordViewModel(
+            networkService: mock,
+            initialErrorMessage: "Something went wrong. Please try again."
+        )
+
+        XCTAssertNotNil(viewModel.errorMessage, "Precondition: errorMessage should be set before typing")
+
+        viewModel.email = "new@example.com"
+
+        XCTAssertNil(viewModel.errorMessage, "Typing in the email field should clear errorMessage")
+    }
+
+    // MARK: - Existing tests
+
     func testSuccessfulSubmitTransitionsToSuccessState() async {
         let mock = MockForgotPasswordNetworkService(result: .success(()))
         let viewModel = ForgotPasswordViewModel(networkService: mock)
