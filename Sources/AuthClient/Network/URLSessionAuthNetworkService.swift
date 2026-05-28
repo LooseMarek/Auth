@@ -15,12 +15,13 @@ import AuthShared
 /// ```
 ///
 /// ## Error mapping
-/// | HTTP status | Thrown error |
-/// |-------------|--------------|
-/// | 401         | `.invalidCredentials` |
-/// | 409         | `.emailTaken` |
-/// | other non-2xx | `.serverError` |
-/// | URLError (offline, timeout, etc.) | `.networkUnavailable` |
+/// | HTTP status / URL error | Thrown error |
+/// |-------------------------|--------------|
+/// | 401                     | `.invalidCredentials` |
+/// | 409                     | `.emailTaken` |
+/// | other non-2xx           | `.serverError` |
+/// | URLError `.notConnectedToInternet`, `.dataNotAllowed` | `.networkUnavailable` |
+/// | URLError `.cannotConnectToHost`, `.timedOut`, `.networkConnectionLost`, other | `.serverUnreachable` |
 public struct URLSessionAuthNetworkService: AuthNetworkService {
 
     private let baseURL: String
@@ -189,16 +190,21 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
         try mapStatusCode(http.statusCode, url: request.url)
     }
 
-    /// Wraps `session.data(for:)` and converts `URLError` to `.networkUnavailable`.
+    /// Wraps `session.data(for:)` and converts `URLError` to the appropriate
+    /// ``AuthNetworkError``:
+    /// - `.notConnectedToInternet` / `.dataNotAllowed` → `.networkUnavailable`
+    ///   (device is genuinely offline)
+    /// - All other URL errors → `.serverUnreachable`
+    ///   (device has internet but the server cannot be reached)
     private func execute(_ request: URLRequest) async throws -> (Data, URLResponse) {
         do {
             return try await session.data(for: request)
         } catch let error as URLError {
             switch error.code {
-            case .notConnectedToInternet, .networkConnectionLost, .timedOut, .cannotConnectToHost:
+            case .notConnectedToInternet, .dataNotAllowed:
                 throw AuthNetworkError.networkUnavailable
             default:
-                throw AuthNetworkError.networkUnavailable
+                throw AuthNetworkError.serverUnreachable
             }
         }
     }
