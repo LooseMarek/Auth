@@ -222,18 +222,14 @@ public struct RegisterView: View {
             Button {
                 viewModel.navigateToLogin()
             } label: {
-                // The full localised string is "Already have an account? Log in".
-                // We split it on "Log in" at runtime so the "Log in" word can be
-                // styled with the primary colour while keeping the full phrase localizable.
-                let fullString = String(localized: "auth.register.link.login", bundle: bundle)
-                let components = fullString.components(separatedBy: "Log in")
-                let prefix = components.first ?? ""
-                Text(prefix)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Color.secondary)
-                + Text("Log in")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(theme.primaryColor)
+                HStack(spacing: 4) {
+                    Text(String(localized: "auth.register.login_prompt", bundle: bundle))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color.secondary)
+                    Text(String(localized: "auth.register.login_link", bundle: bundle))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(theme.primaryColor)
+                }
             }
             .buttonStyle(.plain)
             Spacer()

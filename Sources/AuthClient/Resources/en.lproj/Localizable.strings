@@ -27,8 +27,11 @@
 /* Forgot password link */
 "auth.login.link.forgot_password" = "Forgot password?";
 
-/* Register navigation link (full string: "Don't have an account? Register") */
-"auth.login.link.register" = "Don't have an account? Register";
+/* Register navigation link — prompt text */
+"auth.login.register_prompt" = "Don't have an account?";
+
+/* Register navigation link — action label */
+"auth.login.register_link" = "Register";
 
 /* Guest access button */
 "auth.login.button.guest" = "Continue as Guest";
@@ -65,8 +68,11 @@
 /* Register submit button (guest upgrade) */
 "auth.register.upgrade.button.submit" = "Save account";
 
-/* Login navigation link (full string: "Already have an account? Log in") */
-"auth.register.link.login" = "Already have an account? Log in";
+/* Login navigation link — prompt text */
+"auth.register.login_prompt" = "Already have an account?";
+
+/* Login navigation link — action label */
+"auth.register.login_link" = "Log in";
 
 /* Error: password too short */
 "auth.register.error.password_too_short" = "Password must be at least 8 characters.";

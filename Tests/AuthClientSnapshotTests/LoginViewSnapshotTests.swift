@@ -415,6 +415,24 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Prompt spacing (issue #101)
+
+    /// Verifies the register prompt row renders with correct visual spacing between the
+    /// prompt text and the "Register" link — spacing is supplied by layout, not a string space.
+    func testPromptSpacingPreserved() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testPromptSpacingPreserved_dark() {
+        snapshot(LoginView(
+            authManager: .make(),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(

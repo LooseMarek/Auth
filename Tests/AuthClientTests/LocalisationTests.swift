@@ -18,7 +18,8 @@ final class LocalisationTests: XCTestCase {
         "auth.login.field.password.placeholder",
         "auth.login.button.submit",
         "auth.login.link.forgot_password",
-        "auth.login.link.register",
+        "auth.login.register_prompt",
+        "auth.login.register_link",
         "auth.login.button.guest",
         "auth.login.error.invalid_credentials",
         // RegisterView
@@ -31,7 +32,8 @@ final class LocalisationTests: XCTestCase {
         "auth.register.field.confirm_password.placeholder",
         "auth.register.button.submit",
         "auth.register.upgrade.button.submit",
-        "auth.register.link.login",
+        "auth.register.login_prompt",
+        "auth.register.login_link",
         "auth.register.error.password_too_short",
         "auth.register.error.password_mismatch",
         "auth.register.error.email_taken",
@@ -139,5 +141,27 @@ final class LocalisationTests: XCTestCase {
                 "Key '\(key)' does not follow the auth.{screen}.{element} naming convention."
             )
         }
+    }
+
+    // MARK: - Prompt string whitespace (issue #101)
+
+    /// Verifies the login-to-register prompt string has no leading or trailing whitespace.
+    func testLoginPromptString_noLeadingOrTrailingWhitespace() {
+        let value = String(localized: "auth.login.register_prompt", bundle: bundle)
+        XCTAssertEqual(
+            value,
+            value.trimmingCharacters(in: .whitespaces),
+            "auth.login.register_prompt must not contain leading or trailing whitespace — spacing is a layout concern."
+        )
+    }
+
+    /// Verifies the register-to-login prompt string has no leading or trailing whitespace.
+    func testRegisterPromptString_noLeadingOrTrailingWhitespace() {
+        let value = String(localized: "auth.register.login_prompt", bundle: bundle)
+        XCTAssertEqual(
+            value,
+            value.trimmingCharacters(in: .whitespaces),
+            "auth.register.login_prompt must not contain leading or trailing whitespace — spacing is a layout concern."
+        )
     }
 }
