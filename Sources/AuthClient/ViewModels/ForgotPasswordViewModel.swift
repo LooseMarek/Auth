@@ -4,7 +4,9 @@ import Observation
 @Observable
 @MainActor
 final class ForgotPasswordViewModel {
-    var email: String = ""
+    var email: String = "" {
+        didSet { errorMessage = nil }
+    }
     private(set) var errorMessage: String? = nil
     private(set) var isLoading: Bool = false
     private(set) var isSuccess: Bool = false
@@ -13,10 +15,12 @@ final class ForgotPasswordViewModel {
 
     private let networkService: any AuthNetworkService
     private let localizationBundle: Bundle?
+    var onBackToSignIn: (() -> Void)?
 
     init(
         networkService: any AuthNetworkService,
         localizationBundle: Bundle? = nil,
+        onBackToSignIn: (() -> Void)? = nil,
         initialEmail: String = "",
         initialIsLoading: Bool = false,
         initialIsSuccess: Bool = false,
@@ -24,6 +28,7 @@ final class ForgotPasswordViewModel {
     ) {
         self.networkService = networkService
         self.localizationBundle = localizationBundle
+        self.onBackToSignIn = onBackToSignIn
         self.email = initialEmail
         self.isLoading = initialIsLoading
         self.isSuccess = initialIsSuccess
@@ -32,6 +37,10 @@ final class ForgotPasswordViewModel {
 
     private func localizedString(_ key: String) -> String {
         String(localized: String.LocalizationValue(key), bundle: localizationBundle ?? .module)
+    }
+
+    func backToSignIn() {
+        onBackToSignIn?()
     }
 
     func submit() async {
