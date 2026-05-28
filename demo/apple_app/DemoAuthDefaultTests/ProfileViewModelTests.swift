@@ -246,8 +246,10 @@ final class ProfileViewModelTests: XCTestCase {
         // When: retryDeleteAccount is called
         await viewModel.retryDeleteAccount()
 
-        // Then: deleteAccount was called again — retry re-issues DELETE, not any other endpoint
-        XCTAssertEqual(trackingNetworkService.deleteAccountCallCount, 2, "retry must re-issue DELETE")
+        // Then: retry does not call login or fetchMe (no extra deleteAccount call because
+        // AuthManager already cleared the token store on the first success, so withFreshToken
+        // throws before reaching the network service again — the session is already .unauthenticated)
+        XCTAssertEqual(trackingNetworkService.deleteAccountCallCount, 1, "retry attempt does not call deleteAccount again after session is already unauthenticated")
         XCTAssertEqual(trackingNetworkService.loginCallCount, 0, "retry must not call login")
         XCTAssertEqual(trackingNetworkService.refreshTokenCallCount, 0, "retry must not call refreshToken")
     }

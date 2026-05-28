@@ -10,41 +10,6 @@ packages:
     path: ../..
 
 targets:
-  DemoAuth:
-    type: application
-    platform: iOS
-    deploymentTarget: "17.0"
-    sources: ["DemoAuth"]
-    dependencies:
-      - package: Auth
-        product: AuthClient
-    configFiles:
-      Debug: GoogleCredentials.xcconfig
-      Release: GoogleCredentials.xcconfig
-    settings:
-      base:
-        SWIFT_VERSION: 6.2
-        PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth
-        DEVELOPMENT_TEAM: 9JVYUSJU3D
-        EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift"
-        CODE_SIGN_ENTITLEMENTS: "DemoAuth/DemoAuth.entitlements"
-        INFOPLIST_FILE: "DemoAuth/Info.plist"
-
-  DemoAuthTests:
-    type: bundle.unit-test
-    platform: iOS
-    deploymentTarget: "17.0"
-    sources: ["DemoAuthTests"]
-    dependencies:
-      - target: DemoAuth
-    settings:
-      base:
-        SWIFT_VERSION: 6.2
-        GENERATE_INFOPLIST_FILE: YES
-        CODE_SIGN_IDENTITY: ""
-        CODE_SIGNING_REQUIRED: NO
-        DEVELOPMENT_TEAM: ""
-
   DemoAuthDefault:
     type: application
     platform: iOS
@@ -154,21 +119,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         DEVELOPMENT_TEAM: ""
 
-
-
-
 schemes:
-  DemoAuth:
-    build:
-      targets:
-        DemoAuth: all
-    test:
-      targets:
-        - DemoAuthTests
-    run:
-      config: Debug
-    archive:
-      config: Release
   DemoAuthDefault:
     build:
       targets:

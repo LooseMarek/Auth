@@ -11,7 +11,11 @@ final class AuthManagerSetupTests: XCTestCase {
         // The demo app stores its API base URL as a constant so future tasks can wire it
         // into a real network service. This test verifies that constant is set to the
         // expected local-development value.
+        #if targetEnvironment(simulator)
         XCTAssertEqual(AppRootView.demoAPIBaseURL, "http://localhost:8080")
+        #else
+        XCTAssertEqual(AppRootView.demoAPIBaseURL, "http://192.168.68.58:8080")
+        #endif
     }
 
     // MARK: - testAuthSheetPresentsWhenUnauthenticated
