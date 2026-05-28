@@ -21,6 +21,7 @@ public struct ForgotPasswordView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.authTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
 
     private var bundle: Bundle { authManager.configuration.localizationBundle ?? .module }
 
@@ -58,6 +59,9 @@ public struct ForgotPasswordView: View {
                 \.authTheme,
                 AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
             )
+            .onAppear {
+                viewModel.onBackToSignIn = { dismiss() }
+            }
     }
 
     @ViewBuilder
@@ -188,10 +192,12 @@ public struct ForgotPasswordView: View {
     private var backLink: some View {
         HStack {
             Spacer()
-            Button(String(localized: "auth.forgot.link.back", bundle: bundle)) {}
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(theme.primaryColor)
-                .buttonStyle(.plain)
+            Button(String(localized: "auth.forgot.link.back", bundle: bundle)) {
+                viewModel.backToSignIn()
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(theme.primaryColor)
+            .buttonStyle(.plain)
             Spacer()
         }
     }
@@ -250,7 +256,9 @@ public struct ForgotPasswordView: View {
     }
 
     private var backToLoginButton: some View {
-        Button {} label: {
+        Button {
+            viewModel.backToSignIn()
+        } label: {
             Text(String(localized: "auth.forgot.link.back", bundle: bundle))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.white)
