@@ -89,7 +89,8 @@ public struct GuestAuthController: RouteCollection, Sendable {
         let userDTO = UserDTO(
             id: userID.uuidString,
             email: user.isGuest ? nil : user.email,
-            displayName: nil
+            displayName: nil,
+            isGuest: user.isGuest
         )
 
         return AuthResponse(

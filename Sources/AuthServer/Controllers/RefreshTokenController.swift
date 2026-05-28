@@ -80,8 +80,9 @@ public struct RefreshTokenController: RouteCollection, Sendable {
 
         let userDTO = UserDTO(
             id: userID.uuidString,
-            email: user.email,
-            displayName: nil
+            email: user.isGuest ? nil : user.email,
+            displayName: nil,
+            isGuest: user.isGuest
         )
 
         return AuthResponse(

@@ -15,21 +15,33 @@ final class UserDTOTests: XCTestCase {
     }
 
     func testEncodeDecodeRoundTrip_withAllFields() throws {
-        let original = UserDTO(id: "abc-123", email: "user@example.com", displayName: "Alice")
+        let original = UserDTO(id: "abc-123", email: "user@example.com", displayName: "Alice", isGuest: false)
         let data = try encoder.encode(original)
         let decoded = try decoder.decode(UserDTO.self, from: data)
         XCTAssertEqual(decoded.id, original.id)
         XCTAssertEqual(decoded.email, original.email)
         XCTAssertEqual(decoded.displayName, original.displayName)
+        XCTAssertFalse(decoded.isGuest)
     }
 
     func testEncodeDecodeRoundTrip_withNilOptionals_guestUser() throws {
-        let original = UserDTO(id: "guest-456", email: nil, displayName: nil)
+        let original = UserDTO(id: "guest-456", email: nil, displayName: nil, isGuest: true)
         let data = try encoder.encode(original)
         let decoded = try decoder.decode(UserDTO.self, from: data)
         XCTAssertEqual(decoded.id, original.id)
         XCTAssertNil(decoded.email)
         XCTAssertNil(decoded.displayName)
+        XCTAssertTrue(decoded.isGuest)
+    }
+
+    func testIsGuest_defaultsToFalse() throws {
+        // Verify backward-compat: existing JSON without "isGuest" key decodes to isGuest == false.
+        let json = """
+        {"id":"legacy-user","email":"user@example.com"}
+        """.data(using: .utf8)!
+        let decoded = try decoder.decode(UserDTO.self, from: json)
+        XCTAssertFalse(decoded.isGuest,
+                       "isGuest should default to false when absent from JSON (backward compatibility)")
     }
 
     func testNilOptionals_areOmittedFromJSON() throws {

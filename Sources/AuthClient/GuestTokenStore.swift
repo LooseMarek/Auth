@@ -16,7 +16,11 @@ public protocol GuestTokenStore: TokenStore {
 
     /// Persists the guest refresh token under a separate Keychain key.
     ///
-    /// Called by ``AuthManager/logout()`` when the current session is `.guest`.
+    /// Called by ``AuthManager/loginAsGuest()`` after a new guest account is created,
+    /// so the session can be silently resumed on the next `loginAsGuest()` call.
+    /// **Not** called during explicit logout — ``AuthManager/logout()`` deletes the
+    /// guest token slot so that re-opening the app after an explicit logout results in
+    /// `.unauthenticated`, not a silently-resumed guest session.
     func saveGuestRefreshToken(_ token: String)
 
     /// Returns the previously saved guest refresh token, or `nil` when none exists.
