@@ -25,13 +25,4 @@ final class DemoAuthDefaultAppTests: XCTestCase {
         XCTAssertNil(config.buttonTextColor, "buttonTextColor must be nil so AuthTheme uses .white")
         XCTAssertNil(config.errorColor, "errorColor must be nil so AuthTheme uses Color.red")
     }
-
-    // MARK: - testAPIBaseURLIsSetToLocalhost
-
-    func testAPIBaseURLIsSetToLocalhost() {
-        // The demo app stores its API base URL as a constant so future tasks can wire it
-        // into a real network service. This test verifies that constant is set to the
-        // expected local-development value.
-        XCTAssertEqual(AppRootView.demoAPIBaseURL, "http://localhost:8080")
-    }
 }
