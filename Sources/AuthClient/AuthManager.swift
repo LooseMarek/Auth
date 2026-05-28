@@ -15,6 +15,13 @@ public final class AuthManager {
     /// Number of seconds before access-token expiry at which a silent refresh is triggered.
     static let tokenRefreshThreshold: TimeInterval = 60
 
+    /// UserDefaults key used to record that the user explicitly tapped "Logout".
+    ///
+    /// When `true`, `restoreSession()` skips all token restoration and returns
+    /// `.unauthenticated` immediately, even when a guest refresh token is present.
+    /// The flag is cleared by any successful authentication action.
+    static let explicitLogoutKey = "auth.explicitLogout"
+
     // MARK: - Public state
 
     /// The active authentication session state.
@@ -41,6 +48,11 @@ public final class AuthManager {
     let networkService: any AuthNetworkService
     private let tokenStore: any TokenStore
 
+    /// The `UserDefaults` suite used to persist the explicit-logout flag.
+    ///
+    /// Injected via `init` so tests can supply a clean, isolated instance.
+    private let userDefaults: UserDefaults
+
     // MARK: - Init
 
     /// Creates an `AuthManager` with explicit dependencies.
@@ -52,14 +64,19 @@ public final class AuthManager {
     ///   - configuration: Developer-facing configuration for colours, fonts, and feature flags.
     ///   - networkService: The network layer implementation.
     ///   - tokenStore: Persistence for token metadata.
+    ///   - userDefaults: The `UserDefaults` suite used to persist the explicit-logout flag.
+    ///     Defaults to `UserDefaults.standard`. Pass a custom suite in tests to keep
+    ///     them isolated from each other and from the host app's defaults.
     public init(
         configuration: AuthClientConfiguration,
         networkService: any AuthNetworkService,
-        tokenStore: any TokenStore
+        tokenStore: any TokenStore,
+        userDefaults: UserDefaults = .standard
     ) {
         self.configuration = configuration
         self.networkService = networkService
         self.tokenStore = tokenStore
+        self.userDefaults = userDefaults
     }
 
     /// Convenience initialiser for host apps.
@@ -126,6 +143,15 @@ public final class AuthManager {
     /// `UserDTO` / guest UUID is available and the server acknowledges the session is
     /// still active.
     public func restoreSession() async {
+        // ── 0. If the user explicitly logged out, skip all token restoration. ──
+        // The explicit-logout flag is set by logout() and cleared by any successful
+        // auth action. While set, restoreSession() always returns .unauthenticated —
+        // even when a guest refresh token is present in GuestTokenStore.
+        if userDefaults.bool(forKey: Self.explicitLogoutKey) {
+            session = .unauthenticated
+            return
+        }
+
         // ── 1. Try to restore an email / social session from the main token store. ──
         if let storedMetadata = try? tokenStore.load() {
             do {
@@ -136,7 +162,15 @@ public final class AuthManager {
                     expiresAt: response.expiresAt
                 )
                 try? tokenStore.save(newMetadata)
-                session = .authenticated(response.user)
+                // The refresh response carries isGuest from the server, so we can
+                // distinguish a guest token that was stored in the main slot (which
+                // happens when the app is killed while a guest session is active)
+                // from a real authenticated session.
+                if response.user.isGuest {
+                    restoreGuestSession(from: response)
+                } else {
+                    session = .authenticated(response.user)
+                }
                 return
             } catch {
                 // Refresh failed — clear the stale token and fall through.
@@ -208,6 +242,9 @@ public final class AuthManager {
             expiresAt: response.expiresAt
         )
         try? tokenStore.save(metadata)
+        // Clear the explicit-logout flag: the user has actively resumed or created a guest
+        // session, so future restoreSession() calls should auto-restore it.
+        userDefaults.set(false, forKey: Self.explicitLogoutKey)
         session = .guest(uuid)
         dismissAuthFlow()
     }
@@ -228,6 +265,9 @@ public final class AuthManager {
             expiresAt: response.expiresAt
         )
         try? tokenStore.save(metadata)
+        // Clear the explicit-logout flag: a successful sign-in means the user is
+        // intentionally authenticated — future restoreSession() calls should work.
+        userDefaults.set(false, forKey: Self.explicitLogoutKey)
         session = .authenticated(response.user)
         dismissAuthFlow()
     }
@@ -273,35 +313,50 @@ public final class AuthManager {
 
     // MARK: - Logout
 
-    /// Signs the user out locally and, if a refresh token is present, invalidates it
-    /// on the server.
+    /// Signs the user out locally and, for non-guest accounts, invalidates the refresh
+    /// token on the server.
     ///
-    /// **Guest sessions:** Before clearing the main token store, the current refresh token
-    /// is saved to the guest slot (via ``GuestTokenStore``) so the session can be silently
-    /// resumed on the next "Continue as Guest" tap. Authenticated (non-guest) logout does
-    /// NOT touch the guest slot.
+    /// **Guest sessions:** The current guest refresh token is saved to the ``GuestTokenStore``
+    /// slot so that a subsequent call to ``loginAsGuest()`` can silently resume the same
+    /// guest account (same UUID / app data). The explicit-logout flag is set to prevent
+    /// ``restoreSession()`` from auto-restoring the guest session on the next app launch —
+    /// the user must actively tap "Continue as Guest" to resume. The server logout call is
+    /// intentionally **skipped** for guest sessions: the token must remain valid on the
+    /// server so ``loginAsGuest()`` can use it to resume the same session. Authenticated
+    /// (non-guest) logout does NOT touch the guest slot.
     ///
     /// Local Keychain clearance and state reset always succeed, even if the server call
     /// fails (network unavailable, server error). This satisfies the UX contract:
     /// logout must always succeed locally.
     public func logout() async {
+        // Capture whether this is a guest session before clearing local state.
+        let wasGuest = session.isGuest
+
         // Load the refresh token before clearing the store.
         let refreshToken = (try? tokenStore.load())?.refreshToken
 
-        // If the current session is guest, persist the refresh token to the guest slot
-        // so it can be used to resume the session on the next loginAsGuest() call.
-        if session.isGuest,
+        // If the current session is guest, SAVE the guest refresh token to the guest slot
+        // so that loginAsGuest() can resume the same account after logout. The explicit-logout
+        // flag (set below) prevents restoreSession() from auto-restoring the session.
+        if wasGuest,
            let guestStore = tokenStore as? (any GuestTokenStore),
-           let refreshToken {
-            guestStore.saveGuestRefreshToken(refreshToken)
+           let currentRefreshToken = refreshToken {
+            guestStore.saveGuestRefreshToken(currentRefreshToken)
         }
+
+        // Set the explicit-logout flag so restoreSession() skips all token restoration.
+        // This is cleared by any subsequent successful authentication action.
+        userDefaults.set(true, forKey: Self.explicitLogoutKey)
 
         // Always clear local state first.
         try? tokenStore.delete()
         session = .unauthenticated
 
-        // Best-effort server invalidation — only when a refresh token exists.
-        if let refreshToken {
+        // Best-effort server invalidation — only for real (non-guest) accounts.
+        // Guest tokens must remain valid on the server so loginAsGuest() can resume
+        // the same session. Server-side invalidation is critical for user accounts
+        // (security) but actively prevents guest session resumption.
+        if !wasGuest, let refreshToken {
             try? await networkService.logout(refreshToken: refreshToken)
         }
     }
@@ -324,6 +379,9 @@ public final class AuthManager {
         try? tokenStore.delete()
         // Also clear the guest token slot so the deleted account cannot be resumed.
         (tokenStore as? (any GuestTokenStore))?.deleteGuestRefreshToken()
+        // Clear the explicit-logout flag: a deleted account is gone forever, so the next
+        // "Continue as Guest" must create a fresh account (not resume the deleted one).
+        userDefaults.set(false, forKey: Self.explicitLogoutKey)
         session = .unauthenticated
     }
 }

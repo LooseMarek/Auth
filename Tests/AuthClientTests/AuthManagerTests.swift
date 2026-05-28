@@ -9,6 +9,19 @@ private func makeUser() -> UserDTO {
     UserDTO(id: "user-1", email: "test@example.com", displayName: "Test")
 }
 
+/// Returns a fresh, isolated `UserDefaults` suite for a single test.
+///
+/// Each call creates a unique in-memory suite backed by a UUID-named domain so tests
+/// that write the `auth.explicitLogout` flag cannot interfere with each other.
+/// The suite is NOT persisted to disk (initialisation with a UUID name creates a
+/// temporary in-process suite on all Apple platforms).
+private func makeFreshUserDefaults() -> UserDefaults {
+    let suiteName = UUID().uuidString
+    // UserDefaults(suiteName:) returns nil only when suiteName is an empty string,
+    // which can never happen for a UUID. Force-unwrap is safe here.
+    return UserDefaults(suiteName: suiteName)!
+}
+
 private func makeAuthResponse(accessToken: String = "new-access", refreshToken: String = "refresh-token", expiresAt: Date = Date().addingTimeInterval(3600)) -> AuthResponse {
     AuthResponse(accessToken: accessToken, refreshToken: refreshToken, expiresAt: expiresAt, user: makeUser())
 }
@@ -114,7 +127,8 @@ final class AuthManagerTests: XCTestCase {
         let manager = AuthManager(
             configuration: AuthClientConfiguration(),
             networkService: networkService,
-            tokenStore: store
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
         )
         // signIn with a response that carries the specific refresh token we want to assert
         manager.signIn(response: makeAuthResponse(refreshToken: "my-refresh-token"))
@@ -146,7 +160,8 @@ final class AuthManagerTests: XCTestCase {
         let manager = AuthManager(
             configuration: AuthClientConfiguration(),
             networkService: networkService,
-            tokenStore: store
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
         )
         manager.signIn(response: makeAuthResponse())
 
@@ -161,6 +176,55 @@ final class AuthManagerTests: XCTestCase {
             XCTFail("Expected session to be .unauthenticated even after server failure")
             return
         }
+    }
+
+    func testGuestLogout_doesNotCallServerLogout() async throws {
+        // Given: an active guest session with a token in the main store
+        let guestUUID = UUID()
+        let networkService = MockAuthNetworkService()
+        let store = MockTokenStore()
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
+        )
+        let metadata = TokenMetadata(
+            accessToken: "guest-access",
+            refreshToken: "guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        try store.save(metadata)
+        manager.setGuestSession(uuid: guestUUID)
+
+        // When: logout() is called for a guest session
+        await manager.logout()
+
+        // Then: the server logout endpoint is NOT called.
+        // The guest token must remain valid so loginAsGuest() can resume the same session.
+        XCTAssertEqual(networkService.logoutCallCount, 0,
+                       "logout() must NOT call the server for guest sessions — the token must stay valid for session resumption")
+    }
+
+    func testNonGuestLogout_callsServerLogout() async throws {
+        // Given: an authenticated (non-guest) session
+        let networkService = MockAuthNetworkService()
+        let store = InMemoryTokenStore()
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
+        )
+        manager.signIn(response: makeAuthResponse(refreshToken: "real-user-refresh-token"))
+
+        // When: logout() is called for a non-guest session
+        await manager.logout()
+
+        // Then: the server logout endpoint IS called to invalidate the token (security).
+        XCTAssertEqual(networkService.logoutCallCount, 1,
+                       "logout() must call the server for real (non-guest) sessions to invalidate the token")
+        XCTAssertEqual(networkService.lastLogoutRefreshTokenArg, "real-user-refresh-token")
     }
 
     // MARK: Account deletion
@@ -235,7 +299,6 @@ final class AuthManagerTests: XCTestCase {
         // Given: a guest session with a known UUID
         let guestUUIDString = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
         let guestUUID = UUID(uuidString: guestUUIDString)!
-        let guestUser = UserDTO(id: guestUUIDString, email: nil, displayName: nil)
         let upgradeUser = UserDTO(id: guestUUIDString, email: "test@example.com", displayName: "Test")
         let upgradeResponse = AuthResponse(
             accessToken: "upgraded-access",
@@ -365,19 +428,20 @@ final class AuthManagerTests: XCTestCase {
     // MARK: Guest session persistence
 
     func testGuestLogout_savesGuestRefreshToken() async throws {
-        // Given: an active guest session with a known refresh token
+        // Given: an active guest session whose current refresh token is in the main store
         let guestUUID = UUID()
         let networkService = MockAuthNetworkService()
         let store = MockTokenStore()
         let manager = AuthManager(
             configuration: AuthClientConfiguration(),
             networkService: networkService,
-            tokenStore: store
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
         )
-        // Seed the store with a guest refresh token and set session to .guest
+        // Seed the main token store with the active guest refresh token
         let metadata = TokenMetadata(
             accessToken: "guest-access",
-            refreshToken: "guest-refresh-to-save",
+            refreshToken: "guest-refresh-to-preserve",
             expiresAt: Date().addingTimeInterval(3600)
         )
         try store.save(metadata)
@@ -386,9 +450,10 @@ final class AuthManagerTests: XCTestCase {
         // When: logout() is called
         await manager.logout()
 
-        // Then: the guest refresh token was saved to the guest slot before clearing the main store
-        XCTAssertEqual(store.savedGuestRefreshToken, "guest-refresh-to-save",
-                       "Guest refresh token should be persisted to the guest slot on guest logout")
+        // Then: the guest refresh token is SAVED in the guest slot so loginAsGuest()
+        // can resume the same account after logout.
+        XCTAssertEqual(store.savedGuestRefreshToken, "guest-refresh-to-preserve",
+                       "Guest refresh token must be saved on explicit logout so loginAsGuest() can resume same account")
 
         // And: the main token store is cleared
         XCTAssertNil(try store.load(), "Main token store should be empty after logout")
@@ -398,6 +463,100 @@ final class AuthManagerTests: XCTestCase {
             XCTFail("Expected session to be .unauthenticated after guest logout, got \(manager.session)")
             return
         }
+    }
+
+    func testAfterGuestLogout_restoreSession_remainsUnauthenticated() async throws {
+        // Given: a guest session that the user has explicitly logged out of
+        let guestUUID = UUID()
+        let networkService = MockAuthNetworkService()
+        let store = MockTokenStore()
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
+        )
+        // Seed and logout as guest (simulates the first app run)
+        let metadata = TokenMetadata(
+            accessToken: "guest-access",
+            refreshToken: "guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        try store.save(metadata)
+        manager.setGuestSession(uuid: guestUUID)
+        await manager.logout()
+
+        // Precondition: the explicit-logout flag is set and the guest token is saved
+        // (logout now saves the guest token instead of deleting it).
+        XCTAssertNotNil(store.savedGuestRefreshToken,
+                        "Precondition: guest token should be saved after logout")
+
+        // When: the app is relaunched and restoreSession() is called
+        await manager.restoreSession()
+
+        // Then: session remains .unauthenticated — the explicit-logout flag prevents
+        // auto-restoration even though the guest token is still present.
+        guard case .unauthenticated = manager.session else {
+            XCTFail("Expected session to be .unauthenticated after guest logout + relaunch, got \(manager.session)")
+            return
+        }
+
+        // And: no network calls were made (explicit-logout flag short-circuits all restoration)
+        XCTAssertEqual(networkService.refreshTokenCallCount, 0,
+                       "No refresh should be attempted when the explicit-logout flag is set")
+    }
+
+    func testAfterGuestLogout_continueAsGuest_resumesSameGuestSession() async throws {
+        // Given: a guest session that the user has explicitly logged out of
+        let guestUUIDString = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+        let guestUser = UserDTO(id: guestUUIDString, email: nil, displayName: nil)
+        let refreshedResponse = AuthResponse(
+            accessToken: "refreshed-guest-access",
+            refreshToken: "refreshed-guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: guestUser
+        )
+        let networkService = MockAuthNetworkService()
+        networkService.refreshTokenResult = .success(refreshedResponse)
+
+        let store = MockTokenStore()
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
+        )
+        // Seed a guest session and log out
+        let metadata = TokenMetadata(
+            accessToken: "guest-access",
+            refreshToken: "guest-refresh-to-resume",
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        try store.save(metadata)
+        manager.setGuestSession(uuid: UUID(uuidString: guestUUIDString)!)
+        await manager.logout()
+
+        // Precondition: the guest token is saved and the user is unauthenticated
+        XCTAssertNotNil(store.savedGuestRefreshToken,
+                        "Precondition: guest refresh token should be saved after logout")
+
+        // When: the user taps "Continue as Guest"
+        try await manager.loginAsGuest()
+
+        // Then: the refresh was called with the saved guest token
+        XCTAssertEqual(networkService.refreshTokenCallCount, 1,
+                       "Should call refreshToken to resume the existing guest session")
+        XCTAssertEqual(networkService.loginAsGuestCallCount, 0,
+                       "Should NOT create a new guest account when a saved token exists")
+        XCTAssertEqual(networkService.lastRefreshTokenArg, "guest-refresh-to-resume")
+
+        // And: the session is restored to the SAME guest UUID (id A, not a new id B)
+        guard case .guest(let uuid) = manager.session else {
+            XCTFail("Expected session to be .guest after resuming, got \(manager.session)")
+            return
+        }
+        XCTAssertEqual(uuid.uuidString.uppercased(), guestUUIDString.uppercased(),
+                       "loginAsGuest after explicit logout must resume the SAME guest session (id A), not create a new one")
     }
 
     func testGuestSignIn_resumesExistingSession_whenGuestTokenExists() async throws {
@@ -491,7 +650,8 @@ final class AuthManagerTests: XCTestCase {
         let manager = AuthManager(
             configuration: AuthClientConfiguration(),
             networkService: networkService,
-            tokenStore: store
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
         )
         manager.signIn(response: makeAuthResponse(accessToken: "access-for-deletion"))
 
@@ -503,6 +663,64 @@ final class AuthManagerTests: XCTestCase {
                      "Guest refresh token should be cleared when account is deleted")
     }
 
+    func testAfterDeleteAccount_continueAsGuest_createsNewGuestSession() async throws {
+        // Given: an authenticated guest session that is deleted
+        let originalGuestUUIDString = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+        let newGuestUUIDString = "B2C3D4E5-F6A7-8901-BCDE-F12345678901"
+        let newGuestUser = UserDTO(id: newGuestUUIDString, email: nil, displayName: nil)
+        let newGuestResponse = AuthResponse(
+            accessToken: "new-guest-access",
+            refreshToken: "new-guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: newGuestUser
+        )
+        let networkService = MockAuthNetworkService()
+        networkService.loginAsGuestResult = .success(newGuestResponse)
+
+        let store = MockTokenStore()
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
+        )
+        // Seed a guest session with a valid access token (needed for deleteAccount)
+        let metadata = TokenMetadata(
+            accessToken: "guest-access",
+            refreshToken: "guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        try store.save(metadata)
+        manager.setGuestSession(uuid: UUID(uuidString: originalGuestUUIDString)!)
+        store.savedGuestRefreshToken = "original-guest-refresh"
+
+        // When: deleteAccount() is called
+        try await manager.deleteAccount()
+
+        // Precondition: guest token is deleted after account deletion
+        XCTAssertNil(store.savedGuestRefreshToken,
+                     "Precondition: guest token should be deleted after deleteAccount")
+
+        // And: when the user taps "Continue as Guest"
+        try await manager.loginAsGuest()
+
+        // Then: a NEW guest account is created (no saved token to resume)
+        XCTAssertEqual(networkService.loginAsGuestCallCount, 1,
+                       "Should create a NEW guest account after account deletion")
+        XCTAssertEqual(networkService.refreshTokenCallCount, 0,
+                       "Should NOT attempt to refresh the deleted guest token")
+
+        // And: session is the new guest UUID (id B), not the original (id A)
+        guard case .guest(let uuid) = manager.session else {
+            XCTFail("Expected session to be .guest after new guest creation, got \(manager.session)")
+            return
+        }
+        XCTAssertEqual(uuid.uuidString.uppercased(), newGuestUUIDString.uppercased(),
+                       "After deleteAccount, loginAsGuest must create a fresh guest (id B), not restore old (id A)")
+        XCTAssertNotEqual(uuid.uuidString.uppercased(), originalGuestUUIDString.uppercased(),
+                          "New guest UUID must differ from the deleted account's UUID")
+    }
+
     func testAuthenticatedLogout_doesNotTouchGuestRefreshToken() async throws {
         // Given: an authenticated (non-guest) session with a saved guest refresh token
         let store = MockTokenStore()
@@ -511,7 +729,8 @@ final class AuthManagerTests: XCTestCase {
         let manager = AuthManager(
             configuration: AuthClientConfiguration(),
             networkService: networkService,
-            tokenStore: store
+            tokenStore: store,
+            userDefaults: makeFreshUserDefaults()
         )
         manager.signIn(response: makeAuthResponse())
 

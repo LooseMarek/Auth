@@ -230,6 +230,56 @@ final class SessionRestorationServiceTests: XCTestCase {
                        "The saved guest refresh token should have been used")
     }
 
+    // MARK: - testRestoreSession_guestUser_setsGuestSession
+
+    /// Verifies that when the main token store holds a guest refresh token (the app
+    /// was killed while a guest session was active), `restoreSession()` restores the
+    /// session to `.guest(uuid)` — NOT `.authenticated` — because the server returns
+    /// `isGuest: true` in the refresh response.
+    func testRestoreSession_guestUser_setsGuestSession() async throws {
+        // Given: a main token store seeded with the active guest refresh token
+        let store = InMemoryTokenStore()
+        let guestMetadata = TokenMetadata(
+            accessToken: "guest-access",
+            refreshToken: "guest-main-refresh",
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        try store.save(guestMetadata)
+
+        // And: the server returns a guest user in the refresh response
+        let guestUUIDString = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+        let guestUser = UserDTO(id: guestUUIDString, email: nil, displayName: nil, isGuest: true)
+        let guestResponse = AuthResponse(
+            accessToken: "new-guest-access",
+            refreshToken: "new-guest-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: guestUser
+        )
+        let networkService = MockAuthNetworkService()
+        networkService.refreshTokenResult = .success(guestResponse)
+
+        let manager = AuthManager(
+            configuration: AuthClientConfiguration(),
+            networkService: networkService,
+            tokenStore: store
+        )
+
+        // When: restoreSession() is called (simulating an app relaunch mid-guest-session)
+        await manager.restoreSession()
+
+        // Then: session is .guest(uuid), NOT .authenticated
+        guard case .guest(let uuid) = manager.session else {
+            XCTFail("Expected session to be .guest after restoring a guest token, got \(manager.session)")
+            return
+        }
+        XCTAssertEqual(uuid.uuidString.uppercased(), guestUUIDString.uppercased(),
+                       "Restored guest UUID should match the one returned by the refresh response")
+
+        // And: session.isGuest is true so a subsequent logout() will save the guest token
+        XCTAssertTrue(manager.session.isGuest,
+                      "session.isGuest must be true after restoring a guest session from the main token slot")
+    }
+
     // MARK: - testAppLaunch_savedGuestToken_refreshFails_remainsUnauthenticated
 
     /// Verifies that when the saved guest refresh token is expired or revoked,

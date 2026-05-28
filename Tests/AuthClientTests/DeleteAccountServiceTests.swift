@@ -27,7 +27,8 @@ final class DeleteAccountServiceTests: XCTestCase {
         let manager = AuthManager(
             configuration: AuthClientConfiguration(),
             networkService: networkService,
-            tokenStore: store
+            tokenStore: store,
+            userDefaults: UserDefaults(suiteName: UUID().uuidString)!
         )
         manager.signIn(response: AuthResponse(
             accessToken: accessToken,

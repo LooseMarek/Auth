@@ -109,7 +109,8 @@ public struct AppleAuthController: RouteCollection, Sendable {
         let userDTO = UserDTO(
             id: userID.uuidString,
             email: user.email,
-            displayName: nil
+            displayName: nil,
+            isGuest: false
         )
 
         return AuthResponse(

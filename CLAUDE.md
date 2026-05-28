@@ -220,6 +220,38 @@ Reverting such a migration (restoring NOT NULL) is not possible via `updateField
 
 The `AuthManager` checks for `GuestTokenStore` conformance at runtime via `as? (any GuestTokenStore)`, so the protocol is opt-in and does not break existing `TokenStore` implementations.
 
+#### Explicit-logout flag and two-concern design
+
+`logout()` and `restoreSession()` serve **two separate concerns** that must not be conflated:
+
+| Concern | Mechanism |
+|---------|-----------|
+| Prevent auto-restore on launch after logout | `UserDefaults` flag `"auth.explicitLogout"` |
+| Allow "Continue as Guest" to resume same account | Guest refresh token is **saved** (not deleted) by `logout()` |
+
+**`logout()` behaviour:**
+- Sets `auth.explicitLogout = true` in `UserDefaults`
+- If the current session is `.guest`, **saves** the active refresh token to `GuestTokenStore` (does NOT delete it)
+- Clears the main token store
+
+**`restoreSession()` behaviour:**
+- If `auth.explicitLogout == true`, immediately sets `session = .unauthenticated` and returns — no network call, even if a guest token is present
+- Otherwise, proceeds with normal token restoration (email/social first, then guest)
+
+**`loginAsGuest()` behaviour (unchanged):**
+- Checks `GuestTokenStore` for a saved token; if found, silently refreshes to resume same guest UUID
+- Only creates a new guest account if no saved token exists or the refresh fails
+- On success, clears `auth.explicitLogout` flag so future `restoreSession()` calls auto-restore
+
+**`deleteAccount()` behaviour:**
+- Deletes the guest token from `GuestTokenStore` (so the deleted account cannot be resumed)
+- Sets `auth.explicitLogout = false` (so a subsequent `loginAsGuest()` can create a fresh account normally)
+
+**`signIn(response:)` behaviour:**
+- Clears `auth.explicitLogout = false` on every successful sign-in
+
+**Test isolation:** `AuthManager.init` accepts an injectable `userDefaults: UserDefaults` parameter (defaults to `.standard`). Tests that exercise logout/restoreSession must pass `UserDefaults(suiteName: UUID().uuidString)!` to avoid cross-test interference. The `makeFreshUserDefaults()` helper in `AuthManagerTests.swift` provides this.
+
 ### Demo API — resetting the SQLite database during development
 
 The demo API stores its SQLite database at `demo/api/db.sqlite`. During development,
