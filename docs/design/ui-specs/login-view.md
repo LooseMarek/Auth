@@ -77,7 +77,7 @@ Localisation key: `auth.login.subtitle`.
 | Apple button | Custom button — see § 10.5 of design-system | `auth.button.apple` | `radius.pill`, 50pt |
 | Google button | Custom button — see § 10.6 of design-system | `auth.button.google` | `radius.pill`, 50pt |
 | Guest button | Outline button — see § 10.7 | `auth.login.button.guest` | Hidden when `allowGuestAccess == false` |
-| Register link | `type.subhead`, `color.label.secondary` with bold `color.primary` "Register" run | `auth.login.link.register` | Centred; tap pushes `RegisterView` |
+| Register link | `type.subhead`, `color.label.secondary` with bold `color.primary` "Register" run | `auth.login.register_prompt` + `auth.login.register_link` | Centred; spacing between prompt text and link label is layout-controlled (HStack spacing: 4), not a string space character; tap pushes `RegisterView` |
 
 ---
 
@@ -133,7 +133,8 @@ Tapping the toast banner dismisses it and leaves the Login view in a clean state
 | `auth.login.field.password.placeholder` | Password |
 | `auth.login.button.submit` | Log in |
 | `auth.login.link.forgot_password` | Forgot password? |
-| `auth.login.link.register` | Don't have an account? Register |
+| `auth.login.register_prompt` | Don't have an account? |
+| `auth.login.register_link` | Register |
 | `auth.login.button.guest` | Continue as Guest |
 | `auth.login.error.invalid_credentials` | Incorrect email or password. |
 | `auth.button.google` | Sign in with Google |
