@@ -7,8 +7,11 @@ public enum AuthNetworkError: Error, LocalizedError, Sendable {
     case invalidCredentials
     /// Registration failed because the email address is already associated with an account.
     case emailTaken
-    /// The request could not reach the server (e.g. no internet connection).
+    /// The device has no internet connection (e.g. airplane mode, `NSURLErrorNotConnectedToInternet`).
     case networkUnavailable
+    /// The device has internet but the API server is unreachable — connection refused,
+    /// timed out, or the network connection was lost mid-request.
+    case serverUnreachable
     /// The server returned an unexpected error response.
     case serverError
 
@@ -25,6 +28,8 @@ public enum AuthNetworkError: Error, LocalizedError, Sendable {
             return String(localized: "auth.register.error.email_taken", bundle: .module)
         case .networkUnavailable:
             return String(localized: "auth.error.network", bundle: .module)
+        case .serverUnreachable:
+            return String(localized: "auth.error.server_unreachable", bundle: .module)
         case .serverError:
             return String(localized: "auth.error.server", bundle: .module)
         }
