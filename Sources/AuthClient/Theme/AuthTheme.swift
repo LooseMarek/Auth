@@ -79,14 +79,27 @@ struct AuthTheme {
     ///
     /// Passing `colorScheme` explicitly (rather than reading it from the environment inside the
     /// init) makes the derivation logic fully unit-testable without needing a live SwiftUI view.
+    ///
+    /// When `configuration` was built with the dual-scheme `init(light:dark:)`, the matching
+    /// `AuthColorTokens` set is resolved first; any token that is `nil` in that set falls back
+    /// to the same adaptive defaults used by the flat-colour init path.
     init(configuration: AuthClientConfiguration, colorScheme: ColorScheme) {
         let isDark = colorScheme == .dark
 
-        // Resolve the primary colour for this colour scheme.
-        let primary = AuthTheme.resolvedPrimary(
-            from: configuration.primaryColor,
-            isDark: isDark
-        )
+        // Resolve per-scheme token set, if present.
+        let tokens: AuthColorTokens? = isDark ? configuration.darkTokens : configuration.lightTokens
+
+        // MARK: Primary colour
+
+        // Prefer the scheme-specific primary token; fall back to the configuration's adaptive
+        // primaryColor (which itself already encodes light/dark via UIColor/NSColor dynamic provider).
+        let rawPrimary: Color
+        if let tokenPrimary = tokens?.primaryColor {
+            rawPrimary = tokenPrimary
+        } else {
+            rawPrimary = configuration.primaryColor
+        }
+        let primary = AuthTheme.resolvedPrimary(from: rawPrimary, isDark: isDark)
         self.primaryColor = primary
 
         // Derive interaction states from the resolved primary colour.
@@ -108,17 +121,25 @@ struct AuthTheme {
             height: 50.0
         )
 
-        // Background colour pass-through — no derivation needed.
-        self.backgroundColor = configuration.backgroundColor
+        // MARK: Background colour
 
-        // Surface colour — use provided value or adaptive default.
-        self.surfaceColor = configuration.surfaceColor ?? AuthTheme.defaultSurfaceColor
+        // Prefer scheme-specific token; fall back to configuration.backgroundColor.
+        self.backgroundColor = tokens?.backgroundColor ?? configuration.backgroundColor
 
-        // Text colour tokens — use provided value or semantic SwiftUI defaults.
-        self.primaryTextColor   = configuration.primaryTextColor   ?? Color.primary
-        self.secondaryTextColor = configuration.secondaryTextColor ?? Color.secondary
-        self.buttonTextColor    = configuration.buttonTextColor    ?? Color.white
-        self.errorColor         = configuration.errorColor         ?? Color.red
+        // MARK: Surface colour
+
+        // Prefer scheme-specific surface; fall back to flat configuration token; then adaptive default.
+        self.surfaceColor = tokens?.surfaceColor
+            ?? configuration.surfaceColor
+            ?? AuthTheme.defaultSurfaceColor
+
+        // MARK: Text colour tokens
+
+        // Prefer scheme-specific token; fall back to flat configuration token; then SwiftUI semantic default.
+        self.primaryTextColor   = tokens?.primaryTextColor   ?? configuration.primaryTextColor   ?? Color.primary
+        self.secondaryTextColor = tokens?.secondaryTextColor ?? configuration.secondaryTextColor ?? Color.secondary
+        self.buttonTextColor    = tokens?.buttonTextColor    ?? configuration.buttonTextColor    ?? Color.white
+        self.errorColor         = tokens?.errorColor         ?? configuration.errorColor         ?? Color.red
 
         // Typography pass-through.
         self.font = configuration.font
