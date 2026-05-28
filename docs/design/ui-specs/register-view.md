@@ -66,7 +66,7 @@ not on guest-upgrade where a different subtitle applies (see § 5).
 | Show/hide toggle (both pwds) | SF Symbol `eye` / `eye.slash`, 18pt | `auth.field.password.show` / `.hide` | Per LoginView spec |
 | Inline error | Error Row component | See Error States | |
 | Register button | Primary Button | `auth.register.button.submit` | Full width, 52pt |
-| Login link | `type.subhead`, mixed weight | `auth.register.link.login` | Centred; pops `NavigationStack` |
+| Login link | `type.subhead`, mixed weight | `auth.register.login_prompt` + `auth.register.login_link` | Centred; spacing between prompt text and link label is layout-controlled (HStack spacing: 4), not a string space character; pops `NavigationStack` |
 
 ---
 
@@ -125,7 +125,8 @@ All other components and behaviour are identical.
 | `auth.register.field.confirm_password.placeholder` | Re-enter password |
 | `auth.register.button.submit` | Create account |
 | `auth.register.upgrade.button.submit` | Save account |
-| `auth.register.link.login` | Already have an account? Log in |
+| `auth.register.login_prompt` | Already have an account? |
+| `auth.register.login_link` | Log in |
 | `auth.register.error.password_too_short` | Password must be at least 8 characters. |
 | `auth.register.error.password_mismatch` | Passwords do not match. |
 | `auth.register.error.email_taken` | An account with this email already exists. |
