@@ -128,6 +128,26 @@ private static let adaptivePrimaryColor = Color(nsColor: NSColor(name: nil) { ..
 
 The same `#if canImport(UIKit)` / `#else` pattern applies for all adaptive colour defaults in `AuthTheme` (e.g. `defaultSurfaceColor(isDark:)`).
 
+### Dual light/dark colour sets in AuthClientConfiguration
+
+`AuthClientConfiguration` supports a dual-scheme API via `AuthColorTokens` for host apps that need completely separate colour palettes per scheme:
+
+```swift
+AuthClientConfiguration(
+    light: AuthColorTokens(primaryColor: .blue, backgroundColor: .white),
+    dark:  AuthColorTokens(primaryColor: .cyan, backgroundColor: Color(white: 0.1))
+)
+```
+
+`AuthTheme.init(configuration:colorScheme:)` resolves the active token set (`.light` or `.dark`) first, then falls back to the flat configuration properties, then to design-system adaptive defaults. The priority order is:
+1. Scheme-specific `AuthColorTokens` property (non-nil)
+2. Flat `AuthClientConfiguration` property (e.g. `primaryColor`)
+3. `AuthTheme` adaptive default
+
+**All views (LoginView, RegisterView, ForgotPasswordView) use `theme` tokens exclusively** — no hardcoded `Color.primary`, `Color.red`, or local colour enums remain in view code. If a view needs a colour token, it must come from `theme.surfaceColor`, `theme.primaryTextColor`, `theme.errorColor`, etc.
+
+The "Continue as Guest" button uses `theme.googleButtonStyle` border tokens (same as the Google button) so both respond consistently to a customised primary colour.
+
 ---
 
 ### macOS SwiftUI text field styling

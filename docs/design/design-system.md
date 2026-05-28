@@ -267,14 +267,61 @@ success reveal is the only place we allow a small overshoot.
 ## 9 · Configuration Bridge — How tokens reach SwiftUI
 
 Tokens flow from `AuthClientConfiguration` → an internal `AuthTheme`
-environment value → views. The four publicly themable knobs map as follows:
+environment value → views. Views must **never** read `AuthClientConfiguration`
+directly — they always consume tokens from the injected `AuthTheme`.
+
+### 9.1 Flat-colour API (single adaptive colour)
+
+The original flat-colour API accepts a single adaptive `Color` per token:
 
 | Configuration API | Drives token(s) | Default |
 |-------------------|-----------------|---------|
-| `primaryColor: Color` | `color.primary` + computed `.hover`, `.pressed`, `.disabled`, `.soft` | Auth Blue `#0A66FF` (light) / `#3D8BFF` (dark) |
-| `backgroundColor: Color` | `color.bg` | System background — `#FFFFFF` / `#1C1C1E` |
+| `primaryColor: Color?` | `color.primary` + computed `.hover`, `.pressed`, `.disabled`, `.soft` | Auth Blue `#0A66FF` (light) / `#3D8BFF` (dark) |
+| `backgroundColor: Color?` | `color.bg` | System background — `#FFFFFF` / `#1C1C1E` |
+| `surfaceColor: Color?` | `color.surface` | `#F5F5F7` (light) / `#2C2C2E` (dark) |
+| `primaryTextColor: Color?` | `color.label.primary` | SwiftUI `Color.primary` |
+| `secondaryTextColor: Color?` | `color.label.secondary` | SwiftUI `Color.secondary` |
+| `buttonTextColor: Color?` | `color.label.on-primary` | `.white` |
+| `errorColor: Color?` | `color.error` | `Color.red` |
 | `font: Font?` | Base font; all ramp entries are relative modifiers | `nil` → SwiftUI `.system` (SF Pro) |
 | `allowGuestAccess: Bool` | Visibility of "Continue as Guest" button on `LoginView` | `true` |
+
+The `Color` passed for each token should be an adaptive colour (UIColor/NSColor
+dynamic provider) when you need different values for light and dark mode.
+See CLAUDE.md "Adaptive colours in AuthClientConfiguration" for the required
+`Color?` init pattern.
+
+### 9.2 Dual light/dark API (separate colour sets per scheme)
+
+Use `init(allowGuestAccess:light:dark:font:localizationBundle:)` to supply
+completely independent token sets for each colour scheme:
+
+```swift
+AuthClientConfiguration(
+    light: AuthColorTokens(
+        primaryColor: Color(red: 0.039, green: 0.4, blue: 1.0),  // #0A66FF
+        backgroundColor: .white,
+        surfaceColor: Color(red: 0.961, green: 0.961, blue: 0.969)
+    ),
+    dark: AuthColorTokens(
+        primaryColor: Color(red: 0.239, green: 0.545, blue: 1.0), // #3D8BFF
+        backgroundColor: Color(red: 0.11, green: 0.11, blue: 0.12),
+        surfaceColor: Color(red: 0.173, green: 0.173, blue: 0.18)
+    )
+)
+```
+
+`AuthColorTokens` mirrors the flat token properties — every field is `Color?`
+and falls back to the same adaptive defaults as the flat API when `nil`.
+
+**Resolution priority** (highest to lowest):
+1. Scheme-specific token from `AuthColorTokens` (light or dark set)
+2. Flat token from `AuthClientConfiguration` (e.g. `primaryColor`)
+3. `AuthTheme` adaptive default (design-system value)
+
+Switching between light and dark mode is live — `AuthTheme` is re-created
+whenever the `colorScheme` environment value changes, automatically selecting
+the correct token set.
 
 **Derivation rules** for primary states:
 
@@ -283,7 +330,25 @@ environment value → views. The four publicly themable knobs map as follows:
 - `primary.disabled` — apply 40% alpha to `primary`.
 - `primary.soft`     — apply 10% alpha (light) / 14% alpha (dark) to `primary`.
 
-Adopters get the full state set for free from a single brand color.
+Adopters get the full state set for free from a single brand color regardless
+of which API variant is used.
+
+### 9.3 Views that consume each token
+
+All three auth screens — `LoginView`, `RegisterView`, `ForgotPasswordView` — use
+the same `AuthTheme` tokens. No hardcoded colours remain in these views. The
+mapping is:
+
+| Token | Views |
+|-------|-------|
+| `theme.primaryColor` | All action buttons, links, border tints |
+| `theme.backgroundColor` | Root `.background()` modifier on all screens |
+| `theme.surfaceColor` | All text-field fills |
+| `theme.primaryTextColor` | Titles, field value text, field foreground |
+| `theme.secondaryTextColor` | Subtitles, prompt text, show/hide toggle icon |
+| `theme.buttonTextColor` | Primary button label, back-to-login button label |
+| `theme.errorColor` | Inline error rows, server error rows |
+| `theme.googleButtonStyle.borderColor` | Google button border **and** "Continue as Guest" button border |
 
 ---
 
