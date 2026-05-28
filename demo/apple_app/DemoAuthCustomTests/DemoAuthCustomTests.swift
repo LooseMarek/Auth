@@ -12,40 +12,75 @@ final class DemoAuthCustomAppTests: XCTestCase {
         XCTAssertTrue(true)
     }
 
-    // MARK: - testConfigurationHasCustomPrimaryColor
+    // MARK: - testConfigurationHasLightAndDarkTokens
 
-    func testConfigurationHasCustomPrimaryColor() {
+    func testConfigurationHasLightAndDarkTokens() {
         // Given: the custom app configuration
         let config = DemoAuthCustomApp.makeConfiguration()
 
-        // Then: primaryColor is the warm orange (#FF6B35)
-        // We verify by round-tripping through UIColor to extract components.
-        // Color(red:green:blue:) stores sRGB components — resolve via UIColor.
+        // Then: both scheme-specific token sets are supplied (dual-scheme API)
+        XCTAssertNotNil(config.lightTokens, "lightTokens must be set for the custom theme")
+        XCTAssertNotNil(config.darkTokens,  "darkTokens must be set for the custom theme")
+    }
+
+    // MARK: - testLightTokensHaveWarmOrangePrimary
+
+    func testLightTokensHaveWarmOrangePrimary() {
+        // Given: the custom app configuration
+        let config = DemoAuthCustomApp.makeConfiguration()
+
+        guard let lightPrimary = config.lightTokens?.primaryColor else {
+            XCTFail("lightTokens.primaryColor must be set")
+            return
+        }
+
+        // Then: light primary is the warm orange (~#FF6B35)
         #if canImport(UIKit)
-        let uiColor = UIColor(config.primaryColor)
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
+        let uiColor = UIColor(lightPrimary)
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
         uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        XCTAssertEqual(red,   1.0,  accuracy: 0.01, "primaryColor red component should be ~1.0")
-        XCTAssertEqual(green, 0.42, accuracy: 0.01, "primaryColor green component should be ~0.42")
-        XCTAssertEqual(blue,  0.21, accuracy: 0.01, "primaryColor blue component should be ~0.21")
+        XCTAssertEqual(red,   1.0,  accuracy: 0.01, "light primaryColor red should be ~1.0")
+        XCTAssertEqual(green, 0.42, accuracy: 0.01, "light primaryColor green should be ~0.42")
+        XCTAssertEqual(blue,  0.21, accuracy: 0.01, "light primaryColor blue should be ~0.21")
         #else
-        // On macOS the Color resolves differently; just assert it is not the Auth Blue default.
-        // The Auth Blue default has red ~0.039 in light mode — orange has red 1.0, clearly distinct.
-        XCTAssertNotNil(config.primaryColor)
+        XCTAssertNotNil(lightPrimary)
         #endif
     }
 
-    // MARK: - testConfigurationHasCustomSurfaceColor
+    // MARK: - testDarkTokensHaveBrighterOrangePrimary
 
-    func testConfigurationHasCustomSurfaceColor() {
+    func testDarkTokensHaveBrighterOrangePrimary() {
         // Given: the custom app configuration
         let config = DemoAuthCustomApp.makeConfiguration()
 
-        // Then: surfaceColor is non-nil (an explicit override, not using the Auth adaptive default)
-        XCTAssertNotNil(config.surfaceColor, "surfaceColor must be explicitly set for the custom theme")
+        guard let darkPrimary = config.darkTokens?.primaryColor else {
+            XCTFail("darkTokens.primaryColor must be set")
+            return
+        }
+
+        // Then: dark primary is brighter than the light primary (higher green component)
+        #if canImport(UIKit)
+        let uiColor = UIColor(darkPrimary)
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        XCTAssertEqual(red,   1.0,  accuracy: 0.01, "dark primaryColor red should be ~1.0")
+        XCTAssertGreaterThan(green, 0.42, "dark primaryColor green should be brighter than light variant")
+        #else
+        XCTAssertNotNil(darkPrimary)
+        #endif
+    }
+
+    // MARK: - testAllTokensHaveExplicitBackgroundAndSurface
+
+    func testAllTokensHaveExplicitBackgroundAndSurface() {
+        // Given: the custom app configuration
+        let config = DemoAuthCustomApp.makeConfiguration()
+
+        // Then: neither scheme uses a nil backgroundColor or surfaceColor — full customisation
+        XCTAssertNotNil(config.lightTokens?.backgroundColor, "light backgroundColor must be explicitly set")
+        XCTAssertNotNil(config.lightTokens?.surfaceColor,    "light surfaceColor must be explicitly set")
+        XCTAssertNotNil(config.darkTokens?.backgroundColor,  "dark backgroundColor must be explicitly set")
+        XCTAssertNotNil(config.darkTokens?.surfaceColor,     "dark surfaceColor must be explicitly set")
     }
 
     // MARK: - testConfigurationHasCustomFont
