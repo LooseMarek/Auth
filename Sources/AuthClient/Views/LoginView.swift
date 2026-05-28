@@ -392,18 +392,14 @@ public struct LoginView: View {
                 authManager: authManager,
                 networkService: viewModel.networkService
             )) {
-                // The full localised string is "Don't have an account? Register".
-                // We split it on "Register" at runtime so the "Register" word can be
-                // styled with the primary colour while keeping the full phrase localizable.
-                let fullString = String(localized: "auth.login.link.register", bundle: bundle)
-                let components = fullString.components(separatedBy: "Register")
-                let prefix = components.first ?? ""
-                Text(prefix)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(theme.secondaryTextColor)
-                + Text("Register")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(theme.primaryColor)
+                HStack(spacing: 4) {
+                    Text(String(localized: "auth.login.register_prompt", bundle: bundle))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(theme.secondaryTextColor)
+                    Text(String(localized: "auth.login.register_link", bundle: bundle))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(theme.primaryColor)
+                }
             }
             .buttonStyle(.plain)
             Spacer()
