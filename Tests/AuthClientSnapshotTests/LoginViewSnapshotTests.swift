@@ -255,16 +255,26 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
-    /// Verifies custom surfaceColor renders in text field backgrounds.
+    /// Verifies custom surfaceColor renders in text field backgrounds with good contrast in both schemes.
     ///
-    /// A contrasting `primaryTextColor` is paired with the bright surface so that field text
-    /// remains legible — callers who set a custom `surfaceColor` should always supply a
-    /// matching `primaryTextColor` for adequate contrast.
+    /// Uses `AuthColorTokens` to supply scheme-appropriate token sets — warm cream surface with
+    /// dark text in light mode; dark warm surface with light text in dark mode — so that all
+    /// labels, placeholders, icons, and buttons remain legible regardless of the active scheme.
     func testLoginViewCustomSurfaceColor() {
         snapshot(LoginView(
             authManager: AuthManager(configuration: AuthClientConfiguration(
-                surfaceColor: Color(red: 1.0, green: 0.9, blue: 0.7),
-                primaryTextColor: Color(red: 0.1, green: 0.1, blue: 0.1)
+                light: AuthColorTokens(
+                    backgroundColor: Color(red: 0.98, green: 0.97, blue: 0.94),
+                    surfaceColor: Color(red: 1.0, green: 0.9, blue: 0.7),
+                    primaryTextColor: Color(red: 0.10, green: 0.10, blue: 0.10),
+                    secondaryTextColor: Color(red: 0.45, green: 0.40, blue: 0.35)
+                ),
+                dark: AuthColorTokens(
+                    backgroundColor: Color(red: 0.10, green: 0.08, blue: 0.04),
+                    surfaceColor: Color(red: 0.28, green: 0.20, blue: 0.08),
+                    primaryTextColor: Color(red: 0.95, green: 0.90, blue: 0.75),
+                    secondaryTextColor: Color(red: 0.65, green: 0.58, blue: 0.45)
+                )
             )),
             networkService: NoOpNetworkService()
         ))
@@ -273,8 +283,18 @@ final class LoginViewSnapshotTests: XCTestCase {
     func testLoginViewCustomSurfaceColor_dark() {
         snapshot(LoginView(
             authManager: AuthManager(configuration: AuthClientConfiguration(
-                surfaceColor: Color(red: 1.0, green: 0.9, blue: 0.7),
-                primaryTextColor: Color(red: 0.1, green: 0.1, blue: 0.1)
+                light: AuthColorTokens(
+                    backgroundColor: Color(red: 0.98, green: 0.97, blue: 0.94),
+                    surfaceColor: Color(red: 1.0, green: 0.9, blue: 0.7),
+                    primaryTextColor: Color(red: 0.10, green: 0.10, blue: 0.10),
+                    secondaryTextColor: Color(red: 0.45, green: 0.40, blue: 0.35)
+                ),
+                dark: AuthColorTokens(
+                    backgroundColor: Color(red: 0.10, green: 0.08, blue: 0.04),
+                    surfaceColor: Color(red: 0.28, green: 0.20, blue: 0.08),
+                    primaryTextColor: Color(red: 0.95, green: 0.90, blue: 0.75),
+                    secondaryTextColor: Color(red: 0.65, green: 0.58, blue: 0.45)
+                )
             )),
             networkService: NoOpNetworkService()
         ), colorScheme: .dark)
@@ -411,6 +431,44 @@ final class LoginViewSnapshotTests: XCTestCase {
         manager.setGuestSession(uuid: UUID())
         snapshot(LoginView(
             authManager: manager,
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    // MARK: - Dual light/dark theme (issue #102)
+
+    /// Verifies that when a custom light token set is supplied, the Login view renders with
+    /// the custom light colours (vivid green primary, pale yellow background) in light mode.
+    func testCustomTheme_lightMode() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                light: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.7, blue: 0.3),
+                    backgroundColor: Color(red: 1.0, green: 0.98, blue: 0.88)
+                ),
+                dark: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.9, blue: 0.5),
+                    backgroundColor: Color(red: 0.08, green: 0.10, blue: 0.12)
+                )
+            )),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    /// Verifies that when a custom dark token set is supplied, the Login view renders with
+    /// the custom dark colours (vivid green primary, near-black background) in dark mode.
+    func testCustomTheme_darkMode() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                light: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.7, blue: 0.3),
+                    backgroundColor: Color(red: 1.0, green: 0.98, blue: 0.88)
+                ),
+                dark: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.9, blue: 0.5),
+                    backgroundColor: Color(red: 0.08, green: 0.10, blue: 0.12)
+                )
+            )),
             networkService: NoOpNetworkService()
         ), colorScheme: .dark)
     }

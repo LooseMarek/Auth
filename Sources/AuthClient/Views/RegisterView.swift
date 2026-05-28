@@ -101,10 +101,10 @@ public struct RegisterView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(String(localized: "auth.register.title", bundle: bundle))
                 .font(.title.bold())
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(theme.primaryTextColor)
             Text(String(localized: "auth.register.subtitle", bundle: bundle))
                 .font(.callout)
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(theme.secondaryTextColor)
                 .frame(maxWidth: 340, alignment: .leading)
         }
         .padding(.top, 24)
@@ -119,10 +119,11 @@ public struct RegisterView: View {
 #endif
                 .textContentType(.emailAddress)
                 .submitLabel(.next)
+                .foregroundStyle(theme.primaryTextColor)
                 .textFieldStyle(.plain)
                 .padding(.horizontal, 16)
                 .frame(height: 52)
-                .background(RegisterColors.surface)
+                .background(theme.surfaceColor)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
             if let error = viewModel.emailError {
@@ -164,11 +165,11 @@ public struct RegisterView: View {
         HStack(spacing: 6) {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.red)
+                .foregroundStyle(theme.errorColor)
                 .accessibilityHidden(true)
             Text(message)
                 .font(.footnote)
-                .foregroundStyle(Color.red)
+                .foregroundStyle(theme.errorColor)
         }
         .padding(.top, 4)
         .accessibilityAddTraits(.updatesFrequently)
@@ -179,11 +180,11 @@ public struct RegisterView: View {
         HStack(spacing: 6) {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.red)
+                .foregroundStyle(theme.errorColor)
                 .accessibilityHidden(true)
             Text(message)
                 .font(.footnote)
-                .foregroundStyle(Color.red)
+                .foregroundStyle(theme.errorColor)
         }
         .padding(.top, 8)
         .accessibilityAddTraits(.updatesFrequently)
@@ -200,7 +201,7 @@ public struct RegisterView: View {
                 } else {
                     Text(String(localized: "auth.register.button.submit", bundle: bundle))
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(theme.buttonTextColor)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -225,7 +226,7 @@ public struct RegisterView: View {
                 HStack(spacing: 4) {
                     Text(String(localized: "auth.register.login_prompt", bundle: bundle))
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color.secondary)
+                        .foregroundStyle(theme.secondaryTextColor)
                     Text(String(localized: "auth.register.login_link", bundle: bundle))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(theme.primaryColor)
@@ -248,6 +249,7 @@ private struct RegisterPasswordFieldView: View {
     var bundle: Bundle = .module
 
     @State private var isVisible: Bool = false
+    @Environment(\.authTheme) private var theme
 
     var body: some View {
         HStack {
@@ -256,11 +258,13 @@ private struct RegisterPasswordFieldView: View {
                     TextField(placeholder, text: $text)
                         .textContentType(.newPassword)
                         .submitLabel(isConfirmField ? .go : .next)
+                        .foregroundStyle(theme.primaryTextColor)
                         .textFieldStyle(.plain)
                 } else {
                     SecureField(placeholder, text: $text)
                         .textContentType(.newPassword)
                         .submitLabel(isConfirmField ? .go : .next)
+                        .foregroundStyle(theme.primaryTextColor)
                         .textFieldStyle(.plain)
                 }
             }
@@ -269,7 +273,7 @@ private struct RegisterPasswordFieldView: View {
             } label: {
                 Image(systemName: isVisible ? "eye.slash" : "eye")
                     .font(.system(size: 18))
-                    .foregroundStyle(Color.secondary)
+                    .foregroundStyle(theme.secondaryTextColor)
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
@@ -281,28 +285,9 @@ private struct RegisterPasswordFieldView: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
-        .background(RegisterColors.surface)
+        .background(theme.surfaceColor)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
-}
-
-// MARK: - Internal colour helpers
-
-private enum RegisterColors {
-    /// Field fill — `color.surface` token: #F5F5F7 light / #2C2C2E dark.
-    #if canImport(UIKit)
-    static let surface = Color(uiColor: UIColor { t in
-        t.userInterfaceStyle == .dark
-            ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
-            : UIColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
-    })
-    #else
-    static let surface = Color(nsColor: NSColor(name: nil) { a in
-        a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            ? NSColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
-            : NSColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
-    })
-    #endif
 }
 
 // MARK: - Previews

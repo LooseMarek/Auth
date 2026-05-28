@@ -376,10 +376,17 @@ public struct LoginView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .frame(height: 50)
-            .background(Color.clear)
+            .frame(height: theme.googleButtonStyle.height)
+            .background(theme.googleButtonStyle.background)
             .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(theme.primaryTextColor.opacity(0.2), lineWidth: 1))
+            // Use the same border token as the Google button so both respond consistently
+            // to a customised primary colour in AuthClientConfiguration.
+            .overlay(
+                Capsule().strokeBorder(
+                    theme.googleButtonStyle.borderColor,
+                    lineWidth: theme.googleButtonStyle.borderWidth
+                )
+            )
         }
         .buttonStyle(.plain)
         .accessibilityLabel(String(localized: "auth.login.button.guest", bundle: bundle))
@@ -446,7 +453,7 @@ private struct PasswordFieldView: View {
             } label: {
                 Image(systemName: isVisible ? "eye.slash" : "eye")
                     .font(.system(size: 18))
-                    .foregroundStyle(Color.secondary)
+                    .foregroundStyle(theme.secondaryTextColor)
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
