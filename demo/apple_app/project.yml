@@ -12,8 +12,10 @@ packages:
 targets:
   DemoAuthDefault:
     type: application
-    platform: iOS
-    deploymentTarget: "17.0"
+    platform: [iOS, macOS]
+    deploymentTarget:
+      iOS: "17.0"
+      macOS: "14.0"
     sources: ["DemoAuth"]
     dependencies:
       - package: Auth
@@ -32,8 +34,10 @@ targets:
 
   DemoAuthDefaultTests:
     type: bundle.unit-test
-    platform: iOS
-    deploymentTarget: "17.0"
+    platform: [iOS, macOS]
+    deploymentTarget:
+      iOS: "17.0"
+      macOS: "14.0"
     sources: ["DemoAuthDefaultTests"]
     dependencies:
       - target: DemoAuthDefault
@@ -47,8 +51,10 @@ targets:
 
   DemoAuthCustom:
     type: application
-    platform: iOS
-    deploymentTarget: "17.0"
+    platform: [iOS, macOS]
+    deploymentTarget:
+      iOS: "17.0"
+      macOS: "14.0"
     sources:
       - path: "DemoAuth"
         excludes:
@@ -72,45 +78,13 @@ targets:
 
   DemoAuthCustomTests:
     type: bundle.unit-test
-    platform: iOS
-    deploymentTarget: "17.0"
+    platform: [iOS, macOS]
+    deploymentTarget:
+      iOS: "17.0"
+      macOS: "14.0"
     sources: ["DemoAuthCustomTests"]
     dependencies:
       - target: DemoAuthCustom
-    settings:
-      base:
-        SWIFT_VERSION: 6.2
-        GENERATE_INFOPLIST_FILE: YES
-        CODE_SIGN_IDENTITY: ""
-        CODE_SIGNING_REQUIRED: NO
-        DEVELOPMENT_TEAM: ""
-
-  DemoAuthmacOS:
-    type: application
-    platform: macOS
-    deploymentTarget: "14.0"
-    sources: ["DemoAuth"]
-    dependencies:
-      - package: Auth
-        product: AuthClient
-    configFiles:
-      Debug: GoogleCredentials.xcconfig
-      Release: GoogleCredentials.xcconfig
-    settings:
-      base:
-        SWIFT_VERSION: 6.2
-        PRODUCT_BUNDLE_IDENTIFIER: com.marekloose.DemoAuth-macos
-        DEVELOPMENT_TEAM: 9JVYUSJU3D
-        EXCLUDED_SOURCE_FILE_NAMES: "DemoAuthDefaultApp.swift DemoAuthCustomApp.swift"
-        INFOPLIST_FILE: "DemoAuth/Info.plist"
-
-  DemoAuthmacOSTests:
-    type: bundle.unit-test
-    platform: macOS
-    deploymentTarget: "14.0"
-    sources: ["DemoAuthmacOSTests"]
-    dependencies:
-      - target: DemoAuthmacOS
     settings:
       base:
         SWIFT_VERSION: 6.2
@@ -138,17 +112,6 @@ schemes:
     test:
       targets:
         - DemoAuthCustomTests
-    run:
-      config: Debug
-    archive:
-      config: Release
-  DemoAuthmacOS:
-    build:
-      targets:
-        DemoAuthmacOS: all
-    test:
-      targets:
-        - DemoAuthmacOSTests
     run:
       config: Debug
     archive:
