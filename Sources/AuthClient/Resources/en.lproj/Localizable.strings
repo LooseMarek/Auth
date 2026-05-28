@@ -136,6 +136,9 @@
 /* Error: no internet connection */
 "auth.error.network" = "No internet connection. Please try again.";
 
+/* Error: server is unreachable (device has internet but server is down or connection refused) */
+"auth.error.server_unreachable" = "Unable to reach the server. Please try again later.";
+
 /* Error: generic server error */
 "auth.error.server" = "Something went wrong. Please try again.";
 
