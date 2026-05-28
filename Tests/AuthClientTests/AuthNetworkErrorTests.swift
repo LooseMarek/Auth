@@ -36,6 +36,7 @@ final class AuthNetworkErrorTests: XCTestCase {
             .invalidCredentials,
             .emailTaken,
             .networkUnavailable,
+            .serverUnreachable,
             .serverError,
         ]
 
@@ -67,6 +68,64 @@ final class AuthNetworkErrorTests: XCTestCase {
         XCTAssertFalse(
             description.contains("AuthClient.AuthNetworkError"),
             "invalidCredentials must not expose the raw error domain."
+        )
+    }
+
+    // MARK: - No-internet vs server-unreachable distinction (issue #98)
+
+    /// NSURLErrorNotConnectedToInternet must produce the "No internet connection" message,
+    /// not the generic server-error message.
+    func testNoInternet_mapsToNoInternetMessage() {
+        let error: AuthNetworkError = .networkUnavailable
+
+        let description = error.localizedDescription
+
+        XCTAssertTrue(
+            description.contains("No internet connection"),
+            "networkUnavailable must contain 'No internet connection'. Got: \(description)"
+        )
+        XCTAssertFalse(
+            description.contains("Unable to reach the server"),
+            "networkUnavailable must NOT contain 'Unable to reach the server'. Got: \(description)"
+        )
+    }
+
+    /// NSURLErrorCannotConnectToHost (connection refused) must produce the
+    /// server-unreachable message — not the "No internet connection" message.
+    func testConnectionRefused_mapsToServerUnreachableMessage() {
+        let error: AuthNetworkError = .serverUnreachable
+
+        let description = error.localizedDescription
+
+        XCTAssertTrue(
+            description.contains("Unable to reach the server"),
+            "serverUnreachable must contain 'Unable to reach the server'. Got: \(description)"
+        )
+        XCTAssertFalse(
+            description.contains("No internet connection"),
+            "serverUnreachable must NOT contain 'No internet connection'. Got: \(description)"
+        )
+        XCTAssertFalse(
+            description.isEmpty,
+            "serverUnreachable must produce a non-empty message."
+        )
+    }
+
+    /// NSURLErrorTimedOut must produce the server-unreachable message — not
+    /// the "No internet connection" message. The same `.serverUnreachable` case
+    /// covers both cannotConnectToHost and timedOut in the URL error mapping.
+    func testTimeout_mapsToServerUnreachableMessage() {
+        let error: AuthNetworkError = .serverUnreachable
+
+        let description = error.localizedDescription
+
+        XCTAssertTrue(
+            description.contains("Unable to reach the server"),
+            "serverUnreachable (timeout) must contain 'Unable to reach the server'. Got: \(description)"
+        )
+        XCTAssertFalse(
+            description.contains("No internet connection"),
+            "serverUnreachable (timeout) must NOT contain 'No internet connection'. Got: \(description)"
         )
     }
 }

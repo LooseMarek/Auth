@@ -228,7 +228,7 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
     }
 
     func testLoginThrowsNetworkUnavailableOnURLError() async throws {
-        // Given: URLProtocol throws a network connection error
+        // Given: URLProtocol throws a true offline error (no internet)
         MockURLProtocolForNetworkService.requestHandler = { _ in
             throw URLError(.notConnectedToInternet)
         }
@@ -238,6 +238,36 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
             _ = try await sut.login(email: "u@example.com", password: "pw")
             XCTFail("Expected .networkUnavailable error")
         } catch AuthNetworkError.networkUnavailable {
+            // expected
+        }
+    }
+
+    func testLoginThrowsServerUnreachableOnCannotConnectToHost() async throws {
+        // Given: URLProtocol throws a connection-refused error (server down, device online)
+        MockURLProtocolForNetworkService.requestHandler = { _ in
+            throw URLError(.cannotConnectToHost)
+        }
+
+        // When / Then
+        do {
+            _ = try await sut.login(email: "u@example.com", password: "pw")
+            XCTFail("Expected .serverUnreachable error")
+        } catch AuthNetworkError.serverUnreachable {
+            // expected
+        }
+    }
+
+    func testLoginThrowsServerUnreachableOnTimeout() async throws {
+        // Given: URLProtocol throws a timeout error (server unresponsive, device online)
+        MockURLProtocolForNetworkService.requestHandler = { _ in
+            throw URLError(.timedOut)
+        }
+
+        // When / Then
+        do {
+            _ = try await sut.login(email: "u@example.com", password: "pw")
+            XCTFail("Expected .serverUnreachable error")
+        } catch AuthNetworkError.serverUnreachable {
             // expected
         }
     }
