@@ -114,6 +114,44 @@ final class RegisterViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Dual light/dark theme (issue #102)
+
+    /// Verifies that when a custom light token set is supplied, the Register view renders with
+    /// the custom light colours (vivid green primary, pale yellow background) in light mode.
+    func testCustomTheme_lightMode() {
+        snapshot(RegisterView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                light: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.7, blue: 0.3),
+                    backgroundColor: Color(red: 1.0, green: 0.98, blue: 0.88)
+                ),
+                dark: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.9, blue: 0.5),
+                    backgroundColor: Color(red: 0.08, green: 0.10, blue: 0.12)
+                )
+            )),
+            networkService: NoOpRegisterNetworkService()
+        ))
+    }
+
+    /// Verifies that when a custom dark token set is supplied, the Register view renders with
+    /// the custom dark colours (vivid green primary, near-black background) in dark mode.
+    func testCustomTheme_darkMode() {
+        snapshot(RegisterView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                light: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.7, blue: 0.3),
+                    backgroundColor: Color(red: 1.0, green: 0.98, blue: 0.88)
+                ),
+                dark: AuthColorTokens(
+                    primaryColor: Color(red: 0.0, green: 0.9, blue: 0.5),
+                    backgroundColor: Color(red: 0.08, green: 0.10, blue: 0.12)
+                )
+            )),
+            networkService: NoOpRegisterNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Prompt spacing (issue #101)
 
     /// Verifies the login prompt row renders with correct visual spacing between the

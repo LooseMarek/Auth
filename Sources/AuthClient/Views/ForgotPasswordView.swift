@@ -114,10 +114,10 @@ public struct ForgotPasswordView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(String(localized: "auth.forgot.title", bundle: bundle))
                 .font(.title.bold())
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(theme.primaryTextColor)
             Text(String(localized: "auth.forgot.subtitle", bundle: bundle))
                 .font(.callout)
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(theme.secondaryTextColor)
                 .frame(maxWidth: 340, alignment: .leading)
         }
         .padding(.top, 24)
@@ -132,10 +132,11 @@ public struct ForgotPasswordView: View {
 #endif
                 .textContentType(.emailAddress)
                 .submitLabel(.go)
+                .foregroundStyle(theme.primaryTextColor)
                 .textFieldStyle(.plain)
                 .padding(.horizontal, 16)
                 .frame(height: 52)
-                .background(ForgotPasswordColors.surface)
+                .background(theme.surfaceColor)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .onSubmit {
                     Task { await viewModel.submit() }
@@ -152,11 +153,11 @@ public struct ForgotPasswordView: View {
         HStack(spacing: 6) {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.red)
+                .foregroundStyle(theme.errorColor)
                 .accessibilityHidden(true)
             Text(message)
                 .font(.footnote)
-                .foregroundStyle(Color.red)
+                .foregroundStyle(theme.errorColor)
         }
         .padding(.top, 4)
         .accessibilityAddTraits(.updatesFrequently)
@@ -173,7 +174,7 @@ public struct ForgotPasswordView: View {
                 } else {
                     Text(String(localized: "auth.forgot.button.submit", bundle: bundle))
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(theme.buttonTextColor)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -231,14 +232,14 @@ public struct ForgotPasswordView: View {
 
             Text(String(localized: "auth.forgot.success.title", bundle: bundle))
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(theme.primaryTextColor)
                 .multilineTextAlignment(.center)
 
             Spacer().frame(height: 4)
 
             Text(String(localized: "auth.forgot.success.body", bundle: bundle))
                 .font(.body)
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(theme.secondaryTextColor)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 280)
         }
@@ -261,7 +262,7 @@ public struct ForgotPasswordView: View {
         } label: {
             Text(String(localized: "auth.forgot.link.back", bundle: bundle))
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(theme.buttonTextColor)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
                 .background(theme.primaryColor)
@@ -273,14 +274,13 @@ public struct ForgotPasswordView: View {
 
 // MARK: - Internal colour helpers
 
+/// Design-system constants for the success card in `ForgotPasswordView`.
+///
+/// These tokens are fixed semantic colours (success, separator, elevated surface) that are
+/// not part of the host-app-configurable `AuthClientConfiguration` palette. The `surface`
+/// token for the email field is intentionally absent — that is now sourced from `theme.surfaceColor`.
 private enum ForgotPasswordColors {
-    /// Field fill — `color.surface` token: #F5F5F7 light / #2C2C2E dark.
     #if canImport(UIKit)
-    static let surface = Color(uiColor: UIColor { t in
-        t.userInterfaceStyle == .dark
-            ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
-            : UIColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
-    })
     /// Card background — `color.surface.elevated`: #FFFFFF light / #3A3A3C dark.
     static let surfaceElevated = Color(uiColor: UIColor { t in
         t.userInterfaceStyle == .dark
@@ -306,11 +306,6 @@ private enum ForgotPasswordColors {
             : UIColor(red: 0.043, green: 0.051, blue: 0.071, alpha: 0.08)
     })
     #else
-    static let surface = Color(nsColor: NSColor(name: nil) { a in
-        a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            ? NSColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
-            : NSColor(red: 0.961, green: 0.961, blue: 0.969, alpha: 1)
-    })
     static let surfaceElevated = Color(nsColor: NSColor(name: nil) { a in
         a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
             ? NSColor(red: 0.227, green: 0.227, blue: 0.235, alpha: 1)
