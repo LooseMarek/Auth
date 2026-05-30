@@ -39,6 +39,14 @@ public struct LoginView: View {
 
     private var bundle: Bundle { authManager.configuration.localizationBundle ?? .module }
 
+    /// `true` when at least one of the social / guest buttons is visible.
+    /// Used to hide the "OR" divider when none of them would render.
+    private var hasAnySocialOrGuestButton: Bool {
+        authManager.configuration.allowAppleSignIn
+            || authManager.configuration.allowGoogleSignIn
+            || (authManager.configuration.allowGuestAccess && !authManager.session.isGuest)
+    }
+
     /// Creates a `LoginView`.
     ///
     /// - Parameters:
@@ -100,15 +108,22 @@ public struct LoginView: View {
                     forgotPasswordLink
                     Spacer().frame(height: 24)
                     loginButton
-                    Spacer().frame(height: 16)
-                    orDivider
-                    Spacer().frame(height: 16)
-                    appleSignInButton
-                    Spacer().frame(height: 8)
-                    googleSignInButton
-                    if authManager.configuration.allowGuestAccess && !authManager.session.isGuest {
+                    if hasAnySocialOrGuestButton {
+                        Spacer().frame(height: 16)
+                        orDivider
+                        Spacer().frame(height: 16)
+                    }
+                    if authManager.configuration.allowAppleSignIn {
+                        appleSignInButton
                         Spacer().frame(height: 8)
+                    }
+                    if authManager.configuration.allowGoogleSignIn {
+                        googleSignInButton
+                        Spacer().frame(height: 8)
+                    }
+                    if authManager.configuration.allowGuestAccess && !authManager.session.isGuest {
                         guestButton
+                        Spacer().frame(height: 8)
                     }
                     Spacer().frame(height: 32)
                     registerLink
