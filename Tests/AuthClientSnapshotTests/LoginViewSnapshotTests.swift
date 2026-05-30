@@ -491,6 +491,62 @@ final class LoginViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Social sign-in flags (Task #121)
+
+    /// Verifies the Sign in with Apple button is absent when allowAppleSignIn is false.
+    func testLoginView_appleSignInHidden() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowAppleSignIn: false)),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testLoginView_appleSignInHidden_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowAppleSignIn: false)),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    /// Verifies the Sign in with Google button is absent when allowGoogleSignIn is false.
+    func testLoginView_googleSignInHidden() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGoogleSignIn: false)),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testLoginView_googleSignInHidden_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(allowGoogleSignIn: false)),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    /// Verifies both Apple and Google buttons are absent when both flags are false.
+    /// The OR divider should also be absent since no social or guest button is visible.
+    func testLoginView_bothProvidersHidden() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                allowGuestAccess: false,
+                allowAppleSignIn: false,
+                allowGoogleSignIn: false
+            )),
+            networkService: NoOpNetworkService()
+        ))
+    }
+
+    func testLoginView_bothProvidersHidden_dark() {
+        snapshot(LoginView(
+            authManager: AuthManager(configuration: AuthClientConfiguration(
+                allowGuestAccess: false,
+                allowAppleSignIn: false,
+                allowGoogleSignIn: false
+            )),
+            networkService: NoOpNetworkService()
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Snapshot helper
 
     private func snapshot(
