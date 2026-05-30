@@ -12,6 +12,12 @@ public struct AuthClientConfiguration: Sendable {
     /// When `false`, all guest / anonymous sign-in UI is hidden.
     public let allowGuestAccess: Bool
 
+    /// When `false`, the Sign in with Apple button is hidden in `LoginView`.
+    public let allowAppleSignIn: Bool
+
+    /// When `false`, the Sign in with Google button is hidden in `LoginView`.
+    public let allowGoogleSignIn: Bool
+
     /// Tint applied to buttons and interactive elements.
     /// Defaults to Auth Blue (#0A66FF light / #3D8BFF dark) per the Auth design system.
     ///
@@ -84,6 +90,8 @@ public struct AuthClientConfiguration: Sendable {
     ///
     /// - Parameters:
     ///   - allowGuestAccess: When `false`, guest / anonymous sign-in UI is hidden. Defaults to `true`.
+    ///   - allowAppleSignIn: When `false`, the Sign in with Apple button is hidden. Defaults to `true`.
+    ///   - allowGoogleSignIn: When `false`, the Sign in with Google button is hidden. Defaults to `true`.
     ///   - primaryColor: Pass `nil` to use Auth Blue (adapts to light / dark).
     ///   - backgroundColor: Pass `nil` to use the system background (adapts to light / dark).
     ///   - font: Custom font for all auth screens. Defaults to `nil` (system font).
@@ -95,6 +103,8 @@ public struct AuthClientConfiguration: Sendable {
     ///   - errorColor: Pass `nil` to use `Color.red`.
     public init(
         allowGuestAccess: Bool = true,
+        allowAppleSignIn: Bool = true,
+        allowGoogleSignIn: Bool = true,
         primaryColor: Color? = nil,
         backgroundColor: Color? = nil,
         font: Font? = nil,
@@ -106,6 +116,8 @@ public struct AuthClientConfiguration: Sendable {
         errorColor: Color? = nil
     ) {
         self.allowGuestAccess = allowGuestAccess
+        self.allowAppleSignIn = allowAppleSignIn
+        self.allowGoogleSignIn = allowGoogleSignIn
         self.primaryColor = primaryColor ?? Self.adaptivePrimaryColor
         self.backgroundColor = backgroundColor ?? Self.adaptiveBackgroundColor
         self.font = font
@@ -130,6 +142,8 @@ public struct AuthClientConfiguration: Sendable {
     ///
     /// - Parameters:
     ///   - allowGuestAccess: When `false`, guest / anonymous sign-in UI is hidden. Defaults to `true`.
+    ///   - allowAppleSignIn: When `false`, the Sign in with Apple button is hidden. Defaults to `true`.
+    ///   - allowGoogleSignIn: When `false`, the Sign in with Google button is hidden. Defaults to `true`.
     ///   - light: Colour tokens applied when the colour scheme is `.light`.
     ///            Any `nil` property falls back to the Auth design-system default for that token.
     ///   - dark: Colour tokens applied when the colour scheme is `.dark`.
@@ -138,12 +152,16 @@ public struct AuthClientConfiguration: Sendable {
     ///   - localizationBundle: Pass a bundle to override Auth's built-in localisation. Defaults to `nil`.
     public init(
         allowGuestAccess: Bool = true,
+        allowAppleSignIn: Bool = true,
+        allowGoogleSignIn: Bool = true,
         light: AuthColorTokens,
         dark: AuthColorTokens,
         font: Font? = nil,
         localizationBundle: Bundle? = nil
     ) {
         self.allowGuestAccess = allowGuestAccess
+        self.allowAppleSignIn = allowAppleSignIn
+        self.allowGoogleSignIn = allowGoogleSignIn
         // The flat colour properties are set to adaptive defaults; they are not used when
         // lightTokens / darkTokens are present — AuthTheme uses those directly.
         self.primaryColor = Self.adaptivePrimaryColor
