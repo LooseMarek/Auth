@@ -31,6 +31,20 @@ final class AuthClientConfigurationTests: XCTestCase {
         XCTAssertFalse(config.allowGuestAccess)
     }
 
+    // MARK: - Social sign-in flags (Task #121)
+
+    /// Verifies `allowAppleSignIn` defaults to `true` so existing integrations are unaffected.
+    func testDefaultAllowAppleSignIn() {
+        let config = AuthClientConfiguration()
+        XCTAssertTrue(config.allowAppleSignIn, "allowAppleSignIn should default to true")
+    }
+
+    /// Verifies `allowGoogleSignIn` defaults to `true` so existing integrations are unaffected.
+    func testDefaultAllowGoogleSignIn() {
+        let config = AuthClientConfiguration()
+        XCTAssertTrue(config.allowGoogleSignIn, "allowGoogleSignIn should default to true")
+    }
+
     // MARK: - localizationBundle
 
     func testLocalizationBundleDefaultsToNil() {
