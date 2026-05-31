@@ -120,7 +120,8 @@ private let allAuthKeys: [String] = [
     "auth.login.field.password.placeholder",
     "auth.login.button.submit",
     "auth.login.link.forgot_password",
-    "auth.login.link.register",
+    "auth.login.register_prompt",
+    "auth.login.register_link",
     "auth.login.button.guest",
     "auth.login.error.invalid_credentials",
     // RegisterView
@@ -133,7 +134,8 @@ private let allAuthKeys: [String] = [
     "auth.register.field.confirm_password.placeholder",
     "auth.register.button.submit",
     "auth.register.upgrade.button.submit",
-    "auth.register.link.login",
+    "auth.register.login_prompt",
+    "auth.register.login_link",
     "auth.register.error.password_too_short",
     "auth.register.error.password_mismatch",
     "auth.register.error.email_taken",
@@ -158,8 +160,11 @@ private let allAuthKeys: [String] = [
     "auth.error.required",
     "auth.error.email_format",
     "auth.error.network",
+    "auth.error.server_unreachable",
     "auth.error.server",
     "auth.social.error.token_invalid",
+    // Toast
+    "auth.toast.dismiss.hint",
 ]
 
 final class DemoAuthCustomLocalisationTests: XCTestCase {

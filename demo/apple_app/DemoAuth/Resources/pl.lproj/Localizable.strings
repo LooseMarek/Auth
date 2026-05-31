@@ -26,8 +26,11 @@
 /* Forgot password link */
 "auth.login.link.forgot_password" = "Nie pamiętasz hasła?";
 
-/* Register navigation link */
-"auth.login.link.register" = "Nie masz konta? Zarejestruj się";
+/* Register navigation link — prompt text */
+"auth.login.register_prompt" = "Nie masz konta?";
+
+/* Register navigation link — action label */
+"auth.login.register_link" = "Zarejestruj się";
 
 /* Guest access button */
 "auth.login.button.guest" = "Kontynuuj jako gość";
@@ -64,8 +67,11 @@
 /* Register submit button (guest upgrade) */
 "auth.register.upgrade.button.submit" = "Zapisz konto";
 
-/* Login navigation link */
-"auth.register.link.login" = "Masz już konto? Zaloguj się";
+/* Login navigation link — prompt text */
+"auth.register.login_prompt" = "Masz już konto?";
+
+/* Login navigation link — action label */
+"auth.register.login_link" = "Zaloguj się";
 
 /* Error: password too short */
 "auth.register.error.password_too_short" = "Hasło musi zawierać co najmniej 8 znaków.";
@@ -135,8 +141,16 @@
 /* Error: no internet connection */
 "auth.error.network" = "Brak połączenia z internetem. Spróbuj ponownie.";
 
+/* Error: server is unreachable (device has internet but server is down or connection refused) */
+"auth.error.server_unreachable" = "Nie można połączyć się z serwerem. Spróbuj ponownie później.";
+
 /* Error: generic server error */
 "auth.error.server" = "Coś poszło nie tak. Spróbuj ponownie.";
 
 /* Error: social sign-in token is invalid */
 "auth.social.error.token_invalid" = "Logowanie nie powiodło się. Spróbuj ponownie.";
+
+// MARK: - Toast
+
+/* Accessibility hint for the dismissible toast error banner */
+"auth.toast.dismiss.hint" = "Dotknij, aby zamknąć";
