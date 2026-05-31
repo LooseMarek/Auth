@@ -6,24 +6,19 @@ import UIKit
 import AppKit
 #endif
 
-/// The forgot-password screen of the Auth flow.
+/// The reset-password screen of the Auth flow.
 ///
-/// `ForgotPasswordView` is pushed onto the `AuthSheetContainer` navigation stack from
-/// `LoginView`. It collects the user's email address and calls the injected
-/// `AuthNetworkService.forgotPassword(email:)` endpoint to trigger a password-reset email.
+/// `ResetPasswordView` is pushed onto the `AuthSheetContainer` navigation stack from
+/// the `ForgotPasswordView` success state. It collects the one-time reset token delivered
+/// by email, a new password, and a confirm-password field, then calls the injected
+/// `AuthNetworkService.resetPassword(token:newPassword:)` endpoint to complete the reset.
 ///
-/// On success, the view transitions to a confirmation card with an animated checkmark.
-/// The transition respects `accessibilityReduceMotion` — a simple opacity fade is used
-/// instead of the default spring-scale animation when reduce-motion is enabled.
-public struct ForgotPasswordView: View {
-    @State private var viewModel: ForgotPasswordViewModel
+/// On success, the view transitions to a confirmation card that prompts the user to log in.
+public struct ResetPasswordView: View {
+    @State private var viewModel: ResetPasswordViewModel
     private let authManager: AuthManager
-    /// Closure from `AuthSheetContainer` that appends a `LoginFlowDestination` to the
-    /// `NavigationStack` path, pushing the corresponding screen. When `nil` (standalone
-    /// preview), tapping the "Enter reset token" button is a no-op.
-    private let navigateTo: ((LoginFlowDestination) -> Void)?
-    /// Closure from `AuthSheetContainer` that resets the `NavigationStack` path to empty,
-    /// returning to `LoginView`. When `nil` (standalone preview), falls back to `dismiss()`.
+    /// Closure provided by `AuthSheetContainer` (via `ForgotPasswordView`) to pop the
+    /// entire forgot-password flow back to `LoginView`. See the `init` documentation for details.
     private let popToRoot: (() -> Void)?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.authTheme) private var theme
@@ -32,40 +27,36 @@ public struct ForgotPasswordView: View {
 
     private var bundle: Bundle { authManager.configuration.localizationBundle ?? .module }
 
-    /// Creates a `ForgotPasswordView`.
+    /// Creates a `ResetPasswordView`.
     ///
     /// - Parameters:
     ///   - authManager: The shared authentication state manager (used for theming).
-    ///   - networkService: The network layer used for the forgot-password request.
-    ///   - navigateTo: Optional closure that appends a `LoginFlowDestination` to the
-    ///     `NavigationStack` path, pushing the corresponding screen. Provided by
-    ///     `AuthSheetContainer`; pass `nil` when presenting `ForgotPasswordView` standalone
-    ///     (e.g. Xcode Previews) — tapping "Enter reset token" will be a no-op.
-    ///   - popToRoot: Optional closure that resets the `NavigationStack` path to `LoginView`.
-    ///     Provided by `AuthSheetContainer`. When provided, tapping "Back to sign in" uses
-    ///     this closure to return to `LoginView`. Pass `nil` (default) when presenting
-    ///     `ForgotPasswordView` standalone (e.g. Xcode Previews) — falls back to `dismiss()`.
-    ///   - prefilledEmail: Optional email to pre-populate the email field (e.g. for Xcode Previews).
+    ///   - networkService: The network layer used for the reset-password request.
+    ///   - popToRoot: Optional closure that resets the `NavigationStack` path to empty,
+    ///     returning the user directly to `LoginView`. Provided by `AuthSheetContainer`
+    ///     (via `ForgotPasswordView`'s success state); tapping "Back to log in" fires
+    ///     this closure so both `ResetPasswordView` and `ForgotPasswordView` are popped
+    ///     at once. Pass `nil` (default) when presenting `ResetPasswordView` standalone
+    ///     (e.g. Xcode Previews) — falls back to the local `dismiss()`.
+    ///   - prefilledToken: Optional token to pre-populate the token field (e.g. for Xcode Previews).
     ///   - initialIsLoading: When `true`, the submit button shows a loading indicator on appear.
     ///   - initialIsSuccess: When `true`, the success card is shown immediately on appear.
     ///   - initialErrorMessage: Optional error message to display immediately on appear.
     public init(
         authManager: AuthManager,
         networkService: any AuthNetworkService,
-        navigateTo: ((LoginFlowDestination) -> Void)? = nil,
         popToRoot: (() -> Void)? = nil,
-        prefilledEmail: String = "",
+        prefilledToken: String = "",
         initialIsLoading: Bool = false,
         initialIsSuccess: Bool = false,
         initialErrorMessage: String? = nil
     ) {
         self.authManager = authManager
-        self.navigateTo = navigateTo
         self.popToRoot = popToRoot
-        self._viewModel = State(wrappedValue: ForgotPasswordViewModel(
+        self._viewModel = State(wrappedValue: ResetPasswordViewModel(
             networkService: networkService,
             localizationBundle: authManager.configuration.localizationBundle,
-            initialEmail: prefilledEmail,
+            initialToken: prefilledToken,
             initialIsLoading: initialIsLoading,
             initialIsSuccess: initialIsSuccess,
             initialErrorMessage: initialErrorMessage
@@ -79,14 +70,17 @@ public struct ForgotPasswordView: View {
                 AuthTheme(configuration: authManager.configuration, colorScheme: colorScheme)
             )
             .onAppear {
-                // Use the path-reset closure from AuthSheetContainer when available;
-                // fall back to dismiss() when presenting standalone (Xcode Previews).
-                viewModel.onBackToSignIn = popToRoot ?? { dismiss() }
+                // If popToRoot is provided (set by AuthSheetContainer when pushing
+                // this view via navigationDestination), use it so tapping "Back to log in"
+                // pops both ResetPasswordView and ForgotPasswordView, returning to LoginView.
+                // Otherwise fall back to the local dismiss (standalone / preview use).
+                if let popToRoot {
+                    viewModel.onBackToSignIn = popToRoot
+                } else {
+                    viewModel.onBackToSignIn = { dismiss() }
+                }
             }
     }
-
-    /// The email entered in the form — exposed so `LoginView` can pass it to `ResetPasswordView`.
-    var submittedEmail: String { viewModel.email }
 
     @ViewBuilder
     private var content: some View {
@@ -112,7 +106,6 @@ public struct ForgotPasswordView: View {
                 value: viewModel.isSuccess
             )
             .padding(.horizontal, 24)
-            // Apply custom base font when configured; child modifiers override as needed.
             .font(theme.font)
         }
         .background(theme.backgroundColor)
@@ -124,7 +117,11 @@ public struct ForgotPasswordView: View {
         VStack(alignment: .leading, spacing: 0) {
             titleSection
             Spacer().frame(height: 24)
-            emailFieldSection
+            tokenFieldSection
+            Spacer().frame(height: 14)
+            newPasswordFieldSection
+            Spacer().frame(height: 14)
+            confirmPasswordFieldSection
             Spacer().frame(height: 24)
             submitButton
             Spacer().frame(height: 32)
@@ -136,10 +133,10 @@ public struct ForgotPasswordView: View {
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "auth.forgot.title", bundle: bundle))
+            Text(String(localized: "auth.reset.title", bundle: bundle))
                 .font(.title.bold())
                 .foregroundStyle(theme.primaryTextColor)
-            Text(String(localized: "auth.forgot.subtitle", bundle: bundle))
+            Text(String(localized: "auth.reset.subtitle", bundle: bundle))
                 .font(.callout)
                 .foregroundStyle(theme.secondaryTextColor)
                 .frame(maxWidth: 340, alignment: .leading)
@@ -147,29 +144,53 @@ public struct ForgotPasswordView: View {
         .padding(.top, 24)
     }
 
-    private var emailFieldSection: some View {
+    private var tokenFieldSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            TextField(String(localized: "auth.forgot.field.email.placeholder", bundle: bundle), text: $viewModel.email)
+            TextField(String(localized: "auth.reset.field.token.placeholder", bundle: bundle), text: $viewModel.token)
 #if canImport(UIKit)
-                .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
+                .autocorrectionDisabled(true)
 #endif
-                .textContentType(.emailAddress)
-                .submitLabel(.go)
+                .textContentType(.oneTimeCode)
+                .submitLabel(.next)
                 .foregroundStyle(theme.primaryTextColor)
                 .textFieldStyle(.plain)
                 .padding(.horizontal, 16)
                 .frame(height: 52)
                 .background(theme.surfaceColor)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .onSubmit {
-                    Task { await viewModel.submit() }
-                }
 
             if let message = viewModel.errorMessage {
                 errorRow(message: message)
             }
         }
+    }
+
+    private var newPasswordFieldSection: some View {
+        SecureField(String(localized: "auth.reset.field.new_password.placeholder", bundle: bundle), text: $viewModel.newPassword)
+            .textContentType(.newPassword)
+            .submitLabel(.next)
+            .foregroundStyle(theme.primaryTextColor)
+            .textFieldStyle(.plain)
+            .padding(.horizontal, 16)
+            .frame(height: 52)
+            .background(theme.surfaceColor)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var confirmPasswordFieldSection: some View {
+        SecureField(String(localized: "auth.reset.field.confirm_password.placeholder", bundle: bundle), text: $viewModel.confirmPassword)
+            .textContentType(.newPassword)
+            .submitLabel(.go)
+            .foregroundStyle(theme.primaryTextColor)
+            .textFieldStyle(.plain)
+            .padding(.horizontal, 16)
+            .frame(height: 52)
+            .background(theme.surfaceColor)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .onSubmit {
+                Task { await viewModel.submit() }
+            }
     }
 
     @ViewBuilder
@@ -196,7 +217,7 @@ public struct ForgotPasswordView: View {
                     ProgressView()
                         .colorScheme(.dark)
                 } else {
-                    Text(String(localized: "auth.forgot.button.submit", bundle: bundle))
+                    Text(String(localized: "auth.reset.button.submit", bundle: bundle))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(theme.buttonTextColor)
                 }
@@ -217,7 +238,7 @@ public struct ForgotPasswordView: View {
     private var backLink: some View {
         HStack {
             Spacer()
-            Button(String(localized: "auth.forgot.link.back", bundle: bundle)) {
+            Button(String(localized: "auth.reset.link.back", bundle: bundle)) {
                 viewModel.backToSignIn()
             }
             .font(.subheadline.weight(.medium))
@@ -234,8 +255,6 @@ public struct ForgotPasswordView: View {
             Spacer().frame(height: 32)
             successCard
             Spacer().frame(height: 24)
-            enterResetTokenButton
-            Spacer().frame(height: 16)
             backToLoginButton
             Spacer().frame(height: 32)
         }
@@ -243,27 +262,26 @@ public struct ForgotPasswordView: View {
 
     private var successCard: some View {
         VStack(spacing: 0) {
-            // Hero icon: 64pt soft-circle containing 48pt checkmark
             ZStack {
                 Circle()
-                    .fill(ForgotPasswordColors.successSoft)
+                    .fill(ResetPasswordColors.successSoft)
                     .frame(width: 64, height: 64)
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 48))
-                    .foregroundStyle(ForgotPasswordColors.success)
+                    .foregroundStyle(ResetPasswordColors.success)
                     .accessibilityHidden(true)
             }
 
             Spacer().frame(height: 12)
 
-            Text(String(localized: "auth.forgot.success.title", bundle: bundle))
+            Text(String(localized: "auth.reset.success.title", bundle: bundle))
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(theme.primaryTextColor)
                 .multilineTextAlignment(.center)
 
             Spacer().frame(height: 4)
 
-            Text(String(localized: "auth.forgot.success.body", bundle: bundle))
+            Text(String(localized: "auth.reset.success.body", bundle: bundle))
                 .font(.body)
                 .foregroundStyle(theme.secondaryTextColor)
                 .multilineTextAlignment(.center)
@@ -271,26 +289,22 @@ public struct ForgotPasswordView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity)
-        .background(ForgotPasswordColors.surfaceElevated)
+        .background(ResetPasswordColors.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(ForgotPasswordColors.separator, lineWidth: 1)
+                .strokeBorder(ResetPasswordColors.separator, lineWidth: 1)
         )
         .shadow(color: Color(red: 0.043, green: 0.051, blue: 0.071, opacity: 0.04), radius: 1, x: 0, y: 1)
         .shadow(color: Color(red: 0.043, green: 0.051, blue: 0.071, opacity: 0.06), radius: 12, x: 0, y: 8)
         .accessibilityElement(children: .combine)
     }
 
-    private var enterResetTokenButton: some View {
-        // Pushes ResetPasswordView onto the navigation stack via the value-based path.
-        // navigateTo?(.resetPassword) appends .resetPassword to navPath in AuthSheetContainer,
-        // which triggers the .navigationDestination handler and pushes a fresh ResetPasswordView.
-        // When nil (standalone preview), tapping is a no-op.
+    private var backToLoginButton: some View {
         Button {
-            navigateTo?(.resetPassword)
+            viewModel.backToSignIn()
         } label: {
-            Text(String(localized: "auth.forgot.success.button.enter_token", bundle: bundle))
+            Text(String(localized: "auth.reset.link.back", bundle: bundle))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(theme.buttonTextColor)
                 .frame(maxWidth: .infinity)
@@ -300,49 +314,30 @@ public struct ForgotPasswordView: View {
         }
         .buttonStyle(.plain)
     }
-
-    private var backToLoginButton: some View {
-        HStack {
-            Spacer()
-            Button(String(localized: "auth.forgot.link.back", bundle: bundle)) {
-                viewModel.backToSignIn()
-            }
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(theme.primaryColor)
-            .buttonStyle(.plain)
-            Spacer()
-        }
-    }
 }
 
 // MARK: - Internal colour helpers
 
-/// Design-system constants for the success card in `ForgotPasswordView`.
+/// Design-system constants for the success card in `ResetPasswordView`.
 ///
-/// These tokens are fixed semantic colours (success, separator, elevated surface) that are
-/// not part of the host-app-configurable `AuthClientConfiguration` palette. The `surface`
-/// token for the email field is intentionally absent — that is now sourced from `theme.surfaceColor`.
-private enum ForgotPasswordColors {
+/// Mirrors the same semantic colour tokens used in `ForgotPasswordView`.
+private enum ResetPasswordColors {
     #if canImport(UIKit)
-    /// Card background — `color.surface.elevated`: #FFFFFF light / #3A3A3C dark.
     static let surfaceElevated = Color(uiColor: UIColor { t in
         t.userInterfaceStyle == .dark
             ? UIColor(red: 0.227, green: 0.227, blue: 0.235, alpha: 1)
             : UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1)
     })
-    /// `color.success`: #2BA471 light / #3DD68C dark.
     static let success = Color(uiColor: UIColor { t in
         t.userInterfaceStyle == .dark
             ? UIColor(red: 0.239, green: 0.839, blue: 0.549, alpha: 1)
             : UIColor(red: 0.169, green: 0.643, blue: 0.443, alpha: 1)
     })
-    /// `color.success.soft`: #2BA471 @10% light / #3DD68C @14% dark.
     static let successSoft = Color(uiColor: UIColor { t in
         t.userInterfaceStyle == .dark
             ? UIColor(red: 0.239, green: 0.839, blue: 0.549, alpha: 0.14)
             : UIColor(red: 0.169, green: 0.643, blue: 0.443, alpha: 0.1)
     })
-    /// `color.separator`: rgba(11,13,18,0.08) light / rgba(255,255,255,0.08) dark.
     static let separator = Color(uiColor: UIColor { t in
         t.userInterfaceStyle == .dark
             ? UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.08)
@@ -376,7 +371,7 @@ private enum ForgotPasswordColors {
 
 #if DEBUG
 
-private struct PreviewForgotPasswordNetworkService: AuthNetworkService {
+private struct PreviewResetPasswordNetworkService: AuthNetworkService {
     func login(email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -435,48 +430,48 @@ private struct PreviewForgotPasswordNetworkService: AuthNetworkService {
 }
 
 private extension AuthManager {
-    static var previewForgotPassword: AuthManager {
+    static var previewResetPassword: AuthManager {
         AuthManager(configuration: AuthClientConfiguration())
     }
 }
 
 #Preview("Default — empty") {
-    ForgotPasswordView(
-        authManager: .previewForgotPassword,
-        networkService: PreviewForgotPasswordNetworkService()
+    ResetPasswordView(
+        authManager: .previewResetPassword,
+        networkService: PreviewResetPasswordNetworkService()
     )
 }
 
-#Preview("Email entered") {
-    ForgotPasswordView(
-        authManager: .previewForgotPassword,
-        networkService: PreviewForgotPasswordNetworkService(),
-        prefilledEmail: "user@example.com"
+#Preview("Token entered") {
+    ResetPasswordView(
+        authManager: .previewResetPassword,
+        networkService: PreviewResetPasswordNetworkService(),
+        prefilledToken: "1D92B930-6D05-4C4A-960C-6DAB9A6C152A"
     )
 }
 
 #Preview("Loading") {
-    ForgotPasswordView(
-        authManager: .previewForgotPassword,
-        networkService: PreviewForgotPasswordNetworkService(),
-        prefilledEmail: "user@example.com",
+    ResetPasswordView(
+        authManager: .previewResetPassword,
+        networkService: PreviewResetPasswordNetworkService(),
+        prefilledToken: "1D92B930-6D05-4C4A-960C-6DAB9A6C152A",
         initialIsLoading: true
     )
 }
 
-#Preview("Error") {
-    ForgotPasswordView(
-        authManager: .previewForgotPassword,
-        networkService: PreviewForgotPasswordNetworkService(),
-        prefilledEmail: "user@example.com",
-        initialErrorMessage: "No internet connection. Please try again."
+#Preview("Error — invalid token") {
+    ResetPasswordView(
+        authManager: .previewResetPassword,
+        networkService: PreviewResetPasswordNetworkService(),
+        prefilledToken: "expired-token",
+        initialErrorMessage: "Invalid or expired reset token. Please request a new one."
     )
 }
 
 #Preview("Success") {
-    ForgotPasswordView(
-        authManager: .previewForgotPassword,
-        networkService: PreviewForgotPasswordNetworkService(),
+    ResetPasswordView(
+        authManager: .previewResetPassword,
+        networkService: PreviewResetPasswordNetworkService(),
         initialIsSuccess: true
     )
 }

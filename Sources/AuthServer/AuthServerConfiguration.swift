@@ -62,6 +62,26 @@ public struct AuthServerConfiguration: Sendable {
     /// If `nil`, `POST /auth/google` will fail at runtime with a 500 error (fail-fast).
     public let googleJWKS: JWKS?
 
+    /// Optional closure that produces the subject and body for password-reset emails.
+    ///
+    /// Called by `ForgotPasswordController` with the one-time reset token. Return
+    /// a `(subject:, body:)` tuple containing the full email subject and body text.
+    ///
+    /// When `nil` (the default), `ForgotPasswordController` falls back to a built-in
+    /// English template. Set this closure to localise or brand the reset email for
+    /// your application.
+    ///
+    /// Example:
+    /// ```swift
+    /// authConfig.passwordResetEmailContent = { token in
+    ///     (
+    ///         subject: "Reset your MyApp password",
+    ///         body: "Use this token to reset your password: \(token). It expires in 1 hour."
+    ///     )
+    /// }
+    /// ```
+    public var passwordResetEmailContent: (@Sendable (String) -> (subject: String, body: String))?
+
     // MARK: - Initialiser
 
     /// Creates an `AuthServerConfiguration`.
