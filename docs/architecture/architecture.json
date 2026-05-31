@@ -73,7 +73,7 @@
         },
         "api": {
             "swiftVersion": "6.2",
-            "vaporVersion": "4",
+            "vaporVersion": "4.121.4",
             "port": 8080,
             "hosting": "fly.io",
             "environments": ["staging", "production"],
@@ -165,11 +165,20 @@
                     ],
                     "testTypes": ["unit", "integration"]
                 }
-            ]
+            ],
+            "demo": {
+                "app": {
+                    "bundleIdentifier": "com.marekloose.DemoAuth",
+                    "iosDeploymentTarget": "17.0",
+                    "macosDeploymentTarget": "14.0",
+                    "iosCiBuildTarget": "platform=iOS Simulator,name=iPhone 17 Pro"
+                },
+                "api": {}
+            }
         }
     },
     "infrastructure": {
-        "appleTeamId": "XXXXXXXXXX",
+        "appleTeamId": "9JVYUSJU3D",
         "gitHub": {
             "username": "LooseMarek",
             "private": true,
