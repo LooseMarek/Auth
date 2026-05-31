@@ -17,13 +17,13 @@ public func configure(
     app.http.server.configuration.hostname = "0.0.0.0"
     app.databases.use(database, as: .sqlite)
 
-    let jwtSecret: String
-    if let secret = Environment.get("JWT_SIGNING_SECRET") {
-        jwtSecret = secret
-    } else {
-        app.logger.warning("JWT_SIGNING_SECRET is not set — using insecure default. Set this environment variable before deploying.")
-        jwtSecret = "demo-secret-change-in-production"
-    }
+    // MARK: Development default — set JWT_SIGNING_SECRET in production
+    // The demo API uses a hardcoded insecure secret when JWT_SIGNING_SECRET is absent.
+    // This is intentional: the demo is not a production deployment. For a real server,
+    // export a strong random value, e.g.:
+    //   export JWT_SIGNING_SECRET=$(openssl rand -hex 32)
+    let jwtSecret = Environment.get("JWT_SIGNING_SECRET")
+        ?? AuthServerConfiguration.developmentDefaultJWTSigningSecret
     let appleJWKSData = try await URLSession.shared.data(
         from: URL(string: "https://appleid.apple.com/auth/keys")!
     ).0
