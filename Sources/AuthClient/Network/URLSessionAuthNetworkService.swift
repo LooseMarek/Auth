@@ -18,7 +18,8 @@ import AuthShared
 /// | HTTP status / URL error | Thrown error |
 /// |-------------------------|--------------|
 /// | 401                     | `.invalidCredentials` |
-/// | 409                     | `.emailTaken` |
+/// | 409 on `/auth/upgrade`  | `.accountAlreadyExists` |
+/// | 409 on other paths      | `.emailTaken` |
 /// | other non-2xx           | `.serverError` |
 /// | URLError `.notConnectedToInternet`, `.dataNotAllowed` | `.networkUnavailable` |
 /// | URLError `.cannotConnectToHost`, `.timedOut`, `.networkConnectionLost`, other | `.serverUnreachable` |
@@ -210,6 +211,10 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
     }
 
     /// Maps HTTP status codes to `AuthNetworkError`. Passes through 2xx unchanged.
+    ///
+    /// The 409 mapping is URL-aware:
+    /// - `/auth/upgrade` → `.accountAlreadyExists` (duplicate email/social on upgrade)
+    /// - all other paths → `.emailTaken` (duplicate email on registration)
     private func mapStatusCode(_ statusCode: Int, url: URL?) throws {
         switch statusCode {
         case 200...299:
@@ -217,6 +222,9 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
         case 401:
             throw AuthNetworkError.invalidCredentials
         case 409:
+            if url?.path == "/auth/upgrade" {
+                throw AuthNetworkError.accountAlreadyExists
+            }
             throw AuthNetworkError.emailTaken
         default:
             throw AuthNetworkError.serverError

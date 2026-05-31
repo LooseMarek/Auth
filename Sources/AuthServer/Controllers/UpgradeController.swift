@@ -114,10 +114,22 @@ public struct UpgradeController: RouteCollection, Sendable {
             user.authProvider = "apple"
 
         case .google:
-            guard let email = body.email else {
-                throw Abort(.badRequest, reason: "Email is required for Google upgrade")
+            // Mirror GoogleAuthController: verify the identity token and extract the email
+            // from it rather than requiring the client to supply it separately.
+            guard let jwks = configuration.googleJWKS,
+                  let tokenString = body.identityToken else {
+                throw Abort(.badRequest, reason: "Google identity token is required for Google upgrade")
             }
-            user.email = email
+            let googleKeys = JWTKeyCollection()
+            try await googleKeys.add(jwks: jwks)
+            let googleToken: GoogleIdentityToken
+            do {
+                googleToken = try await googleKeys.verify(tokenString, as: GoogleIdentityToken.self)
+            } catch {
+                throw Abort(.unauthorized, reason: "Invalid Google identity token: \(error.localizedDescription)")
+            }
+            let providerSubject = googleToken.subject.value
+            user.email = body.email ?? googleToken.email ?? "\(providerSubject)@google-account.invalid"
             user.authProvider = "google"
             // Social users do not authenticate with a password via AuthServer.
             // Leave passwordHash as empty string — BCrypt comparison will always fail,
@@ -125,9 +137,26 @@ public struct UpgradeController: RouteCollection, Sendable {
 
         }
 
-        try await user.save(on: req.db)
+        do {
+            try await user.save(on: req.db)
+        } catch {
+            if isDuplicateKeyError(error) {
+                throw Abort(.conflict, reason: "account_already_exists")
+            }
+            throw error
+        }
 
         return try await makeAuthResponse(for: user, on: req)
+    }
+
+    // MARK: - Duplicate-key detection
+
+    /// Returns `true` when `error` represents a UNIQUE constraint violation from either
+    /// SQLite ("UNIQUE constraint failed") or Postgres ("duplicate key value violates
+    /// unique constraint"). Used to map DB-layer errors to HTTP 409 on the upgrade endpoint.
+    func isDuplicateKeyError(_ error: Error) -> Bool {
+        let description = String(describing: error).lowercased()
+        return description.contains("unique") || description.contains("duplicate key")
     }
 
     // MARK: - Shared helpers

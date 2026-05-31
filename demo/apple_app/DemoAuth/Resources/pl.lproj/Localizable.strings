@@ -150,6 +150,11 @@
 /* Error: social sign-in token is invalid */
 "auth.social.error.token_invalid" = "Logowanie nie powiodło się. Spróbuj ponownie.";
 
+// MARK: - Upgrade errors
+
+/* Error: upgrade failed because the email/social account is already registered to another account */
+"auth.upgrade.error.account_already_exists" = "Account already registered. Please sign in with your existing account.";
+
 // MARK: - Toast
 
 /* Accessibility hint for the dismissible toast error banner */

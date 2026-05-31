@@ -113,6 +113,8 @@ public final class AppleSignInHandler: NSObject {
             authManager.signIn(response: response)
         } catch AuthNetworkError.networkUnavailable {
             viewModel.setAppleSignInError(.networkUnavailable)
+        } catch AuthNetworkError.accountAlreadyExists {
+            viewModel.setAppleSignInError(.accountAlreadyExists)
         } catch {
             viewModel.setAppleSignInError(.serverError)
         }
