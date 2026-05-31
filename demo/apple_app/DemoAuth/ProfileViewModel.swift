@@ -65,6 +65,9 @@ final class ProfileViewModel {
     /// Controls the delete-account confirmation alert.
     var showDeleteConfirmation: Bool = false
 
+    /// Controls the change-password sheet (email-auth users only).
+    var showChangePassword: Bool = false
+
     // MARK: - Init
 
     /// Creates a `ProfileViewModel` with the given dependencies.
@@ -147,6 +150,14 @@ final class ProfileViewModel {
     /// sheet down without losing their existing guest session.
     func upgradeAccount() {
         authManager.presentAuthFlow(style: .sheet)
+    }
+
+    /// Presents the change-password sheet for email-auth users.
+    ///
+    /// Sets `showChangePassword = true` to trigger the `.sheet` presentation
+    /// in `ProfileView`. Only call this when `authProvider == "email"`.
+    func changePassword() {
+        showChangePassword = true
     }
 
     // MARK: - Private helpers

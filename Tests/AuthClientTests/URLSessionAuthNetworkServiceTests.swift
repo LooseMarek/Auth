@@ -304,6 +304,28 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
         XCTAssertEqual(body?["email"] as? String, "reset@example.com")
     }
 
+    /// Regression test: if the demo API has no emailTransport configured,
+    /// ForgotPasswordController returns HTTP 500. Verify that a 500 response
+    /// maps to `.serverError` — which surfaces to the user as "Something went wrong."
+    /// rather than silently succeeding.
+    ///
+    /// Fix: wire up a console email transport in `demo/api/Sources/demoauth/configure.swift`.
+    func testForgotPasswordThrowsServerErrorOn500() async throws {
+        // Given: server returns 500 (email transport not configured — the regression scenario)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 500), nil)
+        }
+
+        // When / Then: 500 must map to .serverError, not succeed silently
+        do {
+            try await sut.forgotPassword(email: "reset@example.com")
+            XCTFail("Expected .serverError when server returns 500 (email transport not configured)")
+        } catch AuthNetworkError.serverError {
+            // Expected — confirms 500 is NOT treated as success.
+            // The fix is to wire up emailTransport in configure.swift so the server returns 200.
+        }
+    }
+
     // MARK: - logout
 
     func testLogoutSendsPostToAuthLogout() async throws {
@@ -475,6 +497,113 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
             XCTFail("Expected .emailTaken error")
         } catch AuthNetworkError.emailTaken {
             // expected
+        }
+    }
+
+    // MARK: - resetPassword (issue #128)
+
+    func testResetPasswordSendsPostToAuthResetPassword() async throws {
+        // Given: server returns 200 (success)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
+            return (makeHTTPResponse(url: request.url!, status: 200), nil)
+        }
+
+        // When
+        try await sut.resetPassword(token: "some-token", newPassword: "NewP@ss1")
+
+        // Then
+        XCTAssertEqual(URLSessionAuthNetworkServiceTests.lastCapturedRequest?.httpMethod, "POST")
+        XCTAssertEqual(URLSessionAuthNetworkServiceTests.lastCapturedRequest?.url?.path, "/auth/reset-password")
+    }
+
+    func testResetPasswordEncodesTokenAndNewPasswordInBody() async throws {
+        // Given
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            URLSessionAuthNetworkServiceTests.lastCapturedRequest = request
+            return (makeHTTPResponse(url: request.url!, status: 200), nil)
+        }
+
+        // When
+        try await sut.resetPassword(token: "my-reset-token", newPassword: "NewSecret1!")
+
+        // Then: body must contain token and newPassword keys
+        let body = readBodyJSON(from: URLSessionAuthNetworkServiceTests.lastCapturedRequest)
+        XCTAssertEqual(body?["token"] as? String, "my-reset-token")
+        XCTAssertEqual(body?["newPassword"] as? String, "NewSecret1!")
+    }
+
+    func testResetPasswordThrowsInvalidResetTokenOn400() async throws {
+        // Given: server returns 400 (invalid or expired token)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 400), nil)
+        }
+
+        // When / Then
+        do {
+            try await sut.resetPassword(token: "expired-token", newPassword: "NewP@ss1")
+            XCTFail("Expected .invalidResetToken error on HTTP 400")
+        } catch AuthNetworkError.invalidResetToken {
+            // expected
+        }
+    }
+
+    /// Regression guard: a 400 from a different path must NOT map to .invalidResetToken.
+    /// (The URL-aware 400 mapping must only trigger for /auth/reset-password.)
+    func testMap400OnOtherPath_doesNotReturnInvalidResetToken() async throws {
+        // Simulate a 400 on /auth/login (no 400-mapping logic there → falls through to serverError)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 400), nil)
+        }
+
+        do {
+            _ = try await sut.login(email: "u@example.com", password: "pw")
+            XCTFail("Expected an error")
+        } catch AuthNetworkError.invalidResetToken {
+            XCTFail("400 on /auth/login must NOT map to .invalidResetToken")
+        } catch {
+            // Any other error (serverError) is acceptable
+        }
+    }
+
+    // MARK: - changePassword 422 mapping
+
+    /// A 422 response from POST /auth/change-password must map to `.unsupportedOperation`
+    /// (the account has no stored password hash — Apple, Google, or guest account).
+    func testChangePasswordThrowsUnsupportedOperationOn422() async throws {
+        // Given: server returns 422 (social/guest account — no password stored)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 422), nil)
+        }
+
+        // When / Then
+        do {
+            try await sut.changePassword(
+                currentPassword: "any",
+                newPassword: "any",
+                accessToken: "token"
+            )
+            XCTFail("Expected .unsupportedOperation error")
+        } catch AuthNetworkError.unsupportedOperation {
+            // expected
+        }
+    }
+
+    /// A 422 response from a path OTHER than /auth/change-password must still map to
+    /// `.serverError`, not `.unsupportedOperation`.
+    func testChangePasswordThrows422OnOtherPaths_throwsServerError() async throws {
+        // Given: server returns 422 on /auth/login (a path that doesn't use unsupportedOperation)
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 422), nil)
+        }
+
+        do {
+            _ = try await sut.login(email: "u@example.com", password: "pw")
+            XCTFail("Expected an error")
+        } catch AuthNetworkError.unsupportedOperation {
+            XCTFail("422 on /auth/login must NOT map to .unsupportedOperation")
+        } catch AuthNetworkError.serverError {
+            // expected — 422 on non-change-password paths falls through to serverError
         }
     }
 }

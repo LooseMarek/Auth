@@ -11,12 +11,14 @@ struct ProfileView: View {
     // MARK: - State
 
     private let authManager: AuthManager
+    private let apiBaseURL: String
     @State private var viewModel: ProfileViewModel
 
     // MARK: - Init
 
     init(authManager: AuthManager, apiBaseURL: String) {
         self.authManager = authManager
+        self.apiBaseURL = apiBaseURL
         _viewModel = State(
             initialValue: ProfileViewModel(
                 authManager: authManager,
@@ -47,6 +49,13 @@ struct ProfileView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Are you sure you want to permanently delete your account? This cannot be undone.")
+            }
+            .sheet(isPresented: $viewModel.showChangePassword) {
+                ChangePasswordView(
+                    authManager: authManager,
+                    networkService: URLSessionAuthNetworkService(baseURL: apiBaseURL),
+                    popToRoot: { viewModel.showChangePassword = false }
+                )
             }
         }
     }
@@ -113,6 +122,12 @@ struct ProfileView: View {
                 if viewModel.isGuest {
                     Button("Upgrade Account") {
                         viewModel.upgradeAccount()
+                    }
+                }
+
+                if viewModel.authProvider == "email" {
+                    Button("Change Password") {
+                        viewModel.changePassword()
                     }
                 }
 

@@ -105,6 +105,44 @@
 /* Success state — card body */
 "auth.forgot.success.body" = "Wysłaliśmy link do resetowania hasła na Twój adres e-mail. Może to potrwać kilka minut.";
 
+/* Success state — enter reset token button */
+"auth.forgot.success.button.enter_token" = "Wprowadź token resetujący";
+
+// MARK: - ResetPasswordView
+
+/* Screen title */
+"auth.reset.title" = "Ustaw nowe hasło";
+
+/* Screen subtitle */
+"auth.reset.subtitle" = "Wpisz token z e-maila i wybierz nowe hasło.";
+
+/* Reset token text field placeholder */
+"auth.reset.field.token.placeholder" = "Token resetujący";
+
+/* New password text field placeholder */
+"auth.reset.field.new_password.placeholder" = "Nowe hasło";
+
+/* Confirm password text field placeholder */
+"auth.reset.field.confirm_password.placeholder" = "Potwierdź nowe hasło";
+
+/* Reset password submit button */
+"auth.reset.button.submit" = "Zmień hasło";
+
+/* Back to login link / button */
+"auth.reset.link.back" = "Wróć do logowania";
+
+/* Success state — card title */
+"auth.reset.success.title" = "Hasło zmienione!";
+
+/* Success state — card body */
+"auth.reset.success.body" = "Twoje hasło zostało zaktualizowane. Możesz teraz zalogować się nowym hasłem.";
+
+/* Error: passwords do not match */
+"auth.reset.error.password_mismatch" = "Hasła nie są zgodne.";
+
+/* Error: password too short */
+"auth.reset.error.password_too_short" = "Hasło musi zawierać co najmniej 8 znaków.";
+
 // MARK: - Shared buttons
 
 /* Sign in with Apple button label */
@@ -153,7 +191,24 @@
 // MARK: - Upgrade errors
 
 /* Error: upgrade failed because the email/social account is already registered to another account */
-"auth.upgrade.error.account_already_exists" = "Account already registered. Please sign in with your existing account.";
+"auth.upgrade.error.account_already_exists" = "Konto już zarejestrowane. Zaloguj się na istniejące konto.";
+
+/* Error: reset token is invalid or expired */
+"auth.error.invalid_reset_token" = "Nieprawidłowy lub wygasły token resetujący. Wyślij nowy link.";
+
+/* Error: operation not supported for this account type */
+"auth.error.unsupported_operation" = "Password change is not available for this account type.";
+
+// MARK: - ChangePasswordView
+
+"auth.change_password.title" = "Change Password";
+"auth.change_password.field.current_password" = "Current Password";
+"auth.change_password.field.new_password" = "New Password";
+"auth.change_password.field.confirm_password" = "Confirm New Password";
+"auth.change_password.button.submit" = "Change Password";
+"auth.change_password.success.title" = "Password Changed";
+"auth.change_password.success.subtitle" = "Your password has been updated successfully.";
+"auth.change_password.error.passwords_do_not_match" = "Passwords do not match.";
 
 // MARK: - Toast
 

@@ -70,6 +70,10 @@ private final class CoordinatorMockNetworkService: AuthNetworkService, @unchecke
         throw AuthNetworkError.serverError
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -103,6 +107,10 @@ private final class CoordinatorMockNetworkService: AuthNetworkService, @unchecke
     }
 
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }

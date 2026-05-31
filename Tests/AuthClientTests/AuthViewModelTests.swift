@@ -77,6 +77,7 @@ private final class AlwaysFailingNetworkService: AuthNetworkService, @unchecked 
     func login(email: String, password: String) async throws -> AuthResponse { throw error }
     func register(email: String, password: String) async throws -> AuthResponse { throw error }
     func forgotPassword(email: String) async throws { throw error }
+    func resetPassword(token: String, newPassword: String) async throws { throw error }
     func refreshToken(refreshToken: String) async throws -> AuthResponse { throw error }
     func logout(refreshToken: String) async throws { throw error }
     func deleteAccount(accessToken: String) async throws { throw error }
@@ -86,4 +87,5 @@ private final class AlwaysFailingNetworkService: AuthNetworkService, @unchecked 
     func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse { throw error }
     func loginAsGuest() async throws -> AuthResponse { throw error }
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse { throw error }
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws { throw error }
 }

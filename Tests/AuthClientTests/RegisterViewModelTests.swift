@@ -280,6 +280,10 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
         throw AuthNetworkError.serverError
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -319,5 +323,9 @@ private final class MockRegisterNetworkService: AuthNetworkService, @unchecked S
         case .success(let response): return response
         case .failure(let error): throw error
         }
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
+        throw AuthNetworkError.serverError
     }
 }

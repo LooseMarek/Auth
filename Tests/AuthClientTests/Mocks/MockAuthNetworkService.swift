@@ -11,6 +11,7 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var loginCallCount = 0
     var registerCallCount = 0
     var forgotPasswordCallCount = 0
+    var resetPasswordCallCount = 0
     var refreshTokenCallCount = 0
     var logoutCallCount = 0
     var deleteAccountCallCount = 0
@@ -20,6 +21,7 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var upgradeGuestWithGoogleCallCount = 0
     var loginAsGuestCallCount = 0
     var upgradeGuestWithEmailCallCount = 0
+    var changePasswordCallCount = 0
 
     // MARK: - Recorded arguments
 
@@ -48,6 +50,7 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
     var upgradeGuestWithEmailResult: Result<AuthResponse, Error> = .failure(AuthNetworkError.serverError)
     var logoutShouldThrow: Error? = nil
     var deleteAccountShouldThrow: Error? = nil
+    var changePasswordResult: Result<Void, Error> = .success(())
 
     // MARK: - AuthNetworkService
 
@@ -63,6 +66,10 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
 
     func forgotPassword(email: String) async throws {
         forgotPasswordCallCount += 1
+    }
+
+    func resetPassword(token: String, newPassword: String) async throws {
+        resetPasswordCallCount += 1
     }
 
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
@@ -123,5 +130,10 @@ final class MockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
         lastUpgradeGuestWithEmailEmail = email
         lastUpgradeGuestWithEmailPassword = password
         return try upgradeGuestWithEmailResult.get()
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
+        changePasswordCallCount += 1
+        return try changePasswordResult.get()
     }
 }

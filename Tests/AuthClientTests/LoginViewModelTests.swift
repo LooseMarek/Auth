@@ -216,6 +216,10 @@ private final class LoginMockAuthNetworkService: AuthNetworkService, @unchecked 
         throw AuthNetworkError.serverError
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -249,6 +253,10 @@ private final class LoginMockAuthNetworkService: AuthNetworkService, @unchecked 
     }
 
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }
@@ -275,6 +283,10 @@ private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unche
         throw AuthNetworkError.serverError
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -310,6 +322,10 @@ private final class SuspendingMockAuthNetworkService: AuthNetworkService, @unche
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
+        throw AuthNetworkError.serverError
+    }
 }
 
 private final class FailingGuestNetworkService: AuthNetworkService, @unchecked Sendable {
@@ -323,6 +339,7 @@ private final class FailingGuestNetworkService: AuthNetworkService, @unchecked S
     func login(email: String, password: String) async throws -> AuthResponse { throw error }
     func register(email: String, password: String) async throws -> AuthResponse { throw error }
     func forgotPassword(email: String) async throws { throw error }
+    func resetPassword(token: String, newPassword: String) async throws { throw error }
     func refreshToken(refreshToken: String) async throws -> AuthResponse { throw error }
     func logout(refreshToken: String) async throws { throw error }
     func deleteAccount(accessToken: String) async throws { throw error }
@@ -331,6 +348,7 @@ private final class FailingGuestNetworkService: AuthNetworkService, @unchecked S
     func signInWithGoogle(identityToken: String) async throws -> AuthResponse { throw error }
     func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse { throw error }
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse { throw error }
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws { throw error }
 }
 
 private final class SuspendingGuestMockAuthNetworkService: AuthNetworkService, @unchecked Sendable {
@@ -359,6 +377,10 @@ private final class SuspendingGuestMockAuthNetworkService: AuthNetworkService, @
         throw AuthNetworkError.serverError
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -388,6 +410,10 @@ private final class SuspendingGuestMockAuthNetworkService: AuthNetworkService, @
     }
 
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }
