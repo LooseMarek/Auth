@@ -22,6 +22,10 @@ public struct LoginView: View {
     @State private var appleSignInHandler: AppleSignInHandler
     @State private var googleSignInHandler: GoogleSignInHandler
     private let authManager: AuthManager
+    /// Closure from `AuthSheetContainer` that appends a `LoginFlowDestination` to the
+    /// `NavigationStack` path, pushing the corresponding screen. When `nil` (standalone
+    /// preview), tapping navigation buttons is a no-op.
+    private let navigateTo: ((LoginFlowDestination) -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -52,6 +56,9 @@ public struct LoginView: View {
     /// - Parameters:
     ///   - authManager: The shared authentication state manager.
     ///   - networkService: The network layer used for login and social auth requests.
+    ///   - navigateTo: Optional closure that appends a `LoginFlowDestination` to the
+    ///     `NavigationStack` path, pushing the corresponding screen. Provided by
+    ///     `AuthSheetContainer`; pass `nil` when presenting `LoginView` standalone.
     ///   - prefilledEmail: Optional email to pre-populate the email field (e.g. for Xcode Previews).
     ///   - prefilledPassword: Optional password to pre-populate the password field.
     ///   - initialErrorMessage: Optional inline error message to display immediately on appear
@@ -62,6 +69,7 @@ public struct LoginView: View {
     public init(
         authManager: AuthManager,
         networkService: any AuthNetworkService,
+        navigateTo: ((LoginFlowDestination) -> Void)? = nil,
         prefilledEmail: String = "",
         prefilledPassword: String = "",
         initialErrorMessage: String? = nil,
@@ -69,6 +77,7 @@ public struct LoginView: View {
         initialIsLoading: Bool = false
     ) {
         self.authManager = authManager
+        self.navigateTo = navigateTo
         let vm = LoginViewModel(
             networkService: networkService,
             localizationBundle: authManager.configuration.localizationBundle,
@@ -263,10 +272,9 @@ public struct LoginView: View {
     private var forgotPasswordLink: some View {
         HStack {
             Spacer()
-            NavigationLink(destination: ForgotPasswordView(
-                authManager: authManager,
-                networkService: viewModel.networkService
-            )) {
+            Button {
+                navigateTo?(.forgotPassword(prefilledEmail: viewModel.email))
+            } label: {
                 Text(String(localized: "auth.login.link.forgot_password", bundle: bundle))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(theme.primaryColor)
@@ -410,10 +418,9 @@ public struct LoginView: View {
     private var registerLink: some View {
         HStack {
             Spacer()
-            NavigationLink(destination: RegisterView(
-                authManager: authManager,
-                networkService: viewModel.networkService
-            )) {
+            Button {
+                navigateTo?(.register)
+            } label: {
                 HStack(spacing: 4) {
                     Text(String(localized: "auth.login.register_prompt", bundle: bundle))
                         .font(.subheadline.weight(.medium))
@@ -502,6 +509,10 @@ private struct PreviewNetworkService: AuthNetworkService {
         throw AuthNetworkError.serverError
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -535,6 +546,10 @@ private struct PreviewNetworkService: AuthNetworkService {
     }
 
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }
