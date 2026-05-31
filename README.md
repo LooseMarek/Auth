@@ -21,7 +21,6 @@
 | `AuthClient` | Building an iOS / macOS SwiftUI app |
 | `AuthServer` | Building a Vapor 4 backend |
 | `AuthShared` | Sharing request/response types between both sides |
-| `AuthKit` | Full-stack project — imports all three with a single line |
 
 ---
 
@@ -57,13 +56,6 @@ let package = Package(
                 .product(name: "AuthServer", package: "Auth"),
             ]
         ),
-        // Full-stack target (imports AuthShared + AuthClient + AuthServer)
-        .target(
-            name: "MyFullStackApp",
-            dependencies: [
-                .product(name: "AuthKit", package: "Auth"),
-            ]
-        ),
     ]
 )
 ```
@@ -71,22 +63,6 @@ let package = Package(
 ---
 
 ## iOS Quick-Start
-
-> **Prerequisite — `UILaunchScreen` in `Info.plist`**
->
-> Your host app's `Info.plist` must contain a `UILaunchScreen` key. Without it, iOS
-> renders the app in a legacy compatibility mode and adds black bars at the top and
-> bottom of the screen on all modern iPhone models — even with a bare SwiftUI view.
->
-> Add the following to your `Info.plist`:
->
-> ```xml
-> <key>UILaunchScreen</key>
-> <dict/>
-> ```
->
-> An empty dictionary is sufficient. It signals to iOS that the app is designed for
-> the current device's full screen dimensions.
 
 ### 1. Configure `AuthManager`
 
@@ -100,7 +76,9 @@ import AuthClient
 @main
 struct MyApp: App {
     @State private var authManager = AuthManager(
-        configuration: AuthClientConfiguration()
+        configuration: AuthClientConfiguration(),
+        networkService: URLSessionAuthNetworkService(baseURL: URL(string: "https://api.example.com")!),
+        tokenStore: KeychainTokenStore()
     )
 
     var body: some Scene {
@@ -113,14 +91,16 @@ struct MyApp: App {
 }
 ```
 
-> **Warning:** `AuthManager.init(configuration:)` injects a no-op stub for `networkService`
-> — all auth calls will silently do nothing. For real network calls, inject your own
-> `AuthNetworkService` implementation and a `KeychainTokenStore`:
+> **Note:** `AuthManager.init(configuration:)` (the convenience initialiser) injects a
+> no-op stub for `networkService` — all auth calls will silently fail with a server error.
+> For real network calls, always use the full initialiser and inject your
+> `AuthNetworkService` implementation (e.g. `URLSessionAuthNetworkService`) and a
+> `KeychainTokenStore`:
 >
 > ```swift
 > @State private var authManager = AuthManager(
 >     configuration: AuthClientConfiguration(),
->     networkService: MyAuthNetworkService(baseURL: URL(string: "https://api.example.com")!),
+>     networkService: URLSessionAuthNetworkService(baseURL: URL(string: "https://api.example.com")!),
 >     tokenStore: KeychainTokenStore()
 > )
 > ```
@@ -149,6 +129,20 @@ struct ProfileView: View {
 }
 ```
 
+`presentAuthFlow()` accepts an optional `style` parameter:
+- `.sheet` (default) — user-dismissible sheet; use for contextual flows like guest upgrade.
+- `.fullScreen` — non-dismissible full-screen cover; use when gating app content behind
+  authentication on launch (iOS uses `.fullScreenCover`; macOS uses
+  `interactiveDismissDisabled` sheet).
+
+```swift
+// Full-screen on first launch (non-dismissible)
+authManager.presentAuthFlow(style: .fullScreen)
+
+// Dismissible sheet (default)
+authManager.presentAuthFlow(style: .sheet)
+```
+
 The `.authSheet(manager:)` modifier observes `isPresentingAuthFlow` and presents the
 full auth UI — login, registration, social sign-in, guest access, and the complete
 forgot-password flow — automatically.
@@ -168,7 +162,7 @@ forgot-password flow — automatically.
 ```swift
 switch authManager.session {
 case .authenticated(let user):
-    Text("Welcome, \(user.email)")
+    Text("Welcome, \(user.email ?? user.id)")
 case .guest(let uuid):
     Text("Browsing as guest \(uuid)")
 case .unauthenticated:
@@ -176,7 +170,21 @@ case .unauthenticated:
 }
 ```
 
-### 4. Logout
+`user.email` is `String?` — it is `nil` for guest sessions and may be absent for some
+social sign-in providers (e.g. Apple omits the email on repeat sign-ins).
+
+### 4. Restore a session on launch
+
+Call `restoreSession()` once when the app starts to silently resume a logged-in session:
+
+```swift
+ContentView()
+    .task {
+        await authManager.restoreSession()
+    }
+```
+
+### 5. Logout
 
 ```swift
 Button("Sign Out") {
@@ -192,22 +200,33 @@ Button("Sign Out") {
 
 ```swift
 import Vapor
+import JWTKit
 import AuthServer
 
+// MARK: JWT signing secret
+// For development, fall back to the built-in insecure default when the env var is absent.
+// For production, always set JWT_SIGNING_SECRET to a strong random value, e.g.:
+//   export JWT_SIGNING_SECRET=$(openssl rand -hex 32)
+let jwtSecret = Environment.get("JWT_SIGNING_SECRET")
+    ?? AuthServerConfiguration.developmentDefaultJWTSigningSecret
+
 // Fetch JWKS from Apple and Google once at startup.
-// Both endpoints return a JSON object that JWTKit decodes as `JWKS`.
-// Apple:  GET https://appleid.apple.com/auth/keys
-// Google: GET https://www.googleapis.com/oauth2/v3/certs
-// Note: Apple and Google rotate their signing keys periodically — refresh these on a schedule (e.g. every 24 hours) in production.
-let appleJWKS = try await app.client.get("https://appleid.apple.com/auth/keys")
-    .content.decode(JWKS.self)
-let googleJWKS = try await app.client.get("https://www.googleapis.com/oauth2/v3/certs")
-    .content.decode(JWKS.self)
+// Note: Apple and Google rotate their signing keys periodically — refresh on a schedule
+// (e.g. every 24 hours) in production.
+let appleJWKSData = try await URLSession.shared.data(
+    from: URL(string: "https://appleid.apple.com/auth/keys")!
+).0
+let appleJWKS = try JSONDecoder().decode(JWKS.self, from: appleJWKSData)
+
+let googleJWKSData = try await URLSession.shared.data(
+    from: URL(string: "https://www.googleapis.com/oauth2/v3/certs")!
+).0
+let googleJWKS = try JSONDecoder().decode(JWKS.self, from: googleJWKSData)
 
 let config = AuthServerConfiguration(
-    jwtSigningSecret: Environment.get("JWT_SECRET") ?? "change-me",
+    jwtSigningSecret: jwtSecret,
     emailTransport: { recipient, subject, body in
-        // Deliver via your preferred email provider (SendGrid, SES, etc.)
+        // Deliver via your preferred email provider (SendGrid, SES, Resend, etc.)
         // Replace the line below with your actual email SDK call.
         try await myEmailProvider.send(to: recipient, subject: subject, body: body)
     },
@@ -215,6 +234,20 @@ let config = AuthServerConfiguration(
     googleJWKS: googleJWKS
 )
 ```
+
+> **`JWT_SIGNING_SECRET` — development vs production**
+>
+> `AuthServerConfiguration.developmentDefaultJWTSigningSecret` is an intentionally
+> insecure constant (`"demo-secret-change-in-production"`) provided for local demo use
+> only. **Never deploy it to production.** Before launching a production server, export
+> a strong random secret:
+>
+> ```sh
+> export JWT_SIGNING_SECRET=$(openssl rand -hex 32)
+> ```
+>
+> Store the value in your secret manager (e.g. AWS Secrets Manager, GitHub Secrets,
+> Fly.io secrets) and inject it as an environment variable at runtime.
 
 ### 2. Register migrations
 
@@ -238,6 +271,7 @@ try app.register(collection: RefreshTokenController(configuration: config))
 try app.register(collection: LogoutController(configuration: config))
 try app.register(collection: AccountDeletionController(configuration: config))
 try app.register(collection: UpgradeController(configuration: config))
+try app.register(collection: ChangePasswordController(configuration: config))
 ```
 
 This registers the following routes under the `/auth` prefix:
@@ -255,6 +289,7 @@ This registers the following routes under the `/auth` prefix:
 | `POST` | `/auth/logout` | Invalidate refresh token (JWT required) |
 | `DELETE` | `/auth/account` | Delete account (JWT required) |
 | `POST` | `/auth/upgrade` | Upgrade guest to full account (JWT required) |
+| `POST` | `/auth/change-password` | Change password for email-auth users (JWT required) |
 
 ### 4. Add a Fluent database driver
 
@@ -273,30 +308,78 @@ app.databases.use(.sqlite(.memory), as: .sqlite)
 
 ---
 
+## Known Limitations
+
+### Account merging is not supported
+
+Upgrading a guest session to a full account (`POST /auth/upgrade`) links the existing
+guest UUID to a new email or social-provider credential. If the email address or social
+account is **already registered** to a different user, the upgrade fails with
+`AuthNetworkError.accountAlreadyExists`. There is no automatic merging of data between
+the existing account and the guest account — the host app must handle this case
+(e.g. prompt the user to log in to the existing account instead).
+
+---
+
 ## `AuthClientConfiguration` Reference
 
-| Property | Stored Type | Init Parameter Type | Default | Description |
-|----------|-------------|---------------------|---------|-------------|
-| `allowGuestAccess` | `Bool` | `Bool` | `true` | When `false`, guest/anonymous sign-in UI is hidden |
-| `primaryColor` | `Color` | `Color?` | Auth Blue (`#0A66FF` light / `#3D8BFF` dark) | Tint applied to buttons and interactive elements |
-| `backgroundColor` | `Color` | `Color?` | System background (adapts to light/dark) | Screen background colour |
-| `font` | `Font?` | `Font?` | `nil` (system default) | Custom font applied to all auth screens |
-
-The colour init parameters accept `nil` to use the built-in adaptive defaults. The stored
-properties are always non-optional `Color` values resolved inside the init. Pass `nil` to
-use Auth Blue and the system background:
+### Basic (flat-colour) configuration
 
 ```swift
 // All defaults
 let config = AuthClientConfiguration()
 
-// Custom primary colour, no guest access
+// Customised
 let config = AuthClientConfiguration(
     allowGuestAccess: false,
+    allowAppleSignIn: true,
+    allowGoogleSignIn: true,
     primaryColor: .accentColor,
     font: .custom("MyFont-Regular", size: 16)
 )
 ```
+
+| Property | Stored Type | Init Parameter Type | Default | Description |
+|----------|-------------|---------------------|---------|-------------|
+| `allowGuestAccess` | `Bool` | `Bool` | `true` | When `false`, guest/anonymous sign-in UI is hidden |
+| `allowAppleSignIn` | `Bool` | `Bool` | `true` | When `false`, the Sign in with Apple button is hidden |
+| `allowGoogleSignIn` | `Bool` | `Bool` | `true` | When `false`, the Sign in with Google button is hidden |
+| `primaryColor` | `Color` | `Color?` | Auth Blue (`#0A66FF` light / `#3D8BFF` dark) | Tint applied to buttons and interactive elements |
+| `backgroundColor` | `Color` | `Color?` | System background (adapts to light/dark) | Screen background colour |
+| `font` | `Font?` | `Font?` | `nil` (system default) | Custom font applied to all auth screens |
+| `localizationBundle` | `Bundle?` | `Bundle?` | `nil` (Auth module bundle) | Pass `Bundle.main` to supply custom `Localizable.strings` |
+| `surfaceColor` | `Color?` | `Color?` | `nil` → `#F5F5F7` / `#2C2C2E` | Text field / input background colour |
+| `primaryTextColor` | `Color?` | `Color?` | `nil` → `Color.primary` | Primary body text colour |
+| `secondaryTextColor` | `Color?` | `Color?` | `nil` → `Color.secondary` | Secondary / hint text colour |
+| `buttonTextColor` | `Color?` | `Color?` | `nil` → `.white` | Label colour for the primary action button |
+| `errorColor` | `Color?` | `Color?` | `nil` → `Color.red` | Colour used for error messages and icons |
+
+The colour init parameters accept `nil` to use the built-in adaptive defaults. The stored
+`primaryColor` and `backgroundColor` properties are always non-optional `Color` values
+resolved inside the init.
+
+### Dual-scheme (per light/dark) configuration
+
+For host apps that need completely separate colour palettes per colour scheme, use
+`AuthColorTokens` and the dual-scheme initialiser:
+
+```swift
+let config = AuthClientConfiguration(
+    light: AuthColorTokens(
+        primaryColor: Color(red: 0.039, green: 0.4, blue: 1.0),
+        backgroundColor: .white
+    ),
+    dark: AuthColorTokens(
+        primaryColor: Color(red: 0.239, green: 0.545, blue: 1.0),
+        backgroundColor: Color(red: 0.1, green: 0.1, blue: 0.13)
+    )
+)
+```
+
+`AuthTheme` selects the active token set based on the current colour scheme and falls
+back to adaptive defaults for any token left as `nil`. Each `AuthColorTokens` accepts
+the same optional colour properties as the flat init (`primaryColor`, `backgroundColor`,
+`surfaceColor`, `primaryTextColor`, `secondaryTextColor`, `buttonTextColor`, `errorColor`).
 
 ---
 
@@ -308,6 +391,7 @@ let config = AuthClientConfiguration(
 | `accessTokenTTL` | `TimeInterval` | `3600` (1 hour) | Lifetime of an access token in seconds |
 | `refreshTokenTTL` | `TimeInterval` | `86400` (1 day) | Lifetime of a refresh token in seconds |
 | `emailTransport` | `(@Sendable (String, String, String) async throws -> Void)?` | `nil` | Closure called by `forgot-password` to deliver reset emails. Parameters: `(recipient, subject, body)`. `nil` causes a runtime HTTP 500 on that route. |
+| `passwordResetEmailContent` | `(@Sendable (String) -> (subject: String, body: String))?` | `nil` | Optional closure to customise the password-reset email subject and body. `nil` uses the built-in English template. |
 | `appleJWKS` | `JWKS?` | `nil` | Apple's public JWKS for verifying Sign in with Apple tokens. Fetch from `https://appleid.apple.com/auth/keys`. `nil` causes a runtime HTTP 500 on `POST /auth/apple`. |
 | `googleJWKS` | `JWKS?` | `nil` | Google's public JWKS for verifying Google Sign-In tokens. Fetch from `https://www.googleapis.com/oauth2/v3/certs`. `nil` causes a runtime HTTP 500 on `POST /auth/google`. |
 
@@ -405,20 +489,6 @@ authConfig.passwordResetEmailContent = { token in
 
 When `passwordResetEmailContent` is `nil` (the default), the built-in English subject
 `"Reset your password"` and a standard token-delivery body are used.
-
----
-
-## AuthKit — Full-Stack Import
-
-For monorepo or full-stack Swift projects, import the `AuthKit` umbrella product to get
-`AuthShared`, `AuthClient`, and `AuthServer` in a single line:
-
-```swift
-import AuthKit
-```
-
-This is equivalent to importing all three products individually and is convenient for
-shared modules or packages that need access to the complete Auth surface.
 
 ---
 
