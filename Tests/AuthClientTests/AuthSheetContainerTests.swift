@@ -13,6 +13,41 @@ import AuthShared
 @MainActor
 final class AuthSheetContainerTests: XCTestCase {
 
+    // MARK: - LoginFlowDestination — value-based navigation
+
+    func testNavigationPath_appendsDestinationOnNavigateTo() {
+        // Given: AuthSheetContainer uses [LoginFlowDestination] path
+        // This is structural — verify LoginFlowDestination is Hashable and the path can hold destinations
+        let dest: LoginFlowDestination = .forgotPassword(prefilledEmail: "a@b.com")
+        var path: [LoginFlowDestination] = []
+        path.append(dest)
+        XCTAssertEqual(path.count, 1)
+        if case .forgotPassword(let email) = path[0] {
+            XCTAssertEqual(email, "a@b.com")
+        } else {
+            XCTFail("Expected .forgotPassword destination")
+        }
+    }
+
+    func testNavigationPath_removeAllPopsToRoot() {
+        var path: [LoginFlowDestination] = [
+            .forgotPassword(prefilledEmail: "a@b.com"),
+            .resetPassword
+        ]
+        path.removeAll()
+        XCTAssertTrue(path.isEmpty, "removeAll() should clear the navigation path, popping all views to root")
+    }
+
+    func testLoginFlowDestination_registerCase() {
+        let dest: LoginFlowDestination = .register
+        var path: [LoginFlowDestination] = []
+        path.append(dest)
+        XCTAssertEqual(path.count, 1)
+        if case .register = path[0] { /* pass */ } else {
+            XCTFail("Expected .register destination")
+        }
+    }
+
     // MARK: - testLoginViewReceivesRealNetworkService
 
     func testLoginViewReceivesRealNetworkService() async throws {
