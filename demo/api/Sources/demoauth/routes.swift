@@ -34,4 +34,16 @@ func routes(_ app: Application) throws {
     // GoogleAuthController must be registered so that POST /auth/google is handled.
     // Without it, Vapor returns 404 and Sign in with Google shows "Something went wrong."
     try app.register(collection: GoogleAuthController(configuration: authConfig))
+    // ForgotPasswordController must be registered so that POST /auth/forgot-password is handled.
+    // Without it, Vapor returns 404 and "Send reset link" silently fails — the app shows
+    // no confirmation or error because the 404 maps to .serverError in URLSessionAuthNetworkService.
+    try app.register(collection: ForgotPasswordController(configuration: authConfig))
+    // ResetPasswordController must be registered so that POST /auth/reset-password is handled.
+    // Without it, Vapor returns 404 and the user cannot complete the password reset flow —
+    // the 404 maps to .serverError in URLSessionAuthNetworkService, showing "Something went wrong."
+    try app.register(collection: ResetPasswordController(configuration: authConfig))
+    // ChangePasswordController must be registered so that POST /auth/change-password is handled.
+    // Without it, Vapor returns 404 and the in-app "Change Password" button shows
+    // "Something went wrong." even though the request reached the server.
+    try app.register(collection: ChangePasswordController(configuration: authConfig))
 }

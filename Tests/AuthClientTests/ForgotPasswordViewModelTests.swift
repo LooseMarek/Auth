@@ -21,6 +21,22 @@ final class ForgotPasswordViewModelTests: XCTestCase {
         XCTAssertTrue(navigatedBack, "backToSignIn() should invoke the onBackToSignIn callback")
     }
 
+    func testPopToLoginRoot_isInvokedOnBackToSignIn() {
+        // Given: a popToLoginRoot closure (simulating the path-reset closure from AuthSheetContainer)
+        var popToRootInvoked = false
+        let mock = MockForgotPasswordNetworkService(result: .success(()))
+        let viewModel = ForgotPasswordViewModel(
+            networkService: mock,
+            onBackToSignIn: { popToRootInvoked = true }
+        )
+
+        // When: backToSignIn() is called (e.g. user taps "Back to sign in")
+        viewModel.backToSignIn()
+
+        // Then: the closure — which in production resets navPath to NavigationPath() — is invoked
+        XCTAssertTrue(popToRootInvoked, "backToSignIn() should invoke the popToLoginRoot closure so the NavigationStack path is reset")
+    }
+
     // MARK: - Error clearing on email input
 
     func testEmailFieldChanged_clearsError() {
@@ -35,6 +51,48 @@ final class ForgotPasswordViewModelTests: XCTestCase {
         viewModel.email = "new@example.com"
 
         XCTAssertNil(viewModel.errorMessage, "Typing in the email field should clear errorMessage")
+    }
+
+    // MARK: - Test AC: send reset link
+
+    func testSendResetLink_onSuccess_showsConfirmation() async {
+        let mock = MockForgotPasswordNetworkService(result: .success(()))
+        let viewModel = ForgotPasswordViewModel(networkService: mock)
+
+        viewModel.email = "user@example.com"
+        await viewModel.submit()
+
+        XCTAssertTrue(viewModel.isSuccess, "isSuccess should be true after a successful send reset link")
+        XCTAssertNil(viewModel.errorMessage, "errorMessage should be nil on success")
+        XCTAssertFalse(viewModel.isLoading, "isLoading should be false after submit completes")
+    }
+
+    func testSendResetLink_onNetworkError_showsToast() async {
+        let mock = MockForgotPasswordNetworkService(result: .failure(AuthNetworkError.networkUnavailable))
+        let viewModel = ForgotPasswordViewModel(networkService: mock)
+
+        viewModel.email = "user@example.com"
+        await viewModel.submit()
+
+        XCTAssertNotNil(viewModel.errorMessage, "errorMessage should be set on network error")
+        XCTAssertFalse(viewModel.isSuccess, "isSuccess should remain false on error")
+        XCTAssertFalse(viewModel.isLoading, "isLoading should be false after submit completes")
+    }
+
+    func testSendResetLink_onServerError_showsErrorMessage() async {
+        // Given: the server returns HTTP 500 (e.g. email transport not configured)
+        let mock = MockForgotPasswordNetworkService(result: .failure(AuthNetworkError.serverError))
+        let viewModel = ForgotPasswordViewModel(networkService: mock)
+
+        viewModel.email = "user@example.com"
+
+        // When
+        await viewModel.submit()
+
+        // Then: the generic catch branch should surface the error to the user
+        XCTAssertNotNil(viewModel.errorMessage, "errorMessage should be set when the server returns a 500")
+        XCTAssertFalse(viewModel.isSuccess, "isSuccess should remain false on server error")
+        XCTAssertFalse(viewModel.isLoading, "isLoading should be false after submit completes")
     }
 
     // MARK: - Existing tests
@@ -88,6 +146,10 @@ private final class MockForgotPasswordNetworkService: AuthNetworkService, @unche
         }
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -121,6 +183,10 @@ private final class MockForgotPasswordNetworkService: AuthNetworkService, @unche
     }
 
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }
