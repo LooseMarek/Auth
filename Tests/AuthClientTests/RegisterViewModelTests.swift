@@ -59,8 +59,75 @@ final class RegisterViewModelTests: XCTestCase {
         }
         XCTAssertEqual(user.id, "user-1")
         XCTAssertEqual(user.email, "test@example.com")
-        XCTAssertNil(viewModel.errorMessage)
+        XCTAssertNil(viewModel.toastErrorMessage)
         XCTAssertNil(viewModel.confirmPasswordError)
+    }
+
+    // MARK: - Toast error (issue #122)
+
+    /// Verifies that a network-unavailable error sets `toastErrorMessage` (not an inline error string).
+    func testNetworkError_triggersToast() async {
+        let mock = MockRegisterNetworkService(result: .failure(AuthNetworkError.networkUnavailable))
+        let viewModel = RegisterViewModel(networkService: mock)
+        let authManager = AuthManager(configuration: AuthClientConfiguration())
+
+        viewModel.email = "test@example.com"
+        viewModel.password = "secret123"
+        viewModel.confirmPassword = "secret123"
+        await viewModel.register(authManager: authManager)
+
+        XCTAssertNotNil(viewModel.toastErrorMessage, "toastErrorMessage must be set for network errors")
+        XCTAssertEqual(viewModel.toastErrorMessage, "No internet connection. Please try again.")
+        XCTAssertNil(viewModel.emailError, "emailError must not be set for a network error")
+        XCTAssertNil(viewModel.passwordError, "passwordError must not be set for a network error")
+        XCTAssertNil(viewModel.confirmPasswordError, "confirmPasswordError must not be set for a network error")
+    }
+
+    /// Verifies that a generic server error sets `toastErrorMessage` — not an inline field error.
+    func testInlineErrorRemoved() async {
+        let mock = MockRegisterNetworkService(result: .failure(AuthNetworkError.serverError))
+        let viewModel = RegisterViewModel(networkService: mock)
+        let authManager = AuthManager(configuration: AuthClientConfiguration())
+
+        viewModel.email = "test@example.com"
+        viewModel.password = "secret123"
+        viewModel.confirmPassword = "secret123"
+        await viewModel.register(authManager: authManager)
+
+        XCTAssertNotNil(viewModel.toastErrorMessage, "toastErrorMessage must be set for server errors")
+        XCTAssertEqual(viewModel.toastErrorMessage, "Something went wrong. Please try again.")
+        XCTAssertNil(viewModel.emailError, "emailError must not be set for a server error")
+        XCTAssertNil(viewModel.passwordError, "passwordError must not be set for a server error")
+        XCTAssertNil(viewModel.confirmPasswordError, "confirmPasswordError must not be set for a server error")
+    }
+
+    /// Verifies that `dismissToast()` clears `toastErrorMessage`.
+    func testDismissToast_clearsToastErrorMessage() async {
+        let mock = MockRegisterNetworkService(result: .failure(AuthNetworkError.serverError))
+        let viewModel = RegisterViewModel(networkService: mock)
+        let authManager = AuthManager(configuration: AuthClientConfiguration())
+
+        viewModel.email = "test@example.com"
+        viewModel.password = "secret123"
+        viewModel.confirmPassword = "secret123"
+        await viewModel.register(authManager: authManager)
+
+        XCTAssertNotNil(viewModel.toastErrorMessage, "Precondition: toastErrorMessage must be set")
+
+        viewModel.dismissToast()
+
+        XCTAssertNil(viewModel.toastErrorMessage, "toastErrorMessage must be nil after dismissToast()")
+    }
+
+    /// Verifies that `initialToastErrorMessage` is surfaced via `toastErrorMessage` on init.
+    func testInitialToastErrorMessage_isExposed() {
+        let mock = MockRegisterNetworkService(result: .failure(AuthNetworkError.serverError))
+        let viewModel = RegisterViewModel(
+            networkService: mock,
+            initialToastErrorMessage: "Something went wrong. Please try again."
+        )
+
+        XCTAssertEqual(viewModel.toastErrorMessage, "Something went wrong. Please try again.")
     }
 
     func testGuestSession_register_callsUpgradeNotRegister() async {
