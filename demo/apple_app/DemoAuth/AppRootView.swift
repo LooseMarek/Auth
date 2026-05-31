@@ -43,11 +43,33 @@ struct AppRootView: View {
         )
     }
 
+    // MARK: - Window sizing (macOS)
+
+    /// Minimum window width (pt).
+    ///
+    /// The auth sheet panel is 440pt wide. Adding 40pt (20pt per side) ensures the
+    /// floating panel is never clipped by the host window edge.
+    #if os(macOS)
+    static let minimumWindowWidth: CGFloat = 480
+    #endif
+
+    /// Minimum window height (pt).
+    ///
+    /// The auth sheet panel has a minimum height of 540pt. Adding 40pt accounts for
+    /// the macOS title bar (~28pt) and a small bottom margin, ensuring the full
+    /// `LoginView` (including the register link) is visible without scrolling.
+    #if os(macOS)
+    static let minimumWindowHeight: CGFloat = 580
+    #endif
+
     // MARK: - Body
 
     var body: some View {
         content
             .authSheet(manager: authManager)
+#if os(macOS)
+            .frame(minWidth: Self.minimumWindowWidth, minHeight: Self.minimumWindowHeight)
+#endif
             .task {
                 // Attempt to restore a persisted session (email or guest) before
                 // falling back to showing the auth flow.
