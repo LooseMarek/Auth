@@ -152,6 +152,42 @@ final class RegisterViewSnapshotTests: XCTestCase {
         ), colorScheme: .dark)
     }
 
+    // MARK: - Toast error state (issue #122)
+
+    /// Verifies the default Register view layout has no inline server error row —
+    /// only field-level inline errors (email, password, confirm-password) remain.
+    func testRegisterView_default() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService()
+        ))
+    }
+
+    func testRegisterView_default_dark() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    /// Verifies the toast error banner appears at the bottom of the screen for
+    /// non-validation errors (e.g. network/server errors during registration).
+    func testRegisterView_toastError() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService(),
+            initialToastErrorMessage: "Something went wrong. Please try again."
+        ))
+    }
+
+    func testRegisterView_toastError_dark() {
+        snapshot(RegisterView(
+            authManager: .make(),
+            networkService: NoOpRegisterNetworkService(),
+            initialToastErrorMessage: "Something went wrong. Please try again."
+        ), colorScheme: .dark)
+    }
+
     // MARK: - Prompt spacing (issue #101)
 
     /// Verifies the login prompt row renders with correct visual spacing between the
