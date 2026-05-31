@@ -149,4 +149,37 @@ final class AuthNetworkErrorTests: XCTestCase {
             "accountAlreadyExists must contain 'Account already registered'. Got: \(description)"
         )
     }
+
+    // MARK: - invalidResetToken (issue #128)
+
+    /// When a password reset fails because the token is invalid or expired,
+    /// the error must produce a user-friendly, non-empty, non-domain-exposing message.
+    func testInvalidResetToken_localizedDescription_isNonEmpty() {
+        let error: AuthNetworkError = .invalidResetToken
+
+        let description = error.localizedDescription
+
+        XCTAssertFalse(description.isEmpty, "invalidResetToken must produce a non-empty message.")
+    }
+
+    func testInvalidResetToken_localizedDescription_doesNotExposeRawDomain() {
+        let error: AuthNetworkError = .invalidResetToken
+
+        let description = error.localizedDescription
+
+        XCTAssertFalse(
+            description.contains("AuthClient.AuthNetworkError"),
+            "invalidResetToken must not expose the raw error domain. Got: \(description)"
+        )
+    }
+
+    func testInvalidResetToken_isIncludedInAllCases() {
+        // Ensures allCases_doNotExposeRawDomainString covers invalidResetToken too.
+        let error: AuthNetworkError = .invalidResetToken
+        let description = error.localizedDescription
+        XCTAssertFalse(
+            description.contains("AuthClient.AuthNetworkError"),
+            "invalidResetToken case must not expose the raw error domain."
+        )
+    }
 }

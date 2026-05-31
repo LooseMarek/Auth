@@ -12,30 +12,37 @@ private let snapshotArch = "x86_64"
 #endif
 
 @MainActor
-final class ForgotPasswordViewSnapshotTests: XCTestCase {
+final class ResetPasswordViewSnapshotTests: XCTestCase {
 
     // MARK: - Light mode
 
     func testDefaultState() {
-        snapshot(ForgotPasswordView(
+        snapshot(ResetPasswordView(
             authManager: .make(),
-            networkService: NoOpForgotPasswordNetworkService()
+            networkService: NoOpResetPasswordNetworkService()
+        ))
+    }
+
+    func testLoadingState() {
+        snapshot(ResetPasswordView(
+            authManager: .make(),
+            networkService: NoOpResetPasswordNetworkService(),
+            initialIsLoading: true
+        ))
+    }
+
+    func testErrorState() {
+        snapshot(ResetPasswordView(
+            authManager: .make(),
+            networkService: NoOpResetPasswordNetworkService(),
+            initialErrorMessage: "Invalid or expired reset token. Please request a new one."
         ))
     }
 
     func testSuccessState() {
-        snapshot(ForgotPasswordView(
+        snapshot(ResetPasswordView(
             authManager: .make(),
-            networkService: NoOpForgotPasswordNetworkService(),
-            initialIsSuccess: true
-        ))
-    }
-
-    /// Test AC-required name: verifies the success confirmation renders correctly.
-    func testForgotPasswordView_successState() {
-        snapshot(ForgotPasswordView(
-            authManager: .make(),
-            networkService: NoOpForgotPasswordNetworkService(),
+            networkService: NoOpResetPasswordNetworkService(),
             initialIsSuccess: true
         ))
     }
@@ -43,59 +50,33 @@ final class ForgotPasswordViewSnapshotTests: XCTestCase {
     // MARK: - Dark mode
 
     func testDefaultState_dark() {
-        snapshot(ForgotPasswordView(
+        snapshot(ResetPasswordView(
             authManager: .make(),
-            networkService: NoOpForgotPasswordNetworkService()
+            networkService: NoOpResetPasswordNetworkService()
+        ), colorScheme: .dark)
+    }
+
+    func testLoadingState_dark() {
+        snapshot(ResetPasswordView(
+            authManager: .make(),
+            networkService: NoOpResetPasswordNetworkService(),
+            initialIsLoading: true
+        ), colorScheme: .dark)
+    }
+
+    func testErrorState_dark() {
+        snapshot(ResetPasswordView(
+            authManager: .make(),
+            networkService: NoOpResetPasswordNetworkService(),
+            initialErrorMessage: "Invalid or expired reset token. Please request a new one."
         ), colorScheme: .dark)
     }
 
     func testSuccessState_dark() {
-        snapshot(ForgotPasswordView(
+        snapshot(ResetPasswordView(
             authManager: .make(),
-            networkService: NoOpForgotPasswordNetworkService(),
+            networkService: NoOpResetPasswordNetworkService(),
             initialIsSuccess: true
-        ), colorScheme: .dark)
-    }
-
-    // MARK: - Custom theming
-
-    /// Snapshot with a vivid orange-red primary color — verifies submit button and back links
-    /// reflect the custom brand color via AuthTheme.
-    func testCustomPrimaryColor() {
-        snapshot(ForgotPasswordView(
-            authManager: AuthManager(configuration: AuthClientConfiguration(
-                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
-            )),
-            networkService: NoOpForgotPasswordNetworkService()
-        ))
-    }
-
-    func testCustomPrimaryColor_dark() {
-        snapshot(ForgotPasswordView(
-            authManager: AuthManager(configuration: AuthClientConfiguration(
-                primaryColor: Color(red: 0.8, green: 0.2, blue: 0.0)
-            )),
-            networkService: NoOpForgotPasswordNetworkService()
-        ), colorScheme: .dark)
-    }
-
-    /// Snapshot with a custom rounded system font applied — verifies all text uses the
-    /// configured font when AuthClientConfiguration.font is non-nil.
-    func testCustomFont() {
-        snapshot(ForgotPasswordView(
-            authManager: AuthManager(configuration: AuthClientConfiguration(
-                font: .system(.body, design: .rounded)
-            )),
-            networkService: NoOpForgotPasswordNetworkService()
-        ))
-    }
-
-    func testCustomFont_dark() {
-        snapshot(ForgotPasswordView(
-            authManager: AuthManager(configuration: AuthClientConfiguration(
-                font: .system(.body, design: .rounded)
-            )),
-            networkService: NoOpForgotPasswordNetworkService()
         ), colorScheme: .dark)
     }
 
@@ -136,7 +117,7 @@ final class ForgotPasswordViewSnapshotTests: XCTestCase {
 
 // MARK: - Test doubles
 
-private struct NoOpForgotPasswordNetworkService: AuthNetworkService {
+private struct NoOpResetPasswordNetworkService: AuthNetworkService {
     func login(email: String, password: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }

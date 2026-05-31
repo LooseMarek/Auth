@@ -13,5 +13,6 @@ extension LogoutRequest: Content {}
 extension RefreshTokenRequest: Content {}
 extension ForgotPasswordRequest: Content {}
 extension ResetPasswordRequest: Content {}
+extension ChangePasswordRequest: Content {}
 extension SocialAuthRequest: Content {}
 extension AuthResponse: Content {}

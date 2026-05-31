@@ -68,12 +68,37 @@ public struct ForgotPasswordController: RouteCollection, Sendable {
             try await resetToken.save(on: req.db)
 
             // Deliver the reset email via the injected transport.
-            let subject = "Reset your password"
-            let body = "Use the following token to reset your password (valid for 1 hour): \(rawToken)"
-            try await emailTransport(userEmail, subject, body)
+            let (subject, emailBody) = makeEmailContent(token: rawToken)
+            try await emailTransport(userEmail, subject, emailBody)
         }
 
         // Always 200 — prevents user enumeration.
         return Response(status: .ok)
+    }
+
+    // MARK: - Email content generation
+
+    /// Returns the subject and body for the password-reset email.
+    ///
+    /// Calls `configuration.passwordResetEmailContent` when set, allowing the host
+    /// app to localise or brand the email. Falls back to the built-in English template
+    /// when the closure is `nil`.
+    ///
+    /// - Parameter token: The one-time reset token to embed in the email body.
+    /// - Returns: A tuple of `(subject:, body:)` ready to pass to the email transport.
+    func makeEmailContent(token: String) -> (subject: String, body: String) {
+        if let customContent = configuration.passwordResetEmailContent {
+            return customContent(token)
+        }
+        let subject = "Reset your password"
+        let body = """
+            Use the following token to reset your password in the app (valid for 1 hour):
+
+            \(token)
+
+            Open the app, tap 'Forgot password?', wait for this email, then tap \
+            'Enter reset token'. Enter this token and choose a new password.
+            """
+        return (subject: subject, body: body)
     }
 }

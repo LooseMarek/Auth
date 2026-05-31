@@ -182,3 +182,11 @@ with the success title string on transition.
 | `radius.md` | Primary button |
 | `shadow.card` | Success card lift |
 | `dur.reveal` / `ease.emphasis` | Success reveal |
+
+---
+
+## Next Screen in Flow
+
+After the success state, the user taps "Enter reset token" (a `NavigationLink`) which
+pushes `ResetPasswordView` onto the same `NavigationStack`. See
+[reset-password-view.md](reset-password-view.md) for that screen's full specification.

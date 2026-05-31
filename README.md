@@ -150,7 +150,16 @@ struct ProfileView: View {
 ```
 
 The `.authSheet(manager:)` modifier observes `isPresentingAuthFlow` and presents the
-full auth UI — login, registration, social sign-in, and guest access — automatically.
+full auth UI — login, registration, social sign-in, guest access, and the complete
+forgot-password flow — automatically.
+
+> **Forgot-password flow** — `ForgotPasswordView` collects the user's email and
+> triggers a reset email (`POST /auth/forgot-password`). After the email is sent,
+> the user taps "Enter reset token" to navigate to `ResetPasswordView`, where they
+> enter the one-time token from the email together with a new password
+> (`POST /auth/reset-password`). On success, a confirmation card prompts the user to
+> log in. Both views are pushed automatically by the `AuthSheetContainer` navigation
+> stack — no host-app code is needed.
 
 ### 3. React to auth state changes
 
@@ -301,6 +310,101 @@ let config = AuthClientConfiguration(
 | `emailTransport` | `(@Sendable (String, String, String) async throws -> Void)?` | `nil` | Closure called by `forgot-password` to deliver reset emails. Parameters: `(recipient, subject, body)`. `nil` causes a runtime HTTP 500 on that route. |
 | `appleJWKS` | `JWKS?` | `nil` | Apple's public JWKS for verifying Sign in with Apple tokens. Fetch from `https://appleid.apple.com/auth/keys`. `nil` causes a runtime HTTP 500 on `POST /auth/apple`. |
 | `googleJWKS` | `JWKS?` | `nil` | Google's public JWKS for verifying Google Sign-In tokens. Fetch from `https://www.googleapis.com/oauth2/v3/certs`. `nil` causes a runtime HTTP 500 on `POST /auth/google`. |
+
+---
+
+## Configuring Email Transport
+
+The `emailTransport` closure is how `AuthServer` delivers password-reset emails. You
+supply the implementation — the package just calls it with three strings:
+
+```swift
+// Signature:
+// (recipient: String, subject: String, body: String) async throws -> Void
+```
+
+**Where to configure it:** open `demo/api/Sources/demoauth/configure.swift` and replace
+the `emailTransport` variable with the snippet for your chosen provider.
+
+### Development — log to the Vapor console
+
+During local development you can log the reset token to the server terminal instead of
+sending a real email. No environment variables needed. Capture `app.logger` before
+creating the closure (the closure itself only receives the three strings):
+
+```swift
+let logger = app.logger
+emailTransport = { recipient, subject, body in
+    logger.notice("[EMAIL] To: \(recipient) | Subject: \(subject) | Body: \(body)")
+}
+```
+
+The token appears in Vapor's structured log stream alongside other request logs.
+
+### Production — Resend HTTP API
+
+The demo uses [Resend](https://resend.com) — a zero-dependency option that requires
+only a `URLSession` call. Set two environment variables before starting the server:
+
+| Variable | Description |
+|----------|-------------|
+| `RESEND_API_KEY` | Your Resend API key (starts with `re_`) |
+| `RESEND_FROM_EMAIL` | Sender address (e.g. `noreply@yourdomain.com`) |
+
+```swift
+// Reads RESEND_API_KEY and RESEND_FROM_EMAIL from the environment.
+// If RESEND_API_KEY is absent or empty, the console fallback is used automatically.
+if let resendAPIKey = Environment.get("RESEND_API_KEY"), !resendAPIKey.isEmpty {
+    let fromEmail = Environment.get("RESEND_FROM_EMAIL") ?? "onboarding@resend.dev"
+    let resendTransport = makeResendEmailTransport(apiKey: resendAPIKey, fromEmail: fromEmail)
+    emailTransport = { recipient, subject, body in
+        logger.notice("[EMAIL] To: \(recipient) | Subject: \(subject) | Body: \(body)")
+        try await resendTransport(recipient, subject, body)
+    }
+}
+```
+
+The transport also logs every send to the Vapor console, so you always see what was
+delivered regardless of which provider is active.
+
+> **Free-tier note:** When `RESEND_FROM_EMAIL` is `onboarding@resend.dev` (Resend's
+> built-in test address), Resend only delivers to the email address registered with
+> your Resend account. This is sufficient for local demos — copy the reset token
+> from your inbox. To send to **any** address, verify a custom domain in the Resend
+> dashboard and set `RESEND_FROM_EMAIL` to an address on that domain.
+
+The same `emailTransport` pattern works for any HTTP-based transactional email
+provider (SendGrid, Postmark, AWS SES, etc.) — the closure just needs to deliver
+the email, and the host app owns the implementation.
+
+### Customising the email subject and body
+
+By default, `ForgotPasswordController` uses a built-in English template for the
+password-reset email. To localise or brand the email, set the optional
+`passwordResetEmailContent` closure on `AuthServerConfiguration` after creating it:
+
+```swift
+var authConfig = AuthServerConfiguration(
+    jwtSigningSecret: jwtSecret,
+    emailTransport: emailTransport
+)
+
+authConfig.passwordResetEmailContent = { token in
+    (
+        subject: "Reset your MyApp password",
+        body: """
+            Use the following token to reset your password in the app (valid for 1 hour):
+
+            \(token)
+
+            Open the app, go to Forgot Password, and enter this token.
+            """
+    )
+}
+```
+
+When `passwordResetEmailContent` is `nil` (the default), the built-in English subject
+`"Reset your password"` and a standard token-delivery body are used.
 
 ---
 
