@@ -7,6 +7,9 @@ struct DemoAuthCustomApp: App {
         WindowGroup {
             AppRootView(configuration: DemoAuthCustomApp.makeConfiguration())
         }
+        #if os(macOS)
+        .windowResizability(.contentSize)
+        #endif
     }
 
     /// Builds the custom `AuthClientConfiguration` for the `DemoAuthCustom` target.
