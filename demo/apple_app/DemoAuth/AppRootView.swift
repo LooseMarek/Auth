@@ -14,12 +14,18 @@ struct AppRootView: View {
 
     /// Base URL for the demo Auth API server (local development).
     ///
-    /// Simulators run on the same host as the Mac, so `localhost` works.
-    /// Real devices are on the LAN and must reach the Mac by its IP address.
+    /// Simulators share the Mac's network stack, so `localhost` resolves directly.
+    /// Real devices on the LAN connect via the Mac's mDNS hostname, which Bonjour
+    /// advertises automatically — no DHCP or router configuration required.
+    ///
+    /// See `DemoConfiguration` for hostname update instructions.
     #if targetEnvironment(simulator)
-    static let demoAPIBaseURL = "http://localhost:8080"
+    static let demoAPIBaseURL = DemoConfiguration.fallbackBaseURL
     #else
-    static let demoAPIBaseURL = "http://192.168.68.58:8080"
+    // mDNS hostname — resolves automatically on LAN.
+    // Update DemoConfiguration.defaultBaseURL if Mac hostname changes
+    // (System Settings > General > Sharing).
+    static let demoAPIBaseURL = DemoConfiguration.defaultBaseURL
     #endif
 
     // MARK: - State

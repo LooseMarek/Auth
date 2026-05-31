@@ -290,6 +290,25 @@ The `AuthManager` checks for `GuestTokenStore` conformance at runtime via `as? (
 
 **Test isolation:** `AuthManager.init` accepts an injectable `userDefaults: UserDefaults` parameter (defaults to `.standard`). Tests that exercise logout/restoreSession must pass `UserDefaults(suiteName: UUID().uuidString)!` to avoid cross-test interference. The `makeFreshUserDefaults()` helper in `AuthManagerTests.swift` provides this.
 
+### Demo app — mDNS base URL and DemoConfiguration
+
+The demo Apple app connects to the local Vapor server via a base URL defined in
+`DemoConfiguration` (`demo/apple_app/DemoAuth/DemoConfiguration.swift`):
+
+- **Real devices** use `DemoConfiguration.defaultBaseURL` = `http://ML-MacBook-Air-M4.local:8080`
+  — the Mac's mDNS (Bonjour) hostname, which resolves automatically on the LAN without
+  any DHCP or router configuration.
+- **Simulator** uses `DemoConfiguration.fallbackBaseURL` = `http://localhost:8080`
+  — the Simulator shares the Mac's network stack so `localhost` works directly.
+
+`AppRootView.demoAPIBaseURL` delegates to `DemoConfiguration` via `#if targetEnvironment(simulator)`.
+
+**Updating the hostname:** If the Mac's Local Hostname changes (System Settings → General
+→ Sharing → Local Hostname), update `DemoConfiguration.defaultBaseURL` to match the new
+`.local` value. The hostname is `<ComputerName>.local` with spaces replaced by hyphens.
+
+---
+
 ### Demo API — resetting the SQLite database during development
 
 The demo API stores its SQLite database at `demo/api/db.sqlite`. During development,
