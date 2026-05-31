@@ -58,8 +58,11 @@ final class LocalisationTests: XCTestCase {
         "auth.error.required",
         "auth.error.email_format",
         "auth.error.network",
+        "auth.error.server_unreachable",
         "auth.error.server",
         "auth.social.error.token_invalid",
+        // Toast
+        "auth.toast.dismiss.hint",
     ]
 
     // MARK: - Tests
@@ -76,6 +79,19 @@ final class LocalisationTests: XCTestCase {
             XCTAssertNotEqual(
                 value, key,
                 "Key '\(key)' was not found in Localizable.strings — resolved to the key itself."
+            )
+        }
+    }
+
+    /// Verifies that all keys in the complete key inventory resolve to non-key values
+    /// when looked up via `bundle: .module`. This is the canonical regression guard against
+    /// keys being added to views but omitted from Localizable.strings.
+    func testAllKeysResolveInModuleBundle() {
+        for key in allExpectedKeys {
+            let value = String(localized: String.LocalizationValue(key), bundle: bundle)
+            XCTAssertNotEqual(
+                value, key,
+                "Key '\(key)' resolved to the bare key — it is missing from Localizable.strings or the module bundle is not accessible."
             )
         }
     }
