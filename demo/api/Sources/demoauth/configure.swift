@@ -68,7 +68,7 @@ public func configure(
         }
     }
 
-    var authConfig = AuthServerConfiguration(
+    let authConfig = AuthServerConfiguration(
         jwtSigningSecret: jwtSecret,
         emailTransport: emailTransport,
         appleJWKS: appleJWKS,
@@ -92,8 +92,6 @@ public func configure(
     app.migrations.add(CreateUser())
     app.migrations.add(CreateRefreshToken())
     app.migrations.add(CreatePasswordResetToken())
-    app.migrations.add(AddAuthProviderToUser())
-    app.migrations.add(MakeUserEmailOptional())
 
     try await app.autoMigrate()
 

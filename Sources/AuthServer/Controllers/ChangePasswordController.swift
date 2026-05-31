@@ -91,7 +91,7 @@ public struct ChangePasswordController: RouteCollection, Sendable {
 
         // Return 200 with a simple confirmation body.
         let responseJSON = #"{"message":"Password changed"}"#
-        var response = Response(status: .ok)
+        let response = Response(status: .ok)
         response.headers.contentType = .json
         response.body = .init(string: responseJSON)
         return response
