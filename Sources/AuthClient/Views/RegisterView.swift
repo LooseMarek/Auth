@@ -32,6 +32,8 @@ public struct RegisterView: View {
     ///   - prefilledPassword: Optional password to pre-populate the password field.
     ///   - prefilledConfirmPassword: Optional value to pre-populate the confirm-password field.
     ///   - initialConfirmPasswordError: Optional mismatch error to display immediately on appear.
+    ///   - initialToastErrorMessage: Optional toast error message to display immediately on appear
+    ///     (shown at the bottom of the screen — use for network/server errors).
     ///   - initialIsLoading: When `true`, the register button shows a loading indicator on appear.
     public init(
         authManager: AuthManager,
@@ -40,6 +42,7 @@ public struct RegisterView: View {
         prefilledPassword: String = "",
         prefilledConfirmPassword: String = "",
         initialConfirmPasswordError: String? = nil,
+        initialToastErrorMessage: String? = nil,
         initialIsLoading: Bool = false
     ) {
         self.authManager = authManager
@@ -50,6 +53,7 @@ public struct RegisterView: View {
             initialPassword: prefilledPassword,
             initialConfirmPassword: prefilledConfirmPassword,
             initialConfirmPasswordError: initialConfirmPasswordError,
+            initialToastErrorMessage: initialToastErrorMessage,
             initialIsLoading: initialIsLoading
         ))
     }
@@ -69,30 +73,39 @@ public struct RegisterView: View {
 
     @ViewBuilder
     private var content: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                titleSection
-                Spacer().frame(height: 24)
-                emailFieldSection
-                Spacer().frame(height: 14)
-                passwordFieldSection
-                Spacer().frame(height: 14)
-                confirmPasswordFieldSection
-                Spacer().frame(height: 24)
-                registerButton
-                if let message = viewModel.errorMessage {
-                    serverErrorRow(message: message)
+        ZStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    titleSection
+                    Spacer().frame(height: 24)
+                    emailFieldSection
+                    Spacer().frame(height: 14)
+                    passwordFieldSection
+                    Spacer().frame(height: 14)
+                    confirmPasswordFieldSection
+                    Spacer().frame(height: 24)
+                    registerButton
+                    Spacer().frame(height: 32)
+                    loginLink
+                    Spacer().frame(height: 32)
                 }
-                Spacer().frame(height: 32)
-                loginLink
-                Spacer().frame(height: 32)
+                .padding(.horizontal, 24)
+                // Apply custom base font when configured; child modifiers override as needed.
+                .font(theme.font)
+                .allowsHitTesting(!viewModel.isLoading)
             }
-            .padding(.horizontal, 24)
-            // Apply custom base font when configured; child modifiers override as needed.
-            .font(theme.font)
-            .allowsHitTesting(!viewModel.isLoading)
+            .background(theme.backgroundColor)
+
+            // Toast overlay for non-validation errors (network, server).
+            // Pinned to the bottom of the screen; tapping it dismisses the error.
+            if viewModel.toastErrorMessage != nil {
+                toastOverlay
+            }
         }
-        .background(theme.backgroundColor)
+        // Fill all space proposed by NavigationStack so no gaps appear below content.
+        // ignoresSafeArea() extends the background behind the Dynamic Island and home indicator.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(theme.backgroundColor.ignoresSafeArea())
     }
 
     // MARK: - Subviews
@@ -175,18 +188,44 @@ public struct RegisterView: View {
         .accessibilityAddTraits(.updatesFrequently)
     }
 
-    @ViewBuilder
-    private func serverErrorRow(message: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: "exclamationmark.circle.fill")
-                .font(.system(size: 13))
-                .foregroundStyle(theme.errorColor)
-                .accessibilityHidden(true)
-            Text(message)
-                .font(.footnote)
-                .foregroundStyle(theme.errorColor)
+    /// Toast banner shown at the bottom of the screen for non-validation errors.
+    ///
+    /// Displays a dismissible banner for network and server errors.
+    /// Tapping the banner calls `viewModel.dismissToast()`.
+    private var toastOverlay: some View {
+        VStack {
+            Spacer()
+            if let message = viewModel.toastErrorMessage {
+                Button {
+                    viewModel.dismissToast()
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.white)
+                            .accessibilityHidden(true)
+                        Text(message)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.leading)
+                        Spacer()
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.8))
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .background(theme.errorColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(message)
+                .accessibilityHint(String(localized: "auth.toast.dismiss.hint", bundle: bundle))
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
+            }
         }
-        .padding(.top, 8)
         .accessibilityAddTraits(.updatesFrequently)
     }
 
