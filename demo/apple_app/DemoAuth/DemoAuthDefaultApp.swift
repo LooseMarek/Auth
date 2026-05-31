@@ -6,5 +6,8 @@ struct DemoAuthDefaultApp: App {
         WindowGroup {
             AppRootView()
         }
+        #if os(macOS)
+        .windowResizability(.contentSize)
+        #endif
     }
 }
