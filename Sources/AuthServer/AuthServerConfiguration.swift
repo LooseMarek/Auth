@@ -19,6 +19,16 @@ public struct AuthServerConfiguration: Sendable {
         public typealias Value = AuthServerConfiguration
     }
 
+    // MARK: - Development default
+
+    /// Insecure default signing secret used by the demo API when `JWT_SIGNING_SECRET`
+    /// is not set in the environment.
+    ///
+    /// - Important: This value is intentionally hardcoded for development convenience.
+    ///   **Never use it in production.** Set `JWT_SIGNING_SECRET` to a strong random
+    ///   secret before deploying.
+    public static let developmentDefaultJWTSigningSecret = "demo-secret-change-in-production"
+
     // MARK: - Properties
 
     /// The secret used to sign and verify HMAC-SHA256 JWTs.
