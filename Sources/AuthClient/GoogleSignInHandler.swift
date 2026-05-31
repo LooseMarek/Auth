@@ -117,6 +117,8 @@ public final class GoogleSignInHandler {
             authManager.signIn(response: response)
         } catch AuthNetworkError.networkUnavailable {
             viewModel.setGoogleSignInError(.networkUnavailable)
+        } catch AuthNetworkError.accountAlreadyExists {
+            viewModel.setGoogleSignInError(.accountAlreadyExists)
         } catch {
             viewModel.setGoogleSignInError(.serverError)
         }

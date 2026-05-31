@@ -436,4 +436,45 @@ final class URLSessionAuthNetworkServiceTests: XCTestCase {
         XCTAssertEqual(URLSessionAuthNetworkServiceTests.lastCapturedRequest?.httpMethod, "POST")
         XCTAssertEqual(URLSessionAuthNetworkServiceTests.lastCapturedRequest?.url?.path, "/auth/guest")
     }
+
+    // MARK: - upgrade 409 mapping (issue #127)
+
+    /// A 409 response from POST /auth/upgrade must map to `.accountAlreadyExists`,
+    /// not the generic `.emailTaken` used by registration endpoints.
+    func testMap409OnUpgrade_returnsAccountAlreadyExists() async throws {
+        // Given: server returns 409 on the upgrade endpoint
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 409), nil)
+        }
+
+        // When / Then
+        do {
+            _ = try await sut.upgradeGuestWithEmail(
+                guestUUID: UUID(),
+                accessToken: "tok",
+                email: "existing@example.com",
+                password: "pass"
+            )
+            XCTFail("Expected .accountAlreadyExists error")
+        } catch AuthNetworkError.accountAlreadyExists {
+            // expected
+        }
+    }
+
+    /// Regression guard: a 409 from POST /auth/register must still map to `.emailTaken`
+    /// (the URL-aware 409 mapping must not break existing registration behaviour).
+    func testMap409OnRegister_stillReturnsEmailTaken() async throws {
+        // Given
+        MockURLProtocolForNetworkService.requestHandler = { request in
+            (makeHTTPResponse(url: request.url!, status: 409), nil)
+        }
+
+        // When / Then
+        do {
+            _ = try await sut.register(email: "existing@example.com", password: "pass")
+            XCTFail("Expected .emailTaken error")
+        } catch AuthNetworkError.emailTaken {
+            // expected
+        }
+    }
 }

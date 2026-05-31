@@ -38,6 +38,7 @@ final class AuthNetworkErrorTests: XCTestCase {
             .networkUnavailable,
             .serverUnreachable,
             .serverError,
+            .accountAlreadyExists,
         ]
 
         for error in cases {
@@ -126,6 +127,26 @@ final class AuthNetworkErrorTests: XCTestCase {
         XCTAssertFalse(
             description.contains("No internet connection"),
             "serverUnreachable (timeout) must NOT contain 'No internet connection'. Got: \(description)"
+        )
+    }
+
+    // MARK: - accountAlreadyExists (issue #127)
+
+    /// When a guest upgrade fails because the email/social account is already registered,
+    /// the error must produce a user-friendly "Account already registered" message.
+    func testAccountAlreadyExists_localizedDescription() {
+        let error: AuthNetworkError = .accountAlreadyExists
+
+        let description = error.localizedDescription
+
+        XCTAssertFalse(description.isEmpty, "accountAlreadyExists must produce a non-empty message.")
+        XCTAssertFalse(
+            description.contains("AuthClient.AuthNetworkError"),
+            "accountAlreadyExists must not expose the raw error domain. Got: \(description)"
+        )
+        XCTAssertTrue(
+            description.contains("Account already registered"),
+            "accountAlreadyExists must contain 'Account already registered'. Got: \(description)"
         )
     }
 }

@@ -7,6 +7,9 @@ public enum AuthNetworkError: Error, LocalizedError, Sendable {
     case invalidCredentials
     /// Registration failed because the email address is already associated with an account.
     case emailTaken
+    /// Upgrade failed because the email address or social account is already registered
+    /// to an existing account. Account merging is not supported.
+    case accountAlreadyExists
     /// The device has no internet connection (e.g. airplane mode, `NSURLErrorNotConnectedToInternet`).
     case networkUnavailable
     /// The device has internet but the API server is unreachable — connection refused,
@@ -26,6 +29,8 @@ public enum AuthNetworkError: Error, LocalizedError, Sendable {
             return String(localized: "auth.login.error.invalid_credentials", bundle: .module)
         case .emailTaken:
             return String(localized: "auth.register.error.email_taken", bundle: .module)
+        case .accountAlreadyExists:
+            return String(localized: "auth.upgrade.error.account_already_exists", bundle: .module)
         case .networkUnavailable:
             return String(localized: "auth.error.network", bundle: .module)
         case .serverUnreachable:

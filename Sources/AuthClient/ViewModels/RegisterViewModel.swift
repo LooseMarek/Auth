@@ -116,6 +116,9 @@ final class RegisterViewModel {
         } catch AuthNetworkError.emailTaken {
             // Field-level validation error — shown inline below the email field.
             emailError = localizedString("auth.register.error.email_taken")
+        } catch AuthNetworkError.accountAlreadyExists {
+            // Guest upgrade: the email is already tied to a full account.
+            emailError = localizedString("auth.upgrade.error.account_already_exists")
         } catch AuthNetworkError.networkUnavailable {
             // Non-validation error — shown as a toast.
             toastErrorMessage = localizedString("auth.error.network")

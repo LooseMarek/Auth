@@ -86,6 +86,9 @@ final class LoginViewModel {
         } catch AuthNetworkError.invalidCredentials {
             // Validation error — shown inline below the password field.
             inlineErrorMessage = localizedString("auth.login.error.invalid_credentials")
+        } catch AuthNetworkError.accountAlreadyExists {
+            // Guest upgrade via login form: email is already tied to a full account.
+            inlineErrorMessage = localizedString("auth.upgrade.error.account_already_exists")
         } catch AuthNetworkError.networkUnavailable {
             // Non-validation error — shown as a toast.
             toastErrorMessage = localizedString("auth.error.network")
@@ -125,6 +128,8 @@ final class LoginViewModel {
         switch error {
         case .networkUnavailable:
             toastErrorMessage = localizedString("auth.error.network")
+        case .accountAlreadyExists:
+            toastErrorMessage = localizedString("auth.upgrade.error.account_already_exists")
         default:
             toastErrorMessage = localizedString("auth.error.server")
         }
@@ -137,6 +142,8 @@ final class LoginViewModel {
         switch error {
         case .networkUnavailable:
             toastErrorMessage = localizedString("auth.error.network")
+        case .accountAlreadyExists:
+            toastErrorMessage = localizedString("auth.upgrade.error.account_already_exists")
         default:
             toastErrorMessage = localizedString("auth.error.server")
         }
