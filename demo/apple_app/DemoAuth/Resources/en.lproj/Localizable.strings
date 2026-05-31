@@ -28,8 +28,11 @@
 /* Forgot password link */
 "auth.login.link.forgot_password" = "Can't remember your password?";
 
-/* Register navigation link */
-"auth.login.link.register" = "New here? Create an account";
+/* Register navigation link — prompt text */
+"auth.login.register_prompt" = "New here?";
+
+/* Register navigation link — action label */
+"auth.login.register_link" = "Create an account";
 
 /* Guest access button */
 "auth.login.button.guest" = "Just browsing";
@@ -66,8 +69,11 @@
 /* Register submit button (guest upgrade) */
 "auth.register.upgrade.button.submit" = "Save my account";
 
-/* Login navigation link */
-"auth.register.link.login" = "Already got an account? Sign in";
+/* Login navigation link — prompt text */
+"auth.register.login_prompt" = "Already got an account?";
+
+/* Login navigation link — action label */
+"auth.register.login_link" = "Sign in";
 
 /* Error: password too short */
 "auth.register.error.password_too_short" = "Your password needs at least 8 characters.";
@@ -137,8 +143,16 @@
 /* Error: no internet connection */
 "auth.error.network" = "No connection found. Check your internet and try again.";
 
+/* Error: server is unreachable (device has internet but server is down or connection refused) */
+"auth.error.server_unreachable" = "Can't reach our servers right now. Please try again later.";
+
 /* Error: generic server error */
 "auth.error.server" = "Something went wrong on our end. Please try again.";
 
 /* Error: social sign-in token is invalid */
 "auth.social.error.token_invalid" = "Sign-in didn't work. Please try again.";
+
+// MARK: - Toast
+
+/* Accessibility hint for the dismissible toast error banner */
+"auth.toast.dismiss.hint" = "Tap to dismiss";

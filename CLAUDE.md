@@ -182,6 +182,24 @@ Key convention: `auth.{screen}.{element}` (e.g. `auth.login.title`, `auth.regist
 3. Run each Fastlane lane a second time — first run records, second run verifies.
 4. Do **not** use `swift test` to record macOS baselines — it renders at display backing scale, producing files that mismatch Fastlane-recorded CI baselines.
 
+### DemoAuthCustom — keeping Localizable.strings in sync
+
+`DemoAuthCustom` supplies its own `Localizable.strings` files (English and Polish) at
+`demo/apple_app/DemoAuth/Resources/en.lproj/` and `.../pl.lproj/`. When the host-app
+bundle provides a `Localizable.strings`, iOS/macOS looks up keys there **first** and
+**never falls back to the module bundle** for keys that are absent — it returns the raw
+key string instead.
+
+**Rule:** Every time a new localisation key is added to
+`Sources/AuthClient/Resources/en.lproj/Localizable.strings`, the same key **must also
+be added** to both `demo/apple_app/DemoAuth/Resources/en.lproj/Localizable.strings`
+and `.../pl.lproj/Localizable.strings`. Use the English value as a placeholder in
+`pl.lproj` if a Polish translation is not yet available.
+
+The `testAllKeysResolveInModuleBundle` test in `LocalisationTests` guards the module
+bundle. There is currently no automated test for the demo-target files — visual
+inspection or running `DemoAuthCustom` is required to confirm keys resolve there.
+
 ### AuthServer testing constraint
 
 `AuthServer` does **not** depend on any Fluent driver (`fluent-sqlite-driver`, `fluent-postgres-driver`, etc.) — the host app provides the driver (see ADR-004). Therefore `AuthServerTests` must **never** add a Fluent driver as a test dependency and must **never** import `FluentSQLiteDriver` or any other driver module.
