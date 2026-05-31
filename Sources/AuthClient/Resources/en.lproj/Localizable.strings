@@ -106,6 +106,44 @@
 /* Success state — card body */
 "auth.forgot.success.body" = "We've sent a password reset link to your email. It may take a few minutes to arrive.";
 
+/* Success state — enter reset token button */
+"auth.forgot.success.button.enter_token" = "Enter reset token";
+
+// MARK: - ResetPasswordView
+
+/* Screen title */
+"auth.reset.title" = "Reset password";
+
+/* Screen subtitle */
+"auth.reset.subtitle" = "Enter the token from your email and choose a new password.";
+
+/* Reset token text field placeholder */
+"auth.reset.field.token.placeholder" = "Reset token";
+
+/* New password text field placeholder */
+"auth.reset.field.new_password.placeholder" = "New password";
+
+/* Confirm password text field placeholder */
+"auth.reset.field.confirm_password.placeholder" = "Confirm new password";
+
+/* Reset password submit button */
+"auth.reset.button.submit" = "Reset password";
+
+/* Back to login link / button */
+"auth.reset.link.back" = "Back to log in";
+
+/* Success state — card title */
+"auth.reset.success.title" = "Password reset!";
+
+/* Success state — card body */
+"auth.reset.success.body" = "Your password has been updated. You can now log in with your new password.";
+
+/* Error: passwords do not match */
+"auth.reset.error.password_mismatch" = "Passwords do not match.";
+
+/* Error: password too short */
+"auth.reset.error.password_too_short" = "Password must be at least 8 characters.";
+
 // MARK: - Shared buttons
 
 /* Sign in with Apple button label */
@@ -155,6 +193,38 @@
 
 /* Error: upgrade failed because the email/social account is already registered to another account */
 "auth.upgrade.error.account_already_exists" = "Account already registered. Please sign in with your existing account.";
+
+/* Error: reset token is invalid or expired */
+"auth.error.invalid_reset_token" = "Invalid or expired reset token. Please request a new one.";
+
+/* Error: operation not supported for this account type */
+"auth.error.unsupported_operation" = "Password change is not available for this account type.";
+
+// MARK: - ChangePasswordView
+
+/* Screen title */
+"auth.change_password.title" = "Change Password";
+
+/* Current password text field placeholder */
+"auth.change_password.field.current_password" = "Current Password";
+
+/* New password text field placeholder */
+"auth.change_password.field.new_password" = "New Password";
+
+/* Confirm new password text field placeholder */
+"auth.change_password.field.confirm_password" = "Confirm New Password";
+
+/* Change password submit button */
+"auth.change_password.button.submit" = "Change Password";
+
+/* Success state — card title */
+"auth.change_password.success.title" = "Password Changed";
+
+/* Success state — card subtitle */
+"auth.change_password.success.subtitle" = "Your password has been updated successfully.";
+
+/* Error: passwords do not match (client-side validation) */
+"auth.change_password.error.passwords_do_not_match" = "Passwords do not match.";
 
 // MARK: - Toast
 

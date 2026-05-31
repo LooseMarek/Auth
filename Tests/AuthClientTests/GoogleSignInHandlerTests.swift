@@ -324,6 +324,10 @@ final class MockGoogleAuthNetworkService: AuthNetworkService, @unchecked Sendabl
         throw AuthNetworkError.serverError
     }
 
+    func resetPassword(token: String, newPassword: String) async throws {
+        throw AuthNetworkError.serverError
+    }
+
     func refreshToken(refreshToken: String) async throws -> AuthResponse {
         throw AuthNetworkError.serverError
     }
@@ -341,6 +345,10 @@ final class MockGoogleAuthNetworkService: AuthNetworkService, @unchecked Sendabl
     }
 
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse {
+        throw AuthNetworkError.serverError
+    }
+
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
         throw AuthNetworkError.serverError
     }
 }

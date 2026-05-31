@@ -17,9 +17,13 @@ import AuthShared
 /// ## Error mapping
 /// | HTTP status / URL error | Thrown error |
 /// |-------------------------|--------------|
+/// | 400 on `/auth/reset-password` | `.invalidResetToken` |
+/// | 400 on other paths      | `.serverError` |
 /// | 401                     | `.invalidCredentials` |
 /// | 409 on `/auth/upgrade`  | `.accountAlreadyExists` |
 /// | 409 on other paths      | `.emailTaken` |
+/// | 422 on `/auth/change-password` | `.unsupportedOperation` |
+/// | 422 on other paths      | `.serverError` |
 /// | other non-2xx           | `.serverError` |
 /// | URLError `.notConnectedToInternet`, `.dataNotAllowed` | `.networkUnavailable` |
 /// | URLError `.cannotConnectToHost`, `.timedOut`, `.networkConnectionLost`, other | `.serverUnreachable` |
@@ -63,6 +67,11 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
     public func forgotPassword(email: String) async throws {
         let body = ForgotPasswordRequest(email: email)
         try await postVoid(path: "/auth/forgot-password", body: body)
+    }
+
+    public func resetPassword(token: String, newPassword: String) async throws {
+        let body = ResetPasswordRequest(token: token, newPassword: newPassword)
+        try await postVoid(path: "/auth/reset-password", body: body)
     }
 
     public func refreshToken(refreshToken: String) async throws -> AuthResponse {
@@ -127,6 +136,13 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
             identityToken: nil
         )
         return try await postWithBearer(path: "/auth/upgrade", bearerToken: accessToken, body: body)
+    }
+
+    public func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws {
+        let body = ChangePasswordRequest(currentPassword: currentPassword, newPassword: newPassword)
+        var request = try makeRequest(path: "/auth/change-password", method: "POST", body: body)
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        try await performVoid(request)
     }
 
     // MARK: - Private helpers
@@ -212,6 +228,9 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
 
     /// Maps HTTP status codes to `AuthNetworkError`. Passes through 2xx unchanged.
     ///
+    /// The 400 mapping is URL-aware:
+    /// - `/auth/reset-password` → `.invalidResetToken` (expired or invalid reset token)
+    ///
     /// The 409 mapping is URL-aware:
     /// - `/auth/upgrade` → `.accountAlreadyExists` (duplicate email/social on upgrade)
     /// - all other paths → `.emailTaken` (duplicate email on registration)
@@ -219,6 +238,11 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
         switch statusCode {
         case 200...299:
             return
+        case 400:
+            if url?.path == "/auth/reset-password" {
+                throw AuthNetworkError.invalidResetToken
+            }
+            throw AuthNetworkError.serverError
         case 401:
             throw AuthNetworkError.invalidCredentials
         case 409:
@@ -226,6 +250,11 @@ public struct URLSessionAuthNetworkService: AuthNetworkService {
                 throw AuthNetworkError.accountAlreadyExists
             }
             throw AuthNetworkError.emailTaken
+        case 422:
+            if url?.path == "/auth/change-password" {
+                throw AuthNetworkError.unsupportedOperation
+            }
+            throw AuthNetworkError.serverError
         default:
             throw AuthNetworkError.serverError
         }

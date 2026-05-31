@@ -80,6 +80,8 @@ struct MockAuthNetworkService: AuthNetworkService {
     func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func loginAsGuest() async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func resetPassword(token: String, newPassword: String) async throws { throw AuthNetworkError.serverError }
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws { throw AuthNetworkError.serverError }
 }
 
 // MARK: - ProfileViewModelTests
@@ -302,4 +304,6 @@ final class TrackingAuthNetworkService: AuthNetworkService, @unchecked Sendable 
     func upgradeGuestWithGoogle(guestUUID: UUID, accessToken: String, identityToken: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func loginAsGuest() async throws -> AuthResponse { throw AuthNetworkError.serverError }
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse { throw AuthNetworkError.serverError }
+    func resetPassword(token: String, newPassword: String) async throws { throw AuthNetworkError.serverError }
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws { throw AuthNetworkError.serverError }
 }

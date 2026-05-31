@@ -10,6 +10,8 @@ public enum AuthNetworkError: Error, LocalizedError, Sendable {
     /// Upgrade failed because the email address or social account is already registered
     /// to an existing account. Account merging is not supported.
     case accountAlreadyExists
+    /// The password-reset token is invalid, not found, or has expired.
+    case invalidResetToken
     /// The device has no internet connection (e.g. airplane mode, `NSURLErrorNotConnectedToInternet`).
     case networkUnavailable
     /// The device has internet but the API server is unreachable — connection refused,
@@ -17,6 +19,10 @@ public enum AuthNetworkError: Error, LocalizedError, Sendable {
     case serverUnreachable
     /// The server returned an unexpected error response.
     case serverError
+    /// The requested operation is not supported for this account type.
+    /// Returned as HTTP 422 when an email-only operation (e.g. change password) is attempted
+    /// on an Apple, Google, or guest account.
+    case unsupportedOperation
 
     /// A human-readable description suitable for display in the UI.
     ///
@@ -31,12 +37,16 @@ public enum AuthNetworkError: Error, LocalizedError, Sendable {
             return String(localized: "auth.register.error.email_taken", bundle: .module)
         case .accountAlreadyExists:
             return String(localized: "auth.upgrade.error.account_already_exists", bundle: .module)
+        case .invalidResetToken:
+            return String(localized: "auth.error.invalid_reset_token", bundle: .module)
         case .networkUnavailable:
             return String(localized: "auth.error.network", bundle: .module)
         case .serverUnreachable:
             return String(localized: "auth.error.server_unreachable", bundle: .module)
         case .serverError:
             return String(localized: "auth.error.server", bundle: .module)
+        case .unsupportedOperation:
+            return String(localized: "auth.error.unsupported_operation", bundle: .module)
         }
     }
 }
@@ -76,6 +86,14 @@ public protocol AuthNetworkService: Sendable {
     ///
     /// - Parameter email: The email address for the account to reset.
     func forgotPassword(email: String) async throws
+
+    /// Resets the user's password using a one-time reset token via POST /auth/reset-password.
+    ///
+    /// - Parameters:
+    ///   - token: The one-time reset token delivered via email.
+    ///   - newPassword: The new plaintext password to set (hashed server-side).
+    /// - Throws: ``AuthNetworkError/invalidResetToken`` when the token is not found or has expired.
+    func resetPassword(token: String, newPassword: String) async throws
 
     /// Exchanges a refresh token for a new ``AuthResponse`` containing fresh tokens.
     func refreshToken(refreshToken: String) async throws -> AuthResponse
@@ -127,4 +145,18 @@ public protocol AuthNetworkService: Sendable {
     ///   - email: The email address for the new account.
     ///   - password: The password for the new account.
     func upgradeGuestWithEmail(guestUUID: UUID, accessToken: String, email: String, password: String) async throws -> AuthResponse
+
+    /// Changes the authenticated user's password via POST /auth/change-password.
+    ///
+    /// Only applicable to email-auth users. Apple, Google, and guest users do not have
+    /// a stored password — the server returns HTTP 422 for those accounts (mapped to
+    /// ``AuthNetworkError/serverError``).
+    ///
+    /// - Parameters:
+    ///   - currentPassword: The user's current plaintext password (verified server-side).
+    ///   - newPassword: The desired new plaintext password (hashed server-side).
+    ///   - accessToken: A valid JWT access token for the authenticated user.
+    /// - Throws: ``AuthNetworkError/invalidCredentials`` when `currentPassword` is wrong.
+    /// - Throws: ``AuthNetworkError/unsupportedOperation`` when the account type does not support passwords (Apple, Google, or guest account).
+    func changePassword(currentPassword: String, newPassword: String, accessToken: String) async throws
 }

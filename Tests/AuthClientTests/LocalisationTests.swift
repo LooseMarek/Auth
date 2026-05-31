@@ -45,6 +45,19 @@ final class LocalisationTests: XCTestCase {
         "auth.forgot.link.back",
         "auth.forgot.success.title",
         "auth.forgot.success.body",
+        "auth.forgot.success.button.enter_token",
+        // ResetPasswordView
+        "auth.reset.title",
+        "auth.reset.subtitle",
+        "auth.reset.field.token.placeholder",
+        "auth.reset.field.new_password.placeholder",
+        "auth.reset.field.confirm_password.placeholder",
+        "auth.reset.button.submit",
+        "auth.reset.link.back",
+        "auth.reset.success.title",
+        "auth.reset.success.body",
+        "auth.reset.error.password_mismatch",
+        "auth.reset.error.password_too_short",
         // Shared buttons
         "auth.button.apple",
         "auth.button.apple.accessibility",
@@ -60,6 +73,7 @@ final class LocalisationTests: XCTestCase {
         "auth.error.network",
         "auth.error.server_unreachable",
         "auth.error.server",
+        "auth.error.invalid_reset_token",
         "auth.social.error.token_invalid",
         // Toast
         "auth.toast.dismiss.hint",

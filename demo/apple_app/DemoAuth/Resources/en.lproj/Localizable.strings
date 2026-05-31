@@ -107,6 +107,44 @@
 /* Success state — card body */
 "auth.forgot.success.body" = "We've sent a reset link to your email. It might take a moment to show up.";
 
+/* Success state — enter reset token button */
+"auth.forgot.success.button.enter_token" = "Enter my reset code";
+
+// MARK: - ResetPasswordView
+
+/* Screen title */
+"auth.reset.title" = "Set a new password";
+
+/* Screen subtitle */
+"auth.reset.subtitle" = "Pop in the code from your email and choose a fresh password.";
+
+/* Reset token text field placeholder */
+"auth.reset.field.token.placeholder" = "Your reset code";
+
+/* New password text field placeholder */
+"auth.reset.field.new_password.placeholder" = "New password (8+ chars)";
+
+/* Confirm password text field placeholder */
+"auth.reset.field.confirm_password.placeholder" = "Confirm new password";
+
+/* Reset password submit button */
+"auth.reset.button.submit" = "Update my password";
+
+/* Back to login link / button */
+"auth.reset.link.back" = "Back to sign in";
+
+/* Success state — card title */
+"auth.reset.success.title" = "You're all set!";
+
+/* Success state — card body */
+"auth.reset.success.body" = "Your password has been updated. Tap sign in to jump back in.";
+
+/* Error: passwords do not match */
+"auth.reset.error.password_mismatch" = "Those passwords don't match — give it another try.";
+
+/* Error: password too short */
+"auth.reset.error.password_too_short" = "Your password needs at least 8 characters.";
+
 // MARK: - Shared buttons
 
 /* Sign in with Apple button label */
@@ -156,6 +194,23 @@
 
 /* Error: upgrade failed because the email/social account is already registered to another account */
 "auth.upgrade.error.account_already_exists" = "Account already registered. Please sign in with your existing account.";
+
+/* Error: reset token is invalid or expired */
+"auth.error.invalid_reset_token" = "Invalid or expired reset token. Please request a new one.";
+
+/* Error: operation not supported for this account type */
+"auth.error.unsupported_operation" = "Password change is not available for this account type.";
+
+// MARK: - ChangePasswordView
+
+"auth.change_password.title" = "Change Password";
+"auth.change_password.field.current_password" = "Current Password";
+"auth.change_password.field.new_password" = "New Password";
+"auth.change_password.field.confirm_password" = "Confirm New Password";
+"auth.change_password.button.submit" = "Change Password";
+"auth.change_password.success.title" = "Password Changed";
+"auth.change_password.success.subtitle" = "Your password has been updated successfully.";
+"auth.change_password.error.passwords_do_not_match" = "Passwords do not match.";
 
 // MARK: - Toast
 
