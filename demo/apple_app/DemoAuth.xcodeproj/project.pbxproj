@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		0AD2E266E57E0E0CF4F811EB /* DemoAuthCustomApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CFE905BD2970672E6FFB45 /* DemoAuthCustomApp.swift */; };
 		17DE08B7CFD986FACE644A19 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F15B6914E951F1776B29BBA /* AppRootView.swift */; };
+		1A2B3C4D5E6F7A8B9C0D1E2F /* DemoConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F6A7B8C9D0E1F /* DemoConfiguration.swift */; };
+		2A3B4C5D6E7F8A9B0C1D2E3F /* DemoConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F6A7B8C9D0E1F /* DemoConfiguration.swift */; };
+		3A4B5C6D7E8F9A0B1C2D3E4F /* DemoConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2C3D4E5F6A7B8C9D0E1F2A /* DemoConfigurationTests.swift */; };
 		23778A1E7FBF78B3411DBD05 /* MeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54EB5002B0E09C728DFE83 /* MeResponse.swift */; };
 		5B195A749E2694D63442A7E9 /* AuthManagerSetupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97DFC211F800C1142C37FAB /* AuthManagerSetupTests.swift */; };
 		5C71CDA5C1DADF6444338FE3 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */; };
@@ -75,6 +78,8 @@
 		62ED13878DDA30F8E5012F33 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		63BB8B50E339EA09E75AF119 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8824A1CB67156CFA27C26790 /* DemoAuthDefaultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAuthDefaultTests.swift; sourceTree = "<group>"; };
+		AA1B2C3D4E5F6A7B8C9D0E1F /* DemoConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConfiguration.swift; sourceTree = "<group>"; };
+		BB2C3D4E5F6A7B8C9D0E1F2A /* DemoConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConfigurationTests.swift; sourceTree = "<group>"; };
 		B041BEAD33B8B765DCC6852C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B3997B605F737674862DCCD6 /* DemoAuthDefault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAuthDefault.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F9E2DA7064BAD20DE182C4 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
@@ -125,6 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				C97DFC211F800C1142C37FAB /* AuthManagerSetupTests.swift */,
+				BB2C3D4E5F6A7B8C9D0E1F2A /* DemoConfigurationTests.swift */,
 				8824A1CB67156CFA27C26790 /* DemoAuthDefaultTests.swift */,
 				4A42A24511A5CE01F5E4BD7E /* ProfileViewModelTests.swift */,
 			);
@@ -138,6 +144,7 @@
 				5A66EEEC5A1BCE77CBC9148C /* DemoAuth.entitlements */,
 				48CFE905BD2970672E6FFB45 /* DemoAuthCustomApp.swift */,
 				CA7D287FD52AD54574C835E4 /* DemoAuthDefaultApp.swift */,
+				AA1B2C3D4E5F6A7B8C9D0E1F /* DemoConfiguration.swift */,
 				B041BEAD33B8B765DCC6852C /* Info.plist */,
 				DC54EB5002B0E09C728DFE83 /* MeResponse.swift */,
 				57ADA9D71EAE2601DA21FAF9 /* ProfileView.swift */,
@@ -351,6 +358,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B195A749E2694D63442A7E9 /* AuthManagerSetupTests.swift in Sources */,
+				3A4B5C6D7E8F9A0B1C2D3E4F /* DemoConfigurationTests.swift in Sources */,
 				76284F560AE32B1FD89AE6C9 /* DemoAuthDefaultTests.swift in Sources */,
 				67E2A82B6F033891075993C8 /* ProfileViewModelTests.swift in Sources */,
 			);
@@ -363,6 +371,7 @@
 				17DE08B7CFD986FACE644A19 /* AppRootView.swift in Sources */,
 				7F3D8842923CF7F8F1217901 /* DemoAuthCustomApp.swift in Sources */,
 				81F877C8D6957113B35693F6 /* DemoAuthDefaultApp.swift in Sources */,
+				1A2B3C4D5E6F7A8B9C0D1E2F /* DemoConfiguration.swift in Sources */,
 				23778A1E7FBF78B3411DBD05 /* MeResponse.swift in Sources */,
 				A6288FC870BB1B0F083846CD /* ProfileView.swift in Sources */,
 				5C71CDA5C1DADF6444338FE3 /* ProfileViewModel.swift in Sources */,
@@ -376,6 +385,7 @@
 				F49BAF4C87499EE32BD20E57 /* AppRootView.swift in Sources */,
 				0AD2E266E57E0E0CF4F811EB /* DemoAuthCustomApp.swift in Sources */,
 				934A2EA16C253E97D580F8AD /* DemoAuthDefaultApp.swift in Sources */,
+				2A3B4C5D6E7F8A9B0C1D2E3F /* DemoConfiguration.swift in Sources */,
 				FFD2D5F1BA4642742C837FC5 /* MeResponse.swift in Sources */,
 				E90E5A8EEB9BC7FC255BF022 /* ProfileView.swift in Sources */,
 				BE1F36D3C3F180A0B35C37C6 /* ProfileViewModel.swift in Sources */,

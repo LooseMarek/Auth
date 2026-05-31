@@ -9,12 +9,13 @@ final class AuthManagerSetupTests: XCTestCase {
 
     func testAuthManagerIsInitialisedWithCorrectAPIBaseURL() {
         // The demo app stores its API base URL as a constant so future tasks can wire it
-        // into a real network service. This test verifies that constant is set to the
-        // expected local-development value.
+        // into a real network service. This test verifies that the constant delegates
+        // to DemoConfiguration — the simulator gets localhost, real devices get the
+        // mDNS hostname.
         #if targetEnvironment(simulator)
-        XCTAssertEqual(AppRootView.demoAPIBaseURL, "http://localhost:8080")
+        XCTAssertEqual(AppRootView.demoAPIBaseURL, DemoConfiguration.fallbackBaseURL)
         #else
-        XCTAssertEqual(AppRootView.demoAPIBaseURL, "http://192.168.68.58:8080")
+        XCTAssertEqual(AppRootView.demoAPIBaseURL, DemoConfiguration.defaultBaseURL)
         #endif
     }
 
