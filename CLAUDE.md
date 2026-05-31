@@ -395,6 +395,10 @@ This log line is **harmless** — the request succeeds on the IPv4 fallback. It 
 the cause of the user-visible error. Do not add special IPv6 handling; the fallback
 is automatic and correct.
 
+**RTIInputSystemClient log noise.** The console prints
+`-[RTIInputSystemClient remoteTextInputSessionWithID:performInputOperation:] perform input operation requires a valid sessionID.`
+when a text field resigns first responder on a real device (e.g. after tapping "Send reset link" while the keyboard is visible). This is an iOS internals message from the Remote Text Input subsystem and is **completely unrelated** to the app's code or network layer. It does not indicate any error and can be safely ignored.
+
 ### AppleSignInHandler — presentationContextProvider required on real devices
 
 `ASAuthorizationController.presentationContextProvider` must be set before calling

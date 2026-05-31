@@ -13,14 +13,16 @@ final class ForgotPasswordViewModel {
 
     var canSubmit: Bool { !email.isEmpty }
 
-    private let networkService: any AuthNetworkService
+    let networkService: any AuthNetworkService
     private let localizationBundle: Bundle?
     var onBackToSignIn: (() -> Void)?
+    var onEnterResetToken: (() -> Void)?
 
     init(
         networkService: any AuthNetworkService,
         localizationBundle: Bundle? = nil,
         onBackToSignIn: (() -> Void)? = nil,
+        onEnterResetToken: (() -> Void)? = nil,
         initialEmail: String = "",
         initialIsLoading: Bool = false,
         initialIsSuccess: Bool = false,
@@ -29,6 +31,7 @@ final class ForgotPasswordViewModel {
         self.networkService = networkService
         self.localizationBundle = localizationBundle
         self.onBackToSignIn = onBackToSignIn
+        self.onEnterResetToken = onEnterResetToken
         self.email = initialEmail
         self.isLoading = initialIsLoading
         self.isSuccess = initialIsSuccess
@@ -41,6 +44,10 @@ final class ForgotPasswordViewModel {
 
     func backToSignIn() {
         onBackToSignIn?()
+    }
+
+    func enterResetToken() {
+        onEnterResetToken?()
     }
 
     func submit() async {
