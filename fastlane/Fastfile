@@ -13,17 +13,6 @@ platform :ios do
     )
   end
 
-  desc "Record reference snapshots for iOS Simulator (CI use only)"
-  lane :record_snapshots do |options|
-    destination = options[:destination] || "platform=iOS Simulator,name=iPhone 17 Pro"
-    run_tests(
-      package_path: ".",
-      scheme: "Auth-Package",
-      destination: destination,
-      result_bundle: true
-    )
-  end
-
   desc "Build and test the Demo app for iOS Simulator"
   lane :demo_ios_test do |options|
     destination = options[:destination] || "platform=iOS Simulator,name=iPhone 17 Pro"
@@ -41,17 +30,6 @@ platform :mac do
 
   desc "Build and test the Swift package for macOS"
   lane :test do |options|
-    destination = options[:destination] || "platform=macOS"
-    run_tests(
-      package_path: ".",
-      scheme: "Auth-Package",
-      destination: destination,
-      result_bundle: true
-    )
-  end
-
-  desc "Record reference snapshots for macOS (CI use only)"
-  lane :record_snapshots do |options|
     destination = options[:destination] || "platform=macOS"
     run_tests(
       package_path: ".",
