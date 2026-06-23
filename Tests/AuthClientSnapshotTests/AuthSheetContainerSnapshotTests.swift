@@ -5,12 +5,6 @@ import XCTest
 @testable import AuthClient
 import AuthShared
 
-#if arch(arm64)
-private let snapshotArch = "arm64"
-#else
-private let snapshotArch = "x86_64"
-#endif
-
 /// Snapshot tests for `AuthSheetContainer` — the SwiftUI sheet wrapper used by `.authSheet(manager:)`.
 ///
 /// Each test renders the container inside a full-screen canvas that mimics the system sheet
@@ -65,7 +59,7 @@ final class AuthSheetContainerSnapshotTests: XCTestCase {
         let hosting = NSHostingView(rootView: canvas)
         hosting.appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua)
         hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 700)
-        assertSnapshot(of: hosting, as: .image, named: "macOS-\(snapshotArch)", testName: function)
+        assertSnapshot(of: hosting, as: .image, named: "macOS", testName: function)
 
 #elseif canImport(UIKit)
         // iOS: large-detent sheet anchored to the bottom of a phone-sized canvas.
@@ -88,7 +82,7 @@ final class AuthSheetContainerSnapshotTests: XCTestCase {
         let controller = UIHostingController(rootView: canvas)
         controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
         controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 844)
-        assertSnapshot(of: controller.view, as: .image, named: "iOS-\(snapshotArch)", testName: function)
+        assertSnapshot(of: controller.view, as: .image, named: "iOS", testName: function)
 #endif
     }
 }

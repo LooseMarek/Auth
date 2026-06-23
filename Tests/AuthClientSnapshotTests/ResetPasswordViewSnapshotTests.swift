@@ -5,12 +5,6 @@ import XCTest
 @testable import AuthClient
 import AuthShared
 
-#if arch(arm64)
-private let snapshotArch = "arm64"
-#else
-private let snapshotArch = "x86_64"
-#endif
-
 @MainActor
 final class ResetPasswordViewSnapshotTests: XCTestCase {
 
@@ -98,7 +92,7 @@ final class ResetPasswordViewSnapshotTests: XCTestCase {
         assertSnapshot(
             of: hosting,
             as: .image,
-            named: "macOS-\(snapshotArch)",
+            named: "macOS",
             testName: function
         )
 #elseif canImport(UIKit)
@@ -108,7 +102,7 @@ final class ResetPasswordViewSnapshotTests: XCTestCase {
         assertSnapshot(
             of: controller.view,
             as: .image,
-            named: "iOS-\(snapshotArch)",
+            named: "iOS",
             testName: function
         )
 #endif

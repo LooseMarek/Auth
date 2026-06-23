@@ -5,12 +5,6 @@ import XCTest
 @testable import AuthClient
 import AuthShared
 
-#if arch(arm64)
-private let snapshotArch = "arm64"
-#else
-private let snapshotArch = "x86_64"
-#endif
-
 @MainActor
 final class LoginViewSnapshotTests: XCTestCase {
 
@@ -566,7 +560,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         assertSnapshot(
             of: hosting,
             as: .image,
-            named: "macOS-\(snapshotArch)",
+            named: "macOS",
             testName: function
         )
 #elseif canImport(UIKit)
@@ -576,7 +570,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         assertSnapshot(
             of: controller.view,
             as: .image,
-            named: "iOS-\(snapshotArch)",
+            named: "iOS",
             testName: function
         )
 #endif
@@ -605,7 +599,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         assertSnapshot(
             of: controller.view,
             as: .image,
-            named: "iOS-\(snapshotArch)",
+            named: "iOS",
             testName: function
         )
 #elseif canImport(AppKit)
@@ -615,7 +609,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         assertSnapshot(
             of: hosting,
             as: .image,
-            named: "macOS-\(snapshotArch)",
+            named: "macOS",
             testName: function
         )
 #endif
