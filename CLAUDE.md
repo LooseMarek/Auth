@@ -62,39 +62,25 @@ Auth/
 
 ### Snapshot Testing
 
-**Two-arch workflow.** Snapshots are split by CPU architecture so M4 development machines and Intel CI never compare against each other's baselines:
+**Single arm64 baseline.** Both local development and CI now run on Apple Silicon, so there is only one set of reference images per test — no architecture suffix and no separate recording/commit pipeline.
 
-- `arm64` suffix — recorded on Apple Silicon (M4), committed by agents
-- `x86_64` suffix — recorded on Intel CI runner, committed by the snapshot-commit pipeline
-
-Add this block at the top of every snapshot test file:
+Use a plain `named:` value in every `assertSnapshot` call:
 
 ```swift
-#if arch(arm64)
-private let snapshotArch = "arm64"
-#else
-private let snapshotArch = "x86_64"
-#endif
+assertSnapshot(of: hostingView, as: .image, named: "macOS")
+assertSnapshot(of: controller.view, as: .image, named: "iOS")
 ```
 
-Then use it in every `assertSnapshot` call:
-
-```swift
-assertSnapshot(of: hostingView, as: .image, named: "macOS-\(snapshotArch)")
-assertSnapshot(of: controller.view, as: .image, named: "iOS-\(snapshotArch)")
-```
-
-No `perceptualPrecision` needed — each architecture compares only against its own baselines.
+No `perceptualPrecision` needed — local and CI render identically on the same architecture.
 
 **Always provide snapshots for both platforms.** Every snapshot test must cover iOS (`UIHostingController`) and macOS (`NSHostingView`).
 
 **Agent workflow:**
-1. Write the test. Run locally — missing `arm64` references are auto-recorded on first run (test fails with "Recorded snapshot"), pass on the second run.
-2. Commit both the test code and the `arm64` `.png` files alongside it.
-3. Open the PR. CI fails: `x86_64` references are missing.
-4. Reviewer triggers **Record Snapshots (iOS/macOS)** pipeline, inspects artifacts, then triggers **Commit Snapshots** to write `x86_64` references back to the branch. CI goes green.
+1. Write the test. Run locally — missing references are auto-recorded on first run (test fails with "Recorded snapshot"), pass on the second run.
+2. Commit the test code and the recorded `.png` files together.
+3. Open the PR. CI runs the same tests against the same baselines — no separate recording step needed.
 
-**Record locally via Fastlane, not `swift test`.** `swift test` renders macOS views using the display's backing scale (2× Retina locally, 1× headless), causing scale mismatches against CI. Always record with:
+**Record locally via Fastlane, not `swift test`.** `swift test` renders macOS views using the display's backing scale (2× Retina locally, 1× headless), causing scale mismatches. Always record with:
 ```
 bundle exec fastlane mac test   # records macOS at 2× via xcodebuild
 bundle exec fastlane ios test   # records against the configured simulator
@@ -176,8 +162,8 @@ Do **not** use `NSLocalizedString` — it defaults to the main bundle and will n
 
 Key convention: `auth.{screen}.{element}` (e.g. `auth.login.title`, `auth.register.error.password_too_short`). The full key inventory lives in `docs/design/ui-specs/`.
 
-**Snapshot re-recording after string changes.** Replacing inline strings with localised lookups changes the rendered placeholder text (e.g. `"Email"` → `"you@email.com"`), which invalidates all existing arm64 baselines. When this happens:
-1. Delete the stale arm64 `.png` files for each affected snapshot folder.
+**Snapshot re-recording after string changes.** Replacing inline strings with localised lookups changes the rendered placeholder text (e.g. `"Email"` → `"you@email.com"`), which invalidates all existing baselines. When this happens:
+1. Delete the stale `.png` files for each affected snapshot folder.
 2. Re-record via Fastlane: `bundle exec fastlane ios test` then `bundle exec fastlane mac test`.
 3. Run each Fastlane lane a second time — first run records, second run verifies.
 4. Do **not** use `swift test` to record macOS baselines — it renders at display backing scale, producing files that mismatch Fastlane-recorded CI baselines.
