@@ -68,8 +68,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup environment
+        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/shims" >> $GITHUB_PATH
+          echo "/usr/bin" >> $GITHUB_PATH
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle install
+
       - name: Run tests via Fastlane
-        run: bundle exec fastlane ios test
+        run: |
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle exec fastlane ios test
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -89,8 +100,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup environment
+        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/shims" >> $GITHUB_PATH
+          echo "/usr/bin" >> $GITHUB_PATH
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle install
+
       - name: Run tests via Fastlane
-        run: bundle exec fastlane mac test
+        run: |
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle exec fastlane mac test
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -110,8 +132,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup environment
+        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/shims" >> $GITHUB_PATH
+          echo "/usr/bin" >> $GITHUB_PATH
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle install
+
       - name: Run tests via Fastlane
-        run: bundle exec fastlane ios demo_ios_test
+        run: |
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle exec fastlane ios demo_ios_test
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -131,8 +164,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup environment
+        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/shims" >> $GITHUB_PATH
+          echo "/usr/bin" >> $GITHUB_PATH
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle install
+
       - name: Run tests via Fastlane
-        run: bundle exec fastlane mac demo_mac_test
+        run: |
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle exec fastlane mac demo_mac_test
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -152,5 +196,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup environment
+        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/shims" >> $GITHUB_PATH
+          echo "/usr/bin" >> $GITHUB_PATH
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle install
+
       - name: Run tests via Fastlane
-        run: bundle exec fastlane mac demo_api_test
+        run: |
+          export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
+          bundle exec fastlane mac demo_api_test
