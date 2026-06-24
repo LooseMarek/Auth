@@ -25,6 +25,10 @@ env:
   FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
   FASTLANE_XCODEBUILD_SETTINGS_RETRIES: "5"
 
+concurrency:
+  group: ios-simulator-serial
+  cancel-in-progress: false
+
 jobs:
   changes:
     name: Detect Changes
@@ -76,6 +80,14 @@ jobs:
           sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
           bundle install
+
+      - name: Cleanup Simulator State (important)
+        run: |
+          killall Simulator || true
+          killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
+          xcrun simctl shutdown all || true
+          xcrun simctl erase all || true
+          sleep 5
 
       - name: Run tests via Fastlane
         run: |
@@ -140,6 +152,14 @@ jobs:
           sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           export PATH="/opt/homebrew/bin:/opt/homebrew/shims:$PATH"
           bundle install
+
+      - name: Cleanup Simulator State (important)
+        run: |
+          killall Simulator || true
+          killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
+          xcrun simctl shutdown all || true
+          xcrun simctl erase all || true
+          sleep 5
 
       - name: Run tests via Fastlane
         run: |
