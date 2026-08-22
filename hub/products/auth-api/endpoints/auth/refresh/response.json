@@ -1,0 +1,11 @@
+{
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "9a1d3f9c-4e77-0b2e-8c2a-1f445d6b7e0a",
+    "expiresAt": "2026-08-22T21:10:13Z",
+    "user": {
+        "id": "b1e5c8b0-3c9a-4c2a-9b6d-7e0f2c9a1e5c",
+        "email": "jane@example.com",
+        "displayName": null,
+        "isGuest": false
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "7e0f2c9a-1e5c-3c9a-4c2a-9b6db1e5c8b0",
+    "expiresAt": "2026-08-22T20:10:13Z",
+    "user": {
+        "id": "9b6d7e0f-2c9a-1e5c-3c9a-4c2ab1e5c8b0",
+        "email": "jane@privaterelay.appleid.com",
+        "displayName": null,
+        "isGuest": false
+    }
+}

@@ -1,0 +1,52 @@
+{
+    "hubVersion": 1,
+    "kind": "promo",
+    "slug": "auth",
+    "displayName": "Auth",
+    "domain": "software",
+    "state": "mvp-published",
+    "version": "1.0.1",
+    "hostingScope": "public",
+    "githubLink": null,
+    "relatedSlugs": ["auth-api"],
+    "tagline": "Drop-in email, Apple, Google, and guest authentication for iOS + Vapor — with a shared token lifecycle already wired up.",
+    "overview": "Auth is a multi-target Swift Package that gives any iOS + Vapor project email, Sign in with Apple, Google Sign-In, and guest authentication with a single, shared token lifecycle. It ships pre-built, localised SwiftUI screens on the client and Vapor route collections on the server, so JWT issuance, Keychain storage, automatic refresh, and logout invalidation never need to be hand-rolled again. Guest sessions upgrade in place to a full account without losing data, and every screen is themeable to match the host app.",
+    "features": [
+        "Email/password sign-up, login, forgot-password, and reset-password flows out of the box",
+        "Sign in with Apple and Google Sign-In, wired to the same shared token lifecycle",
+        "Guest/anonymous sessions that upgrade in place to a real account without losing data",
+        "Automatic silent JWT refresh with Keychain-backed storage — no manual token handling in the host app",
+        "Programmatic auth UI presentation — call one method to present login/register as a sheet from any screen",
+        "Themeable SwiftUI screens with dual light/dark color token support",
+        "Fully localised, externalised strings ready to translate for any host app",
+        "Self-service account deletion and logout, wired end-to-end from client to server"
+    ],
+    "platforms": [
+        {
+            "name": "ios",
+            "techStack": ["Swift 6.2", "SwiftUI", "Sign in with Apple (AuthenticationServices)", "Google Sign-In SDK", "Keychain (Security framework)"],
+            "linkToStore": null,
+            "screenshots": [
+                "01_login.iOS.png",
+                "02_register.iOS.png",
+                "03_change_password.iOS.png",
+                "04_change_password_success.iOS.png",
+                "05_reset_password.iOS.png",
+                "06_reset_password_success.iOS.png"
+            ]
+        },
+        {
+            "name": "macos",
+            "techStack": ["Swift 6.2", "SwiftUI", "Sign in with Apple (AuthenticationServices)", "Google Sign-In SDK", "Keychain (Security framework)"],
+            "linkToStore": null,
+            "screenshots": ["01_main.macOS.png"]
+        },
+        {
+            "name": "spm",
+            "techStack": ["Swift 6.2", "SwiftUI", "Sign in with Apple (AuthenticationServices)", "Google Sign-In SDK", "Keychain (Security framework)"],
+            "linkToStore": null,
+            "screenshots": []
+        }
+    ],
+    "updatedAt": "2026-06-24T14:31:13Z"
+}

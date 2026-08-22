@@ -1,0 +1,328 @@
+{
+    "hubVersion": 1,
+    "kind": "api",
+    "slug": "auth-api",
+    "displayName": "Auth API",
+    "state": "mvp-published",
+    "version": "1.0.1",
+    "hostingScope": "lan-only",
+    "relatedSlugs": ["auth"],
+    "tagline": "The Vapor backend behind Auth — JWT issuance, refresh, and account lifecycle for email, Apple, Google, and guest sign-in.",
+    "overview": "Auth API is the Vapor server-side of the Auth Swift Package — route collections a host app registers to get email/password, Sign in with Apple, Google Sign-In, and guest authentication with zero hand-rolled JWT or persistence code. It owns the full token lifecycle end to end: JWT generation, non-rotating refresh tokens, guest-to-account upgrade, password reset, and account deletion, all backed by Fluent so the host app only supplies a database driver. The endpoints below are demonstrated end-to-end by the bundled demo/api reference server.",
+    "techStack": ["Swift 6.2", "Vapor 4", "Fluent (driver-agnostic)", "JWTKit", "BCrypt"],
+    "uptimeKumaMonitorId": null,
+    "baseUrl": "http://localhost:8080",
+    "gettingStarted": "## Getting Started\n\nAuth API is the Vapor server-side of the Auth Swift Package. A host app adds Auth as a package dependency, registers each RouteCollection (AuthController, RefreshTokenController, LogoutController, GuestAuthController, UpgradeController, AppleAuthController, GoogleAuthController, ForgotPasswordController, ResetPasswordController, ChangePasswordController, AccountDeletionController) against its Vapor Application, and supplies its own Fluent database driver — Auth itself stays driver-agnostic.\n\n## Authentication\n\nMost endpoints are public: registration, login, refresh, social sign-in, guest sign-in, forgot-password, and reset-password. Endpoints that act on an existing session — logout, guest upgrade, change password, account deletion, and the profile lookup — require a Bearer JWT access token issued by one of the sign-in endpoints, verified by JWTMiddleware.\n\n## Reference server\n\nThe endpoints below are demonstrated end-to-end by the bundled demo/api Vapor app, which stores data in SQLite for local development and is started with swift run from demo/api.",
+    "endpoints": [
+        {
+            "method": "POST",
+            "path": "/auth/register",
+            "overview": "Registers a new user with an email and password, hashes the password with BCrypt, and returns a fresh access/refresh token pair.",
+            "requestBody": "auth/register/request.json",
+            "requestFields": [
+                { "key": "email", "type": "string", "description": "The new user's email address. Must be unique." },
+                { "key": "password", "type": "string", "description": "Plaintext password. Hashed with BCrypt before storage." }
+            ],
+            "responseBody": "auth/register/response.json",
+            "responseFields": [
+                { "key": "accessToken", "type": "string", "description": "Signed JWT access token." },
+                { "key": "refreshToken", "type": "string", "description": "Opaque refresh token string." },
+                { "key": "expiresAt", "type": "string", "description": "ISO 8601 expiry date of the access token." },
+                {
+                    "key": "user",
+                    "type": "object",
+                    "description": "The newly created user's profile.",
+                    "children": [
+                        { "key": "id", "type": "string", "description": "User UUID." },
+                        { "key": "email", "type": "string | null", "description": "The user's email, null for guests." },
+                        { "key": "displayName", "type": "string | null", "description": "Always null — not yet settable via this endpoint." },
+                        { "key": "isGuest", "type": "boolean", "description": "Always false for this endpoint." }
+                    ]
+                }
+            ],
+            "errors": [
+                { "code": "conflict", "description": "A user with this email already exists." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/login",
+            "overview": "Authenticates an existing user by email and password and returns a fresh access/refresh token pair.",
+            "requestBody": "auth/login/request.json",
+            "requestFields": [
+                { "key": "email", "type": "string", "description": "The account's email address." },
+                { "key": "password", "type": "string", "description": "Plaintext password, verified against the stored BCrypt hash." }
+            ],
+            "responseBody": "auth/login/response.json",
+            "responseFields": [
+                { "key": "accessToken", "type": "string", "description": "Signed JWT access token." },
+                { "key": "refreshToken", "type": "string", "description": "Opaque refresh token string." },
+                { "key": "expiresAt", "type": "string", "description": "ISO 8601 expiry date of the access token." },
+                {
+                    "key": "user",
+                    "type": "object",
+                    "description": "The authenticated user's profile.",
+                    "children": [
+                        { "key": "id", "type": "string", "description": "User UUID." },
+                        { "key": "email", "type": "string | null", "description": "The user's email, null for guests." },
+                        { "key": "displayName", "type": "string | null", "description": "The user's display name, if set." },
+                        { "key": "isGuest", "type": "boolean", "description": "Whether the account is an anonymous guest." }
+                    ]
+                }
+            ],
+            "errors": [
+                { "code": "unauthorized", "description": "The email is not found or the password is wrong." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/refresh",
+            "overview": "Exchanges a valid, non-expired refresh token for a new access token and a rotated refresh token. Refresh tokens are one-time use — the old one is deleted as soon as a new pair is issued.",
+            "requestBody": "auth/refresh/request.json",
+            "requestFields": [
+                { "key": "refreshToken", "type": "string", "description": "The refresh token previously issued by any sign-in endpoint." }
+            ],
+            "responseBody": "auth/refresh/response.json",
+            "responseFields": [
+                { "key": "accessToken", "type": "string", "description": "A fresh signed JWT access token." },
+                { "key": "refreshToken", "type": "string", "description": "A newly rotated refresh token — replaces the one just used." },
+                { "key": "expiresAt", "type": "string", "description": "ISO 8601 expiry date of the new access token." },
+                {
+                    "key": "user",
+                    "type": "object",
+                    "description": "The session's user profile.",
+                    "children": [
+                        { "key": "id", "type": "string", "description": "User UUID." },
+                        { "key": "email", "type": "string | null", "description": "The user's email, null for guests." },
+                        { "key": "displayName", "type": "string | null", "description": "Always null on this endpoint." },
+                        { "key": "isGuest", "type": "boolean", "description": "Whether the account is an anonymous guest." }
+                    ]
+                }
+            ],
+            "errors": [
+                { "code": "unauthorized", "description": "The refresh token was not found or has expired." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/logout",
+            "overview": "Invalidates the supplied refresh token, ending the session. Requires a Bearer JWT. Idempotent — a token that is already deleted or never existed still returns HTTP 200 rather than an error.",
+            "requestBody": "auth/logout/request.json",
+            "requestFields": [
+                { "key": "refreshToken", "type": "string", "description": "The refresh token to invalidate." }
+            ],
+            "responseBody": "auth/logout/response.json",
+            "responseFields": [],
+            "errors": [
+                { "code": "unauthorized", "description": "Missing or invalid Bearer JWT." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/guest",
+            "overview": "Creates a new anonymous user tied to a device identifier and returns a fresh access/refresh token pair. Each call creates a distinct guest account — the client is responsible for persisting and reusing the returned tokens rather than calling this repeatedly.",
+            "requestBody": "auth/guest/request.json",
+            "requestFields": [
+                { "key": "deviceID", "type": "string", "description": "A stable device identifier generated and persisted by the host app. Recorded but not used for de-duplication." }
+            ],
+            "responseBody": "auth/guest/response.json",
+            "responseFields": [
+                { "key": "accessToken", "type": "string", "description": "Signed JWT access token for the new guest session." },
+                { "key": "refreshToken", "type": "string", "description": "Opaque refresh token string." },
+                { "key": "expiresAt", "type": "string", "description": "ISO 8601 expiry date of the access token." },
+                {
+                    "key": "user",
+                    "type": "object",
+                    "description": "The new guest user's profile.",
+                    "children": [
+                        { "key": "id", "type": "string", "description": "The guest's UUID — the stable identifier for this session." },
+                        { "key": "email", "type": "string | null", "description": "Always null for guests." },
+                        { "key": "displayName", "type": "string | null", "description": "Always null." },
+                        { "key": "isGuest", "type": "boolean", "description": "Always true." }
+                    ]
+                }
+            ],
+            "errors": []
+        },
+        {
+            "method": "POST",
+            "path": "/auth/upgrade",
+            "overview": "Attaches email/password or social credentials to the authenticated guest session, preserving the guest UUID so no app data is lost. Requires a Bearer JWT for the guest session being upgraded. Supply exactly one credential group: email + password for an email upgrade, or provider + identityToken for a social upgrade.",
+            "requestBody": "auth/upgrade/request.json",
+            "requestFields": [
+                { "key": "guestUUID", "type": "string", "description": "The UUID of the guest session to upgrade." },
+                { "key": "provider", "type": "string", "description": "\"email\", \"apple\", or \"google\"." },
+                { "key": "email", "type": "string | null", "description": "Required for an email upgrade; optional for social upgrades when the provider token doesn't carry one." },
+                { "key": "password", "type": "string | null", "description": "Required for an email upgrade; hashed server-side." },
+                { "key": "identityToken", "type": "string | null", "description": "Required for apple/google upgrades — the identity token from the provider's SDK." }
+            ],
+            "responseBody": "auth/upgrade/response.json",
+            "responseFields": [
+                { "key": "accessToken", "type": "string", "description": "Signed JWT access token for the upgraded session." },
+                { "key": "refreshToken", "type": "string", "description": "Opaque refresh token string." },
+                { "key": "expiresAt", "type": "string", "description": "ISO 8601 expiry date of the access token." },
+                {
+                    "key": "user",
+                    "type": "object",
+                    "description": "The upgraded user's profile — same UUID as the guest session.",
+                    "children": [
+                        { "key": "id", "type": "string", "description": "Same UUID the guest session already had." },
+                        { "key": "email", "type": "string | null", "description": "The newly attached email address." },
+                        { "key": "displayName", "type": "string | null", "description": "Always null on this endpoint." },
+                        { "key": "isGuest", "type": "boolean", "description": "Always false after a successful upgrade." }
+                    ]
+                }
+            ],
+            "errors": [
+                { "code": "unauthorized", "description": "Missing/invalid Bearer JWT, or the user was not found." },
+                { "code": "conflict", "description": "The account has already been upgraded, or the new email is already taken." },
+                { "code": "badRequest", "description": "Required fields for the chosen provider are missing." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/apple",
+            "overview": "Verifies an Apple identity token (from ASAuthorizationController) and signs the user in, creating an account on first sign-in. Apple only includes the user's email on the very first sign-in for a given app — on repeat sign-ins a stable synthetic address is derived from the token's subject claim so the same Apple ID always maps to the same account.",
+            "requestBody": "auth/apple/request.json",
+            "requestFields": [
+                { "key": "provider", "type": "string", "description": "Always \"apple\"." },
+                { "key": "identityToken", "type": "string", "description": "The identity token returned by ASAuthorizationController." }
+            ],
+            "responseBody": "auth/apple/response.json",
+            "responseFields": [
+                { "key": "accessToken", "type": "string", "description": "Signed JWT access token." },
+                { "key": "refreshToken", "type": "string", "description": "Opaque refresh token string." },
+                { "key": "expiresAt", "type": "string", "description": "ISO 8601 expiry date of the access token." },
+                {
+                    "key": "user",
+                    "type": "object",
+                    "description": "The signed-in user's profile.",
+                    "children": [
+                        { "key": "id", "type": "string", "description": "User UUID." },
+                        { "key": "email", "type": "string | null", "description": "Real email on first sign-in, otherwise a synthetic @privaterelay.appleid.com address." },
+                        { "key": "displayName", "type": "string | null", "description": "Always null." },
+                        { "key": "isGuest", "type": "boolean", "description": "Always false." }
+                    ]
+                }
+            ],
+            "errors": [
+                { "code": "internalServerError", "description": "Apple JWKS is not configured on the server." },
+                { "code": "unauthorized", "description": "The identity token is invalid or tampered." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/google",
+            "overview": "Verifies a Google identity token (from the Google Sign-In SDK) and signs the user in, creating an account on first sign-in.",
+            "requestBody": "auth/google/request.json",
+            "requestFields": [
+                { "key": "provider", "type": "string", "description": "Always \"google\"." },
+                { "key": "identityToken", "type": "string", "description": "The ID token returned by the Google Sign-In SDK." }
+            ],
+            "responseBody": "auth/google/response.json",
+            "responseFields": [
+                { "key": "accessToken", "type": "string", "description": "Signed JWT access token." },
+                { "key": "refreshToken", "type": "string", "description": "Opaque refresh token string." },
+                { "key": "expiresAt", "type": "string", "description": "ISO 8601 expiry date of the access token." },
+                {
+                    "key": "user",
+                    "type": "object",
+                    "description": "The signed-in user's profile.",
+                    "children": [
+                        { "key": "id", "type": "string", "description": "User UUID." },
+                        { "key": "email", "type": "string | null", "description": "The Google account's email address." },
+                        { "key": "displayName", "type": "string | null", "description": "Always null." },
+                        { "key": "isGuest", "type": "boolean", "description": "Always false." }
+                    ]
+                }
+            ],
+            "errors": [
+                { "code": "internalServerError", "description": "Google JWKS is not configured on the server." },
+                { "code": "unauthorized", "description": "The identity token is invalid or tampered." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/forgot-password",
+            "overview": "Initiates a password reset for the given email. Always returns HTTP 200, whether or not the email is registered, to prevent user enumeration. If found, a one-hour reset token is generated and delivered via the host app's injected email transport closure.",
+            "requestBody": "auth/forgot-password/request.json",
+            "requestFields": [
+                { "key": "email", "type": "string", "description": "The email address of the account to reset." }
+            ],
+            "responseBody": "auth/forgot-password/response.json",
+            "responseFields": [],
+            "errors": [
+                { "code": "internalServerError", "description": "No email transport closure is configured on the server (fail-fast)." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/reset-password",
+            "overview": "Completes a password reset using the one-time token delivered by /auth/forgot-password. The token is invalidated after use.",
+            "requestBody": "auth/reset-password/request.json",
+            "requestFields": [
+                { "key": "token", "type": "string", "description": "The one-time reset token delivered to the user's email." },
+                { "key": "newPassword", "type": "string", "description": "The new plaintext password. Hashed with BCrypt before storage." }
+            ],
+            "responseBody": "auth/reset-password/response.json",
+            "responseFields": [],
+            "errors": [
+                { "code": "badRequest", "description": "The reset token was not found or has expired." }
+            ]
+        },
+        {
+            "method": "POST",
+            "path": "/auth/change-password",
+            "overview": "Changes the authenticated user's password. Only available to email-authenticated accounts — Apple, Google, and guest accounts have no stored password hash. Requires a Bearer JWT.",
+            "requestBody": "auth/change-password/request.json",
+            "requestFields": [
+                { "key": "currentPassword", "type": "string", "description": "The user's current plaintext password, verified against the stored hash." },
+                { "key": "newPassword", "type": "string", "description": "The desired new plaintext password. Hashed with BCrypt before storage." }
+            ],
+            "responseBody": "auth/change-password/response.json",
+            "responseFields": [
+                { "key": "message", "type": "string", "description": "Always \"Password changed\" on success." }
+            ],
+            "errors": [
+                { "code": "unauthorized", "description": "Missing/invalid Bearer JWT, or currentPassword does not match the stored hash." },
+                { "code": "notFound", "description": "No user with the decoded ID exists." },
+                { "code": "unprocessableEntity", "description": "The account has no stored password (Apple, Google, or guest account)." }
+            ]
+        },
+        {
+            "method": "DELETE",
+            "path": "/auth/account",
+            "overview": "Permanently deletes the authenticated user and every refresh token associated with them. Requires a Bearer JWT. Takes no request body.",
+            "requestBody": "auth/account/request.json",
+            "requestFields": [],
+            "responseBody": "auth/account/response.json",
+            "responseFields": [],
+            "errors": [
+                { "code": "unauthorized", "description": "Missing or invalid Bearer JWT, or the subject claim can't be parsed as a UUID." },
+                { "code": "notFound", "description": "No user with the derived ID exists." }
+            ]
+        },
+        {
+            "method": "GET",
+            "path": "/me",
+            "overview": "Returns the authenticated user's profile and current token debug information. Registered by the demo/api reference server (MeController), not by the AuthServer package itself — a host app can mirror this controller or write its own. Requires a Bearer JWT. Takes no request body.",
+            "requestBody": "me/request.json",
+            "requestFields": [],
+            "responseBody": "me/response.json",
+            "responseFields": [
+                { "key": "id", "type": "string", "description": "The authenticated user's UUID." },
+                { "key": "email", "type": "string", "description": "The user's email address. Empty string for guest users." },
+                { "key": "authProvider", "type": "string", "description": "One of \"email\", \"apple\", \"google\", \"guest\"." },
+                { "key": "createdAt", "type": "string", "description": "ISO 8601 date the account was created." },
+                { "key": "isGuest", "type": "boolean", "description": "Whether this is a guest (anonymous) account." },
+                { "key": "accessTokenExpiry", "type": "string", "description": "ISO 8601 expiry date of the access token used for this request." },
+                { "key": "refreshTokenId", "type": "string", "description": "The ID of the active refresh token record for this user." }
+            ],
+            "errors": [
+                { "code": "unauthorized", "description": "Missing or invalid Authorization header." },
+                { "code": "internalServerError", "description": "The user record or an active refresh token could not be found." }
+            ]
+        }
+    ],
+    "updatedAt": "2026-06-24T14:31:13Z"
+}

@@ -1,0 +1,7 @@
+{
+    "guestUUID": "d4c1a9e2-7b3f-4a0d-9e5c-2b8f1a6d3c7e",
+    "provider": "email",
+    "email": "jane@example.com",
+    "password": "correct-horse-battery-staple",
+    "identityToken": null
+}

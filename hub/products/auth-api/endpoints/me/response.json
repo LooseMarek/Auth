@@ -1,0 +1,9 @@
+{
+    "id": "b1e5c8b0-3c9a-4c2a-9b6d-7e0f2c9a1e5c",
+    "email": "jane@example.com",
+    "authProvider": "email",
+    "createdAt": "2026-08-01T09:12:00Z",
+    "isGuest": false,
+    "accessTokenExpiry": "2026-08-22T20:10:13Z",
+    "refreshTokenId": "3f9c0b2e-8a1d-4e77-9c2a-0a6b7e5d1f44"
+}
